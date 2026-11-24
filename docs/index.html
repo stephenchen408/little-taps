@@ -427,6 +427,25 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .tabs { flex-wrap: wrap; }
 .tabs button { padding: 4px 12px; }
 
+/* ---------- Spelled words, brain breaks ---------- */
+.sword { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; --fs: min(2.4rem, calc(78vw / var(--n) / 1.5)); }
+.sword b { font-size: var(--fs); line-height: 1.15; min-width: 1.05em; padding: 0 .12em; text-align: center; border: 3px solid var(--ink); border-radius: 12px;
+  background: #fff; color: var(--ink); -webkit-text-stroke: 0; transition: transform .15s, background .2s, color .2s; }
+.sword b.lit { background: var(--sun); }
+.sword b.on { background: var(--tomato); color: #fff; transform: translateY(-8px) scale(1.18); }
+.sword.all b { background: var(--leaf); color: #fff; }
+.sword i { width: .5em; }
+.ovl .sword { margin: 4px 0; }
+.gate { position: absolute; left: 0; right: 0; bottom: 0; top: calc(var(--btn) + 14px); z-index: 44; display: grid; place-items: center; background: rgba(23,58,94,.55); padding: 10px; border-radius: 30px; }
+.gcard { width: min(100%, 560px); height: min(100%, 660px); display: flex; flex-direction: column; gap: 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 28px; box-shadow: 0 7px 0 var(--ink); padding: 14px; }
+.ghead { display: flex; align-items: center; gap: 10px; font-size: clamp(1.1rem, 5vw, 1.7rem); white-space: nowrap; }
+.ghead b { flex: 1; }
+.gpips { display: flex; gap: 6px; }
+.gpips i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--ink); }
+.gpips i.on { background: var(--sun); }
+.gbody { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.gbody.land { flex-direction: row; }
+
 /* ---------- Larger screens (iPad mini and up) ---------- */
 @media (min-width: 700px) and (min-height: 600px) {
   :root { --btn: 68px; }
@@ -493,6 +512,10 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
         <div class="seg" id="speed"><button data-rate="0.82">Slower</button><button data-rate="0.95">Normal</button><button data-rate="1.05">Faster</button></div>
       </div>
     </div>
+    <h3>Brain breaks</h3>
+    <p>Arcade games pause for 3 quick questions (numbers, letters, math). The questions get harder or easier based on how they go.</p>
+    <div class="seg" id="gateMins" style="margin-bottom:8px"><button data-m="1">Every 1 min</button><button data-m="2">2 min</button><button data-m="3">3 min</button><button data-m="0">Off</button></div>
+    <p id="skills"></p>
     <h3>Progress</h3>
     <p>Levels and stickers are saved on this device.</p>
     <button id="resetAll" class="danger">Start over (clear levels and stickers)</button>
@@ -629,7 +652,7 @@ window.LT = (() => {
     // Arcade
     "Arcade","Snake","Space","Maze","Swipe or tap the arrows to steer.","Eat the numbers in order, all the way to one hundred!",
     "Game over! You scored","Wave","Drag to move your ship. It shoots by itself!","Ouch!",
-    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.","Shoot the letters in order!","Stack","Slice","Flap","Runner","Tap to drop the block.","Swipe to slice the fruit! Don't touch the bombs.","Tap to flap! Fly through the gaps.","Drag to steer. Go through the best gates!","Smash!","So close! Try again.",
+    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.","Shoot the letters in order!","Brain break!","Back to the game!","Power up!","Catch the answer!","Stack","Slice","Flap","Runner","Tap to drop the block.","Swipe to slice the fruit! Don't touch the bombs.","Tap to flap! Fly through the gaps.","Drag to steer. Go through the best gates!","Smash!","So close! Try again.",
   ];
   function voiceLines() {
     const L = {};
@@ -685,7 +708,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("littletaps." + k, JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "7 (Nov 24, more arcade)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "8 (Nov 24, brain breaks)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -791,6 +814,26 @@ function say(...parts) {
   }
   ttsSay(keys.map(k => LINES[k] || k).join(" "));
 }
+// When each spoken part starts (seconds from now), so letters can light up in time with the voice.
+function partTimes(parts) {
+  const keys = keysOf(parts), idx = CLIPS.index, rec = voiceMode === "recorded" && idx && keys.every(k => idx.clips[k]);
+  let t = .03;
+  const out = keys.map(k => { const st = t; t += rec ? idx.clips[k][2] + .04 : (k.length <= 2 ? .6 : .3 + k.length * .065); return st; });
+  out.push(t);
+  return out;
+}
+const spellHTML = word => `<div class="sword" style="--n:${Math.max(3, word.replace(/[^a-z]/gi, "").length)}">` +
+  [...word.toUpperCase()].map(c => /[A-Z]/.test(c) ? `<b>${c}</b>` : "<i></i>").join("") + "</div>";
+// Says `before`, then spells `word` letter by letter (each letter lights up as it's spoken), then says the word.
+// Returns roughly how long it all takes, in seconds.
+function spellAloud(el, before, word, after = []) {
+  const letters = [...word.toUpperCase()].filter(c => /[A-Z]/.test(c)), pre = before.filter(Boolean);
+  const parts = [...pre, ...letters, word, ...after], times = partTimes(parts), spans = el ? [...el.querySelectorAll("b")] : [];
+  say(...parts);
+  letters.forEach((_, i) => later(() => { spans.forEach(x => x.classList.remove("on")); if (spans[i]) spans[i].classList.add("on", "lit"); }, times[pre.length + i] * 1000));
+  later(() => { spans.forEach(x => x.classList.remove("on")); if (el) el.classList.add("all"); }, times[pre.length + letters.length] * 1000);
+  return times[times.length - 1];
+}
 // Device speech engine: the fallback, or the grown-ups' choice in settings.
 const ROBOTIC = /^(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|pipe organ|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|fred|junior|kathy|ralph)\b/i;
 // iPhones and iPads often keep "premium"/"enhanced" out of the name and only in the voiceURI
@@ -877,16 +920,82 @@ function reward(lead, next) {
   if (s) { have.push(s[0]); store.set("stickers", have); }
   const ov = document.createElement("div");
   ov.className = "reward";
-  ov.innerHTML = `<div class="rcard"><div class="big">${s ? s[0] : "⭐"}</div><div class="rt">${s ? "New sticker!" : "You earned a star!"}</div></div>`;
+  ov.innerHTML = `<div class="rcard"><div class="big">${s ? s[0] : "⭐"}</div><div class="rt">${s ? "New sticker!" : "You earned a star!"}</div>${s ? spellHTML(s[1]) : ""}</div>`;
   stage.appendChild(ov);
   sfx.yay(); celebrate();
-  say(lead, s ? "You earned a sticker!" : "You earned a star!", s ? s[1] : null);
+  // The sticker's name is read, spelled with each letter lighting up, then read again.
+  const total = s ? spellAloud($(".sword", ov), [lead, "You earned a sticker!"], s[1]) : (say(lead, "You earned a star!"), 2.4);
   const t0 = performance.now();
   let closed = false;
   const close = () => { if (closed) return; closed = true; ov.remove(); if (next) next(); };
-  ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > 1200) close(); });
-  later(close, 3600);
+  ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > total * 1000) close(); });
+  later(close, Math.max(3600, total * 1000 + 1400));
 }
+/* ---------- Brain breaks: arcade games pause for 3 quick questions; the level adapts ---------- */
+const GATE_TRACKS = [["numbers", numberRound], ["letters", letterRound], ["math", mathRound]];
+let gateClock = 0;
+function gateTick(dt) { const m = store.get("gateMins", 2); if (!m) return false; gateClock += dt; return gateClock >= m * 60; }
+function openGate(onDone) {
+  gateClock = 0;
+  const n = store.get("gateNext", 0), [track, make] = GATE_TRACKS[n % GATE_TRACKS.length];
+  store.set("gateNext", n + 1);
+  let lvl = store.get("skill." + track, 1), q = 0, firstTry = 0, wrongHere = 0, round = null, busy = false;
+  const ov = document.createElement("div");
+  ov.className = "gate";
+  ov.innerHTML = '<div class="gcard"><div class="ghead"><b>🧠 Brain break!</b><span class="gpips"></span><button class="tool big" aria-label="Say it again">🔊</button></div><div class="gbody"><div class="prompt"></div><div class="choices"></div></div></div>';
+  stage.appendChild(ov);
+  const body = $(".gbody", ov), promptEl = $(".prompt", ov), wrap = $(".choices", ov), pips = $(".gpips", ov);
+  ov._answer = () => round && round.answer; // read by automated tests
+  const ask = () => { if (round && !busy) say(...round.ask); };
+  $(".ghead .tool", ov).addEventListener("click", ask);
+  const drawPips = () => { pips.innerHTML = range(1, 3).map(i => `<i class="${i <= q ? "on" : ""}"></i>`).join(""); };
+  function layout() {
+    const k = wrap.children.length, land = body.clientWidth > body.clientHeight * 1.1;
+    body.classList.toggle("land", land);
+    wrap.style.gridTemplateColumns = `repeat(${k === 2 ? 2 : land ? (k === 4 ? 2 : k) : (k === 3 ? 1 : 2)}, 1fr)`;
+    if (round && round.relayout) round.relayout(promptEl);
+  }
+  function next(first) {
+    busy = false; wrongHere = 0; round = make(lvl);
+    promptEl.innerHTML = round.prompt;
+    const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", ask);
+    wrap.innerHTML = "";
+    const cols = shuffle(COLORS);
+    round.choices.forEach((ch, i) => {
+      const b = document.createElement("button"), text = String(ch);
+      b._val = ch; b.className = "choice pop-in" + (round.kind ? " " + round.kind : ""); b.style.animationDelay = i * 80 + "ms";
+      b.style.setProperty("--c", cols[i % cols.length].c); b.style.setProperty("--len", Math.max(1, [...text].length));
+      b.innerHTML = `<span>${text}</span>`; b.setAttribute("aria-label", round.label ? round.label(ch) : text);
+      b.addEventListener("pointerdown", e => {
+        e.preventDefault();
+        if (busy) return;
+        b.classList.remove("pop-in"); b.style.animationDelay = "0ms";
+        if (ch === round.answer) {
+          busy = true; q++; if (!wrongHere) firstTry++; drawPips();
+          wrap.querySelectorAll(".choice").forEach(x => x !== b && x.classList.add("fade"));
+          b.classList.remove("hint"); b.classList.add("yes"); sfx.yay();
+          say(praise(), ...round.right); if (round.onRight) round.onRight(promptEl);
+          later(q >= 3 ? finish : () => next(false), 3000);
+        } else {
+          wrongHere++; replay(b, "wiggle"); sfx.boop(); say(...round.wrong(ch));
+          if (wrongHere >= 2) { const h = [...wrap.children].find(x => x._val === round.answer); if (h) h.classList.add("hint"); }
+        }
+      });
+      wrap.appendChild(b);
+    });
+    layout(); drawPips();
+    say(...(first ? ["Brain break!"] : []), ...round.ask);
+  }
+  function finish() {
+    // All three right the first time: harder next time. Struggled: easier next time.
+    if (firstTry === 3) lvl++; else if (firstTry <= 1) lvl = Math.max(1, lvl - 1);
+    store.set("skill." + track, lvl);
+    celebrate(); sfx.yay(); say("Back to the game!");
+    later(() => { ov.remove(); onDone(); }, 1600);
+  }
+  next(true);
+}
+if (window.__debug) window.__debug.openGate = openGate;
 // Picks a column count that gives the biggest cells for n items.
 const fitGrid = (el, n, aspect = 1, pad = 28, gap = 10) => {
   const W = el.clientWidth - pad, H = el.clientHeight - pad;
@@ -2577,17 +2686,34 @@ function gameSnake(root, tools) {
   root.innerHTML = `<div class="field arcade snakef"><div class="play"><canvas></canvas><div class="ovl"></div></div>${DPAD}</div>`;
   const field = root.firstChild, box = $(".play", field), cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild, modeBtn = $("[data-mode]", tools);
   let mode = store.get("snakeMode", "classic"), W, H, cols, rows, cell, ox, oy, snake, dir, queue, foods, score, need, state, acc, stepMs, grow, best;
+  let word = "cat", wordEm = "🐱", li = 0, spelledN = 0, recentW = [];
+  function newWord() {
+    let w; do { w = pick(spelledN < 4 ? SPELL3 : [...SPELL3, ...SPELL4]); } while (recentW.includes(w[0]));
+    recentW = [...recentW.slice(-5), w[0]]; [word, wordEm] = w; li = 0;
+  }
+  const readWord = () => say(word, ...[...word.toUpperCase()], word);
   const bestKey = () => "snakeBest." + mode;
   function fit() {
     ({ W, H } = fitCanvas(cv, g, box));
     cell = Math.floor(Math.min(W, H) / (Math.min(W, H) < 500 ? 15 : 19));
     cols = Math.floor(W / cell); rows = Math.floor(H / cell); ox = (W - cols * cell) / 2; oy = (H - rows * cell) / 2;
   }
-  const setChip = () => { chip.textContent = mode === "numbers" ? `Next: ${need}` : `⭐ ${score} · best ${best}`; modeBtn.textContent = mode === "numbers" ? "123" : "🍎"; };
+  const setChip = () => {
+    chip.textContent = mode === "numbers" ? `Next: ${need}` : mode === "letters" ? `${wordEm} ${[...word.toUpperCase()].map((c, i) => i < li ? c : "_").join(" ")}` : `⭐ ${score} · best ${best}`;
+    modeBtn.textContent = mode === "numbers" ? "123" : mode === "letters" ? "ABC" : "🍎";
+  };
   const taken = (x, y) => snake.some(p => p.x === x && p.y === y) || foods.some(f => f.x === x && f.y === y);
   function freeCell() { for (let i = 0; i < 800; i++) { const x = ri(0, cols - 1), y = ri(0, rows - 1); if (!taken(x, y)) return { x, y }; } return { x: 0, y: 0 }; }
   function stock() {
     if (mode === "classic") { if (!foods.length) foods.push(freeCell()); return; }
+    if (mode === "letters") {
+      // The next letter of the word is always on the board, plus a couple of decoys.
+      if (li >= word.length) return;
+      const nextCh = word[li];
+      if (!foods.some(f => f.ch === nextCh)) foods.push({ ...freeCell(), ch: nextCh });
+      while (foods.length < 3) { const c = "abcdefghiklmnoprstuw"[ri(0, 19)]; if (c !== nextCh && !foods.some(f => f.ch === c)) foods.push({ ...freeCell(), ch: c }); }
+      return;
+    }
     // Numbers mode: the next number is always on the board, plus a few decoys just above it.
     if (!foods.some(f => f.n === need)) foods.push({ ...freeCell(), n: need });
     let k = 1;
@@ -2598,8 +2724,10 @@ function gameSnake(root, tools) {
     const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
     snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
     dir = 1; queue = []; foods = []; score = 0; if (!keepNeed) need = store.get("snakeNeed", 1); stepMs = 240; grow = 0; acc = 0; best = store.get(bestKey(), 0);
+    if (mode === "letters" && (!keepNeed || li >= word.length)) newWord();
     stock(); state = "ready"; setChip();
-    overlay(ovl, `<b>${mode === "numbers" ? "Eat the numbers in order" : "Snake"}</b><span>Swipe or tap an arrow to start</span>`);
+    overlay(ovl, mode === "letters" ? `<b style="font-size:2.6rem">${wordEm}</b>${spellHTML(word)}<span>Eat the letters in order</span><span>Swipe or tap an arrow to start</span>`
+      : `<b>${mode === "numbers" ? "Eat the numbers in order" : "Snake"}</b><span>Swipe or tap an arrow to start</span>`);
   }
   function turn(d) {
     if (d === null) return;
@@ -2618,22 +2746,30 @@ function gameSnake(root, tools) {
     const fi = foods.findIndex(f => f.x === nx && f.y === ny);
     if (fi >= 0) {
       const f = foods[fi]; foods.splice(fi, 1);
-      if (mode === "classic" || f.n === need) {
+      if (mode === "classic" || (mode === "numbers" && f.n === need) || (mode === "letters" && f.ch === word[li])) {
         grow++; score++; stepMs = Math.max(95, stepMs - 5); sfx.note((score - 1) % 10 + 1);
-        if (mode === "numbers") {
+        if (mode === "letters") {
+          const C = f.ch.toUpperCase(); li++;
+          if (li >= word.length) {
+            spelledN++; score += 5; sfx.yay(); celebrate(); say(C, "You spelled it!", word);
+            const nextWord = () => { newWord(); foods = []; stock(); setChip(); readWord(); };
+            if (spelledN % 3 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { nextWord(); state = "play"; acc = 0; }), 1800); }
+            else later(nextWord, 1800);
+          } else say(C);
+        } else if (mode === "numbers") {
           say(need); need++; store.set("snakeNeed", need > 100 ? 1 : need);
           if (need > 100) { state = "paused"; later(() => reward("You did it!", () => { need = 1; reset(true); }), 800); }
           else if ((need - 1) % 10 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; acc = 0; }), 500); }
         } else if (score > best) { best = score; store.set(bestKey(), best); }
         if (mode === "classic" && score % 15 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; acc = 0; }), 400); }
-      } else { sfx.boop(); say("That's", f.n, "Find", need); }
+      } else { sfx.boop(); if (mode === "letters") say("That's", f.ch.toUpperCase(), "Find", word[li].toUpperCase()); else say("That's", f.n, "Find", need); }
       stock(); setChip();
     }
     if (grow > 0) grow--; else snake.pop();
   }
   function gameOver() {
     state = "over"; sfx.boop();
-    if (mode === "classic") say("Game over! You scored", score, "points!"); else say("Ouch!", "Find", need);
+    if (mode === "classic") say("Game over! You scored", score, "points!"); else if (mode === "letters") say("Ouch!"); else say("Ouch!", "Find", need);
     overlay(ovl, `<b>${mode === "classic" ? `⭐ ${score}` : "Oops!"}</b><span>Swipe to play again</span>`);
   }
   function draw(t) {
@@ -2646,10 +2782,11 @@ function gameSnake(root, tools) {
         g.fillStyle = "#4CC764"; g.beginPath(); g.ellipse(cx + cell * .12, cy - cell * .36 + bob, cell * .14, cell * .07, -.6, 0, 7); g.fill();
         g.fillStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.arc(cx - cell * .12, cy - cell * .1 + bob, cell * .08, 0, 7); g.fill();
       } else {
-        g.fillStyle = f.n === need ? "#FFC93C" : "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
+        const label = mode === "letters" ? f.ch.toUpperCase() : f.n, isNext = mode === "letters" ? f.ch === word[li] : f.n === need;
+        g.fillStyle = isNext ? "#FFC93C" : "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
         g.beginPath(); g.arc(cx, cy + bob, cell * .48, 0, 7); g.fill(); g.stroke();
         g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(cell * (f.n > 99 ? .42 : f.n > 9 ? .52 : .66))}px "Baloo 2", sans-serif`;
-        g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(f.n, cx, cy + bob + cell * .04);
+        g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, cx, cy + bob + cell * .04);
       }
     });
     snake.forEach((p, i) => {
@@ -2664,14 +2801,18 @@ function gameSnake(root, tools) {
       g.fillStyle = "#173A5E"; g.beginPath(); g.arc(ex + DX[dir] * cell * .05, ey + DY[dir] * cell * .05, cell * .07, 0, 7); g.fill();
     });
   }
-  modeBtn.addEventListener("click", () => { mode = mode === "classic" ? "numbers" : "classic"; store.set("snakeMode", mode); sfx.tap(); reset(); say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer."); });
+  modeBtn.addEventListener("click", () => {
+    mode = mode === "classic" ? "numbers" : mode === "numbers" ? "letters" : "classic"; store.set("snakeMode", mode); sfx.tap(); reset();
+    if (mode === "letters") spellAloud($(".sword", ovl), [], word); else say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer.");
+  });
   steering(field, box, turn);
   loop((dt, t) => {
+    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } 
     if (state === "play") { acc += dt * 1000; while (acc >= stepMs && state === "play") { acc -= stepMs; step(); } }
     draw(t);
   });
   reset();
-  say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer.");
+  if (mode === "letters") spellAloud($(".sword", ovl), [], word); else say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer.");
   onWin("resize", () => { if (state !== "play") reset(true); else fit(); });
 }
 
@@ -2681,7 +2822,7 @@ function gameSpace(root, tools) {
   root.innerHTML = '<div class="field arcade spacef"><canvas></canvas><div class="ovl"></div></div>';
   const field = root.firstChild, cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild;
   let W, H, ship, bullets, bombs, aliens, wave, lives, score, state = "ready", fireT, dirX, stepDown, bombT, stars, bits, best = store.get("spaceBest", 0);
-  let word = "", wordEm = "", spellIdx = 0, spelled = 0, recent = [], introT = 0;
+  let word = "", wordEm = "", spellIdx = 0, spelled = 0, recent = [], introT = 0, power = { type: "", t: 0 }, caps = [], capQ = null;
   const ROW_COLORS = ["#FF86C8", "#A574F2", "#3D9BFF", "#4CC764", "#FFD43B"];
   function fit() { ({ W, H } = fitCanvas(cv, g, field)); stars = range(1, 60).map(() => ({ x: rand(0, W), y: rand(0, H), s: rand(.5, 2) })); }
   const shipY = () => H - Math.max(46, H * .09);
@@ -2699,15 +2840,14 @@ function gameSpace(root, tools) {
     aliens = [];
     const x0 = (W - gap * cols) / 2 + gap / 2;
     for (let r = 0; r < rowsN; r++) for (let c = 0; c < cols; c++)
-      aliens.push({ x: x0 + gap * c, y: 96 + r * gap * .82, r: gap * .36, row: r, ch: word[c].toUpperCase(), alive: true, ph: rand(0, 6) });
-    dirX = 1; stepDown = gap * .3; bullets = []; bombs = []; bombT = 2; spellIdx = 0; spelled = 0;
+      aliens.push({ x: x0 + gap * c, y: 116 + r * gap * .82, r: gap * .36, row: r, ch: word[c].toUpperCase(), alive: true, ph: rand(0, 6) });
+    dirX = 1; stepDown = gap * .3; bullets = []; bombs = []; bombT = 2; spellIdx = 0; spelled = 0; caps = []; capQ = null;
   }
   function intro() {
     // Show and read the word before the wave starts: "Cat. C, A, T. Cat."
-    state = "intro"; introT = 3.6 + word.length * .35;
-    const letters = [...word.toUpperCase()];
-    overlay(ovl, `<b style="font-size:3rem">${wordEm}</b><b class="spellword">${letters.join(" ")}</b><span>Shoot the letters in order!</span>`);
-    say(word, ...letters, word, "Shoot the letters in order!");
+    state = "intro";
+    overlay(ovl, `<b style="font-size:3rem">${wordEm}</b>${spellHTML(word)}<span>Shoot the letters in order!</span>`);
+    introT = spellAloud($(".sword", ovl), [word], word, ["Shoot the letters in order!"]) + .4;
   }
   function reset() {
     fit(); wave = 1; lives = 3; score = 0; bits = [];
@@ -2730,20 +2870,48 @@ function gameSpace(root, tools) {
       spellIdx++; say(a.ch); sfx.note(spellIdx);
       if (spellIdx >= word.length) { spellIdx = 0; spelled++; score += 100; sfx.yay(); say("You spelled it!", word); boom(W / 2, 40, "#FFD43B", 24); }
     }
+    if (!caps.length && power.t <= 0 && state === "play" && Math.random() < .16) spawnPower(a.x, a.y);
     setChip();
+  }
+  // Power-ups: two capsules fall with answers to a sum. Catching the right one gives a big weapon for 10 seconds.
+  function spawnPower(x, y) {
+    const lvl = store.get("skill.math", 1), add = lvl < 3 || Math.random() < .6, max = lvl <= 1 ? 5 : lvl === 2 ? 10 : 20;
+    const a = add ? ri(1, max - 1) : ri(3, max), b = add ? ri(1, max - a) : ri(1, a - 1), ans = add ? a + b : a - b;
+    let wrong; do { wrong = ans + pick([-2, -1, 1, 2]); } while (wrong < 0 || wrong === ans);
+    capQ = { a, b, add, ans, text: `${a} ${add ? "+" : "−"} ${b}` };
+    const xs = [Math.max(40, Math.min(W - 40, x - 50)), Math.max(40, Math.min(W - 40, x + 50))];
+    caps = shuffle([ans, wrong]).map((v, i) => ({ x: xs[i], y, v, ok: v === ans }));
+    say("Catch the answer!", "What is", a, add ? "plus" : "minus", b);
+  }
+  function catchCap(c) {
+    const q = capQ;
+    if (c.ok && q) {
+      power = { type: pick(["spread", "giant"]), t: 10 }; caps.forEach(x => x.gone = true); capQ = null;
+      sfx.yay(); boom(ship.x, shipY() - 20, "#7CF5FF", 24);
+      say(praise(), q.a, q.add ? "plus" : "minus", q.b, "is", q.ans, "Power up!");
+    } else { c.gone = true; sfx.boop(); say("That's", c.v); }
   }
   function update(dt) {
     ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12);
     if (ship.inv > 0) ship.inv -= dt;
     fireT -= dt;
-    if (fireT <= 0 && bullets.length < 3) { bullets.push({ x: ship.x, y: shipY() - 22 }); fireT = .34; tone(1100, { d: .05, v: .04, type: "square", to: 700 }); }
-    bullets.forEach(b => b.y -= 560 * dt); bullets = bullets.filter(b => b.y > -20);
+    if (power.t > 0) power.t -= dt;
+    const spread = power.t > 0 && power.type === "spread", giant = power.t > 0 && power.type === "giant";
+    if (fireT <= 0 && bullets.length < (spread ? 9 : 3)) {
+      if (spread) [-170, 0, 170].forEach(vx => bullets.push({ x: ship.x, y: shipY() - 22, vx }));
+      else if (giant) bullets.push({ x: ship.x, y: shipY() - 22, r: 13, pierce: true });
+      else bullets.push({ x: ship.x, y: shipY() - 22 });
+      fireT = .34; tone(giant ? 500 : 1100, { d: .06, v: .05, type: "square", to: giant ? 260 : 700 });
+    }
+    bullets.forEach(b => { b.y -= 560 * dt; b.x += (b.vx || 0) * dt; }); bullets = bullets.filter(b => b.y > -20 && b.x > -20 && b.x < W + 20);
+    caps.forEach(c => { c.y += 105 * dt; if (!c.gone && Math.abs(c.x - ship.x) < 34 && Math.abs(c.y - shipY()) < 28) catchCap(c); });
+    caps = caps.filter(c => !c.gone && c.y < H + 30); if (!caps.length) capQ = null;
     const live = aliens.filter(a => a.alive), total = aliens.length;
     const speed = (24 + wave * 6) * (1 + (1 - live.length / total) * 2);
     let edge = false;
     live.forEach(a => { a.x += dirX * speed * dt; if (a.x < a.r + 8 || a.x > W - a.r - 8) edge = true; });
     if (edge) { dirX *= -1; live.forEach(a => { a.x += dirX * 4; a.y += stepDown; }); }
-    bullets.forEach(b => live.forEach(a => { if (a.alive && Math.hypot(a.x - b.x, a.y - b.y) < a.r + 4) { b.y = -99; shootAlien(a); } }));
+    bullets.forEach(b => live.forEach(a => { if (a.alive && Math.hypot(a.x - b.x, a.y - b.y) < a.r + (b.r || 4)) { if (!b.pierce) b.y = -99; shootAlien(a); } }));
     bombT -= dt;
     if (bombT <= 0 && live.length) {
       const shooters = live.filter(a => !live.some(o => o !== a && Math.abs(o.x - a.x) < a.r && o.y > a.y));
@@ -2800,8 +2968,18 @@ function gameSpace(root, tools) {
     stars.forEach(s => { s.y += s.s * .4; if (s.y > H) s.y = 0; g.fillStyle = `rgba(255,255,255,${.3 + s.s * .3})`; g.fillRect(s.x, s.y, s.s, s.s); });
     if (word) drawWordBar();
     aliens.forEach(a => a.alive && drawAlien(a, t));
-    g.fillStyle = "#FFD43B"; bullets.forEach(b => { roundRect(g, b.x - 3, b.y - 9, 6, 18, 3); g.fill(); });
+    bullets.forEach(b => {
+      if (b.r) { g.fillStyle = "#7CF5FF"; g.beginPath(); g.arc(b.x, b.y, b.r, 0, 7); g.fill(); g.fillStyle = "#fff"; g.beginPath(); g.arc(b.x, b.y, b.r * .45, 0, 7); g.fill(); }
+      else { g.fillStyle = "#FFD43B"; roundRect(g, b.x - 3, b.y - 9, 6, 18, 3); g.fill(); }
+    });
     g.fillStyle = "#FF86C8"; bombs.forEach(b => { g.beginPath(); g.arc(b.x, b.y, 6, 0, 7); g.fill(); });
+    caps.forEach(c => {
+      g.fillStyle = "#7CF5FF"; g.strokeStyle = "#173A5E"; g.lineWidth = 3; roundRect(g, c.x - 26, c.y - 19, 52, 38, 19); g.fill(); g.stroke();
+      g.fillStyle = "#173A5E"; g.font = `800 24px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(c.v, c.x, c.y + 1);
+    });
+    g.textAlign = "center"; g.textBaseline = "middle"; g.lineWidth = 5; g.strokeStyle = "#173A5E";
+    if (capQ) { g.font = `800 24px "Baloo 2", sans-serif`; g.strokeText(`Catch ${capQ.text} = ?`, W / 2, 78); g.fillStyle = "#7CF5FF"; g.fillText(`Catch ${capQ.text} = ?`, W / 2, 78); }
+    if (power.t > 0) { const label = `${power.type === "spread" ? "✨ Triple shot" : "💥 Giant shots"} ${Math.ceil(power.t)}`; g.font = `800 18px "Baloo 2", sans-serif`; g.strokeText(label, W / 2, H - 14); g.fillStyle = "#FFD43B"; g.fillText(label, W / 2, H - 14); }
     bits.forEach(p => { g.globalAlpha = Math.max(0, p.life * 1.5); g.fillStyle = p.color; g.fillRect(p.x - 3, p.y - 3, 6, 6); }); g.globalAlpha = 1;
     drawShip();
   }
@@ -2818,6 +2996,7 @@ function gameSpace(root, tools) {
   onWin("keydown", e => { if (e.key === "ArrowLeft") ship.tx = Math.max(26, ship.tx - 40); if (e.key === "ArrowRight") ship.tx = Math.min(W - 26, ship.tx + 40); });
   loop((dt, t) => {
     if (state === "intro") { introT -= dt; ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12); if (introT <= 0) { state = "play"; overlay(ovl, ""); } }
+    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } 
     if (state === "play") update(dt);
     draw(t);
   });
@@ -2832,6 +3011,7 @@ function gameMaze(root, tools) {
   root.innerHTML = `<div class="field arcade mazef"><div class="play"><canvas></canvas><div class="ovl"></div></div>${DPAD}</div>`;
   const field = root.firstChild, box = $(".play", field), cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild;
   let level = levelOf("maze"), W, H, TW, TH, tile, ox, oy, grid, dots, starsLeft, player, bees, lives, score, state = "ready", sleepy = 0, home;
+  let mword = "", mem = "", mli = 0, mletters = new Map(), firstLevel = true;
   const open = (x, y) => x >= 0 && y >= 0 && x < TW && y < TH && grid[y][x] === 0;
   function genMaze() {
     ({ W, H } = fitCanvas(cv, g, box));
@@ -2860,6 +3040,9 @@ function gameMaze(root, tools) {
     dots = new Set(); starsLeft = new Set();
     for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x] === 0) dots.add(x + "," + y);
     [[1, 1], [TW - 2, 1], [1, TH - 2], [TW - 2, TH - 2]].forEach(([x, y]) => { dots.delete(x + "," + y); starsLeft.add(x + "," + y); });
+    // A word's letters hide among the berries; collecting them in order spells it for a bonus.
+    [mword, mem] = pick(level <= 3 ? SPELL3 : [...SPELL3, ...SPELL4]); mli = 0; mletters = new Map();
+    shuffle([...dots]).slice(0, mword.length).forEach((k, i) => { dots.delete(k); mletters.set(k, i); });
     // Bees start on the open tile nearest the middle.
     let bestD = 1e9;
     for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x] === 0) { const d = Math.hypot(x - TW / 2, y - TH / 2); if (d < bestD) { bestD = d; home = { x, y }; } }
@@ -2870,11 +3053,13 @@ function gameMaze(root, tools) {
     const n = Math.min(4, 1 + Math.ceil(level / 2));
     bees = range(1, n).map((_, i) => ({ x: home.x, y: home.y, dir: -1, p: 0, speed: Math.min(3.9, 2.6 + level * .18), wait: i * 1.2 }));
   }
-  const setChip = () => { chip.textContent = `Lv ${level} ${"❤️".repeat(lives)} ⭐ ${score}`; };
+  const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score} · ${[...mword.toUpperCase()].map((c, i) => i < mli ? c : "_").join("")}`; };
   function newLevel(fresh) {
     if (fresh) { lives = 3; score = 0; }
     genMaze(); place(); sleepy = 0; setChip();
-    state = "ready"; overlay(ovl, `<b>Level ${level}</b><span>Collect every berry. Stay away from the bees!</span><span>Swipe or tap an arrow to start</span>`);
+    state = "ready"; overlay(ovl, `<b>Level ${level}</b><span>Collect every berry. Stay away from the bees!</span><span>Find the letters in order:</span><b style="font-size:2.2rem">${mem}</b>${spellHTML(mword)}<span>Swipe or tap an arrow to start</span>`);
+    const el = $(".sword", ovl);
+    if (firstLevel) { firstLevel = false; later(() => { if (state === "ready") spellAloud(el, [], mword); }, 3300); } else spellAloud(el, [], mword);
   }
   function steer(d) {
     if (d === null) return;
@@ -2897,6 +3082,12 @@ function gameMaze(root, tools) {
   function arrive(e) {
     if (e !== player) return;
     const k = e.x + "," + e.y;
+    if (mletters.get(k) === mli) {
+      mletters.delete(k); mli++; score += 30;
+      const C = mword[mli - 1].toUpperCase();
+      if (mli >= mword.length) { score += 200; sfx.yay(); celebrate(); say(C, "You spelled it!", mword); } else { sfx.note(mli); say(C); }
+      setChip();
+    }
     if (dots.delete(k)) { score += 10; tone(880 + (score % 50) * 6, { d: .05, v: .07, type: "triangle" }); setChip(); }
     if (starsLeft.delete(k)) { score += 50; sleepy = 7; sfx.yay(); say("Power star! The bees are sleepy."); setChip(); }
     if (!dots.size && !starsLeft.size) {
@@ -2950,6 +3141,11 @@ function gameMaze(root, tools) {
     g.fillStyle = "#E8478C";
     dots.forEach(k => { const [x, y] = k.split(",").map(Number); g.beginPath(); g.arc(ox + x * tile + tile / 2, oy + y * tile + tile / 2, Math.max(2.5, tile * .12), 0, 7); g.fill(); });
     g.textAlign = "center"; g.textBaseline = "middle";
+    mletters.forEach((i, k) => {
+      const [x, y] = k.split(",").map(Number), next = i === mli, px = ox + x * tile + tile / 2, py = oy + y * tile + tile / 2, sz = tile * (next ? .86 + .06 * Math.sin(t * 8) : .74);
+      g.fillStyle = next ? "#FFD43B" : "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2; roundRect(g, px - sz / 2, py - sz / 2, sz, sz, sz * .25); g.fill(); g.stroke();
+      g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(sz * .72)}px "Baloo 2", sans-serif`; g.fillText(mword[i].toUpperCase(), px, py + 1);
+    });
     g.font = `${Math.round(tile * .8 * (1 + .08 * Math.sin(t * 6)))}px ${EMOJI_FONT}`;
     starsLeft.forEach(k => { const [x, y] = k.split(",").map(Number); g.fillText("⭐", ox + x * tile + tile / 2, oy + y * tile + tile / 2); });
     g.font = `${Math.round(tile * .9)}px ${EMOJI_FONT}`;
@@ -2964,7 +3160,7 @@ function gameMaze(root, tools) {
     g.fillText("🐰", ox + pp.x * tile + tile / 2, oy + pp.y * tile + tile / 2 + (player.dir !== -1 ? Math.abs(Math.sin(t * 12)) * -tile * .08 : 0));
   }
   steering(field, box, steer);
-  loop((dt, t) => { if (state === "play") update(dt); if (grid) draw(t); });
+  loop((dt, t) => { if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (state === "play") update(dt); if (grid) draw(t); });
   lives = 3; score = 0; newLevel(false);
   say("Collect all the berries! Stay away from the bees.");
   onWin("resize", () => { if (state !== "play") newLevel(false); });
@@ -3097,7 +3293,7 @@ function gameStack(root, tools) {
   loop((dt, t) => {
     J.update(dt);
     falling.forEach(f => { f.vy += 900 * dt; f.y += f.vy * dt; f.rot += dt * 2; }); falling = falling.filter(f => f.y < H + 200);
-    if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
   reset();
@@ -3209,7 +3405,7 @@ function gameSlice(root, tools) {
     J.update(dt);
     halves.forEach(h => { h.x += h.vx * dt; h.y += h.vy * dt; h.vy += H * 1.25 * dt; h.rot += h.side * 3 * dt; h.life -= dt; }); halves = halves.filter(h => h.life > 0);
     trail.forEach(p => p.life -= dt); trail = trail.filter(p => p.life > 0);
-    if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
   reset();
@@ -3312,7 +3508,7 @@ function gameFlap(root, tools) {
     if (state === "play") flap();
   });
   onWin("keydown", e => { if (e.key === " " || e.key === "ArrowUp") { e.preventDefault(); if (state === "ready") { state = "play"; overlay(ovl, ""); } if (state === "play") flap(); } });
-  loop((dt, t) => { J.update(dt); if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
   reset();
   say("Tap to flap! Fly through the gaps.");
   onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
@@ -3430,7 +3626,7 @@ function gameRunner(root, tools) {
   });
   cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") aim(e); });
   onWin("keydown", e => { if (e.key === "ArrowLeft") tx = Math.max(trackL + 20, tx - 60); if (e.key === "ArrowRight") tx = Math.min(trackR - 20, tx + 60); });
-  loop((dt, t) => { J.update(dt); if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
   reset();
   say("Drag to steer. Go through the best gates!");
   onWin("resize", () => { if (state !== "play") reset(); });
@@ -3499,7 +3695,7 @@ function openGame(gm) {
   hub.hidden = true; stage.hidden = false; homeAsk.hidden = true;
   titleEl.innerHTML = `<span class="nm">${gm.name}</span>`;
   toolsEl.innerHTML = ""; gameEl.innerHTML = ""; fx.innerHTML = "";
-  stage.querySelectorAll(".reward").forEach(x => x.remove());
+  stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   say(gm.name); // speaking inside the tap unlocks audio on iPhone and iPad; the game's intro replaces it
   gm.run(gameEl, toolsEl);
   keepAwake();
@@ -3507,7 +3703,7 @@ function openGame(gm) {
 function goHome() {
   endSession();
   gameEl.innerHTML = ""; toolsEl.innerHTML = ""; fx.innerHTML = ""; homeAsk.hidden = true;
-  stage.querySelectorAll(".reward").forEach(x => x.remove());
+  stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   stage.hidden = true; hub.hidden = false;
   renderHub();
   if (wakeLock) { wakeLock.release().catch(() => {}); wakeLock = null; }
@@ -3562,7 +3758,10 @@ function renderSheet() {
     });
   }
   speedEl.querySelectorAll("button").forEach(b => b.classList.toggle("on", Math.abs(Number(b.dataset.rate) - rate) < .01));
+  $("#gateMins").querySelectorAll("button").forEach(b => b.classList.toggle("on", Number(b.dataset.m) === store.get("gateMins", 2)));
+  $("#skills").textContent = `Brain-break levels: Numbers ${store.get("skill.numbers", 1)} · Letters ${store.get("skill.letters", 1)} · Math ${store.get("skill.math", 1)}`;
 }
+$("#gateMins").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { store.set("gateMins", Number(b.dataset.m)); sfx.tap(); renderSheet(); }));
 modeEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { voiceMode = b.dataset.mode; store.set("voiceMode", voiceMode); audio(); renderSheet(); say("Hi! Let's play!"); }));
 speedEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rate = Number(b.dataset.rate); store.set("rate", rate); renderSheet(); say("Hi! Let's play!"); }));
 $("#gear").addEventListener("click", () => { audio(); renderSheet(); sheet.hidden = false; });
