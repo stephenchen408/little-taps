@@ -413,10 +413,11 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .snakef, .mazef { background: #E9F7DF; }
 .arcade .play { position: relative; flex: 1; min-height: 0; }
 .arcade canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
-.spacef canvas { position: absolute; inset: 0; }
+.spacef canvas, .stackf canvas, .slicef canvas, .flapf canvas, .runnerf canvas { position: absolute; inset: 0; }
 .ovl { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 4px;
   width: max-content; max-width: 86%; padding: 14px 22px; text-align: center; background: rgba(255,253,246,.94); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 5px 0 var(--ink); }
 .ovl b { font-size: clamp(1.6rem, 7vw, 2.6rem); line-height: 1.1; }
+.ovl .spellword { letter-spacing: .12em; font-size: clamp(2.2rem, 11vw, 3.6rem); color: var(--tomato); -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; }
 .ovl span { font-size: clamp(1rem, 4vw, 1.3rem); font-weight: 600; }
 .dpad { flex: none; display: grid; grid-template-columns: repeat(3, var(--dp)); grid-template-rows: repeat(2, var(--dp)); gap: 6px; justify-content: center; padding: 8px 0 10px; --dp: min(17vw, 70px); }
 .dpad button { width: var(--dp); height: var(--dp); border: 4px solid var(--ink); border-radius: 18px; background: var(--paper); box-shadow: 0 4px 0 var(--ink); font-size: calc(var(--dp) * .4); padding: 0; color: var(--ink); }
@@ -628,7 +629,7 @@ window.LT = (() => {
     // Arcade
     "Arcade","Snake","Space","Maze","Swipe or tap the arrows to steer.","Eat the numbers in order, all the way to one hundred!",
     "Game over! You scored","Wave","Drag to move your ship. It shoots by itself!","Ouch!",
-    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.",
+    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.","Shoot the letters in order!","Stack","Slice","Flap","Runner","Tap to drop the block.","Swipe to slice the fruit! Don't touch the bombs.","Tap to flap! Fly through the gaps.","Drag to steer. Go through the best gates!","Smash!","So close! Try again.",
   ];
   function voiceLines() {
     const L = {};
@@ -684,7 +685,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("littletaps." + k, JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "6 (Nov 24, arcade)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "7 (Nov 24, more arcade)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -2680,16 +2681,33 @@ function gameSpace(root, tools) {
   root.innerHTML = '<div class="field arcade spacef"><canvas></canvas><div class="ovl"></div></div>';
   const field = root.firstChild, cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild;
   let W, H, ship, bullets, bombs, aliens, wave, lives, score, state = "ready", fireT, dirX, stepDown, bombT, stars, bits, best = store.get("spaceBest", 0);
+  let word = "", wordEm = "", spellIdx = 0, spelled = 0, recent = [], introT = 0;
   const ROW_COLORS = ["#FF86C8", "#A574F2", "#3D9BFF", "#4CC764", "#FFD43B"];
   function fit() { ({ W, H } = fitCanvas(cv, g, field)); stars = range(1, 60).map(() => ({ x: rand(0, W), y: rand(0, H), s: rand(.5, 2) })); }
   const shipY = () => H - Math.max(46, H * .09);
   const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score}`; };
+  // Each wave is a word: every row of aliens spells it, one letter per alien.
+  function pickWord() {
+    const pool = wave <= 3 ? SPELL3 : wave <= 6 ? [...SPELL3, ...SPELL4] : SPELL4;
+    let w; do { w = pick(pool); } while (recent.includes(w[0]));
+    recent = [...recent.slice(-6), w[0]];
+    [word, wordEm] = w;
+  }
   function newWave() {
-    const cols = W < 500 ? 6 : 8, rowsN = Math.min(5, 2 + Math.floor((wave + 1) / 2)), gap = Math.min(64, (W - 40) / (cols + 1));
+    pickWord();
+    const cols = word.length, rowsN = Math.min(4, 1 + Math.ceil(wave / 2)), gap = Math.min(86, (W - 40) / (cols + 1.8));
     aliens = [];
-    for (let r = 0; r < rowsN; r++) for (let c = 0; c < cols; c++) aliens.push({ x: 20 + gap * (c + 1) - gap / 2, y: 60 + r * gap * .8, r: gap * .3, row: r, alive: true, ph: rand(0, 6) });
-    aliens.forEach(a => a.r = gap * .36);
-    dirX = 1; stepDown = gap * .35; bullets = []; bombs = []; bombT = 1.5;
+    const x0 = (W - gap * cols) / 2 + gap / 2;
+    for (let r = 0; r < rowsN; r++) for (let c = 0; c < cols; c++)
+      aliens.push({ x: x0 + gap * c, y: 96 + r * gap * .82, r: gap * .36, row: r, ch: word[c].toUpperCase(), alive: true, ph: rand(0, 6) });
+    dirX = 1; stepDown = gap * .3; bullets = []; bombs = []; bombT = 2; spellIdx = 0; spelled = 0;
+  }
+  function intro() {
+    // Show and read the word before the wave starts: "Cat. C, A, T. Cat."
+    state = "intro"; introT = 3.6 + word.length * .35;
+    const letters = [...word.toUpperCase()];
+    overlay(ovl, `<b style="font-size:3rem">${wordEm}</b><b class="spellword">${letters.join(" ")}</b><span>Shoot the letters in order!</span>`);
+    say(word, ...letters, word, "Shoot the letters in order!");
   }
   function reset() {
     fit(); wave = 1; lives = 3; score = 0; bits = [];
@@ -2705,6 +2723,15 @@ function gameSpace(root, tools) {
       overlay(ovl, `<b>⭐ ${score}</b><span>Best: ${best}</span><span>Tap to play again</span>`);
     } else say("Ouch!");
   }
+  function shootAlien(a) {
+    a.alive = false; score += 10; boom(a.x, a.y, ROW_COLORS[a.row % 5]); sfx.pop();
+    if (a.ch === word[spellIdx].toUpperCase()) {
+      // In spelling order: say the letter, light it up, and finish the word for a bonus.
+      spellIdx++; say(a.ch); sfx.note(spellIdx);
+      if (spellIdx >= word.length) { spellIdx = 0; spelled++; score += 100; sfx.yay(); say("You spelled it!", word); boom(W / 2, 40, "#FFD43B", 24); }
+    }
+    setChip();
+  }
   function update(dt) {
     ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12);
     if (ship.inv > 0) ship.inv -= dt;
@@ -2712,37 +2739,38 @@ function gameSpace(root, tools) {
     if (fireT <= 0 && bullets.length < 3) { bullets.push({ x: ship.x, y: shipY() - 22 }); fireT = .34; tone(1100, { d: .05, v: .04, type: "square", to: 700 }); }
     bullets.forEach(b => b.y -= 560 * dt); bullets = bullets.filter(b => b.y > -20);
     const live = aliens.filter(a => a.alive), total = aliens.length;
-    const speed = (26 + wave * 7) * (1 + (1 - live.length / total) * 2.2);
+    const speed = (24 + wave * 6) * (1 + (1 - live.length / total) * 2);
     let edge = false;
     live.forEach(a => { a.x += dirX * speed * dt; if (a.x < a.r + 8 || a.x > W - a.r - 8) edge = true; });
     if (edge) { dirX *= -1; live.forEach(a => { a.x += dirX * 4; a.y += stepDown; }); }
-    bullets.forEach(b => live.forEach(a => {
-      if (a.alive && Math.hypot(a.x - b.x, a.y - b.y) < a.r + 4) {
-        a.alive = false; b.y = -99; score += 10 * (5 - a.row); boom(a.x, a.y, ROW_COLORS[a.row % 5]); sfx.pop(); setChip();
-      }
-    }));
+    bullets.forEach(b => live.forEach(a => { if (a.alive && Math.hypot(a.x - b.x, a.y - b.y) < a.r + 4) { b.y = -99; shootAlien(a); } }));
     bombT -= dt;
     if (bombT <= 0 && live.length) {
       const shooters = live.filter(a => !live.some(o => o !== a && Math.abs(o.x - a.x) < a.r && o.y > a.y));
-      const s = pick(shooters); bombs.push({ x: s.x, y: s.y + s.r }); bombT = Math.max(.35, 1.6 - wave * .12) * rand(.6, 1.3);
+      const s = pick(shooters); bombs.push({ x: s.x, y: s.y + s.r }); bombT = Math.max(.45, 1.7 - wave * .12) * rand(.6, 1.3);
     }
-    bombs.forEach(b => b.y += (150 + wave * 12) * dt); bombs = bombs.filter(b => b.y < H + 20);
+    bombs.forEach(b => b.y += (140 + wave * 12) * dt); bombs = bombs.filter(b => b.y < H + 20);
     if (ship.inv <= 0 && bombs.some(b => Math.abs(b.x - ship.x) < 20 && Math.abs(b.y - shipY()) < 18)) { bombs = []; hit(); }
-    if (live.some(a => a.y + a.r > shipY() - 18)) { hit(); if (state !== "over") newWave(); }
+    if (live.some(a => a.y + a.r > shipY() - 18)) { hit(); if (state !== "over") { newWave(); intro(); } }
     if (!aliens.some(a => a.alive) && state === "play") {
-      wave++; sfx.yay(); celebrate();
-      if (wave % 3 === 1) { state = "paused"; reward("Fantastic!", () => { newWave(); state = "play"; say("Wave", wave); }); }
-      else { newWave(); say("Wave", wave); }
+      wave++; celebrate();
+      if (wave % 3 === 1) { state = "paused"; reward("Fantastic!", () => { newWave(); intro(); }); }
+      else { newWave(); intro(); }
     }
     bits.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }); bits = bits.filter(p => p.life > 0);
   }
   function drawAlien(a, t) {
     const wob = Math.sin(t * 6 + a.ph) * a.r * .08, col = ROW_COLORS[a.row % 5], x = a.x, y = a.y + wob, r = a.r;
+    const next = state === "play" && a.ch === word[spellIdx].toUpperCase();
     g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
     [-1, 1].forEach(s => { g.beginPath(); g.moveTo(x + s * r * .4, y - r * .7); g.lineTo(x + s * r * .65, y - r * 1.15); g.stroke(); g.fillStyle = col; g.beginPath(); g.arc(x + s * r * .65, y - r * 1.15, r * .16, 0, 7); g.fill(); g.stroke(); });
+    if (next) { g.fillStyle = "rgba(255,212,59,.35)"; g.beginPath(); g.arc(x, y, r * 1.35 + Math.sin(t * 8) * r * .08, 0, 7); g.fill(); }
     g.fillStyle = col; g.beginPath(); g.ellipse(x, y, r, r * .85, 0, 0, 7); g.fill(); g.stroke();
     for (let i = -1; i <= 1; i++) { g.beginPath(); g.ellipse(x + i * r * .55, y + r * .8, r * .18, r * .25, 0, 0, 7); g.fill(); g.stroke(); }
-    [-1, 1].forEach(s => { g.fillStyle = "#fff"; g.beginPath(); g.arc(x + s * r * .35, y - r * .1, r * .26, 0, 7); g.fill(); g.fillStyle = "#173A5E"; g.beginPath(); g.arc(x + s * r * .35 + dirX * r * .07, y - r * .05, r * .12, 0, 7); g.fill(); });
+    [-1, 1].forEach(s => { g.fillStyle = "#fff"; g.beginPath(); g.arc(x + s * r * .35, y - r * .3, r * .2, 0, 7); g.fill(); g.fillStyle = "#173A5E"; g.beginPath(); g.arc(x + s * r * .35 + dirX * r * .06, y - r * .27, r * .09, 0, 7); g.fill(); });
+    // The alien's letter on its tummy.
+    g.font = `800 ${Math.round(r * .95)}px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+    g.lineWidth = 4; g.strokeStyle = "#173A5E"; g.strokeText(a.ch, x, y + r * .28); g.fillStyle = "#fff"; g.fillText(a.ch, x, y + r * .28);
   }
   function drawShip() {
     const x = ship.x, y = shipY();
@@ -2754,9 +2782,23 @@ function gameSpace(root, tools) {
     g.fillStyle = "#4DA8FF"; g.beginPath(); g.arc(x, y - 4, 5.5, 0, 7); g.fill(); g.stroke();
     g.fillStyle = Math.random() < .5 ? "#FFC93C" : "#FF9A3C"; g.beginPath(); g.moveTo(x - 7, y + 19); g.lineTo(x, y + 30 + Math.random() * 6); g.lineTo(x + 7, y + 19); g.fill();
   }
+  function drawWordBar() {
+    // The word across the top; letters light up as he spells it in order.
+    const n = word.length, s = Math.min(44, (W - 40) / (n + 2)), x0 = W / 2 - (n * (s + 6)) / 2 + s / 2, y = 34;
+    g.font = `${Math.round(s * .9)}px ${EMOJI_FONT}`; g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillText(wordEm, x0 - s - 8, y);
+    [...word.toUpperCase()].forEach((ch, i) => {
+      const x = x0 + i * (s + 6), lit = i < spellIdx;
+      g.fillStyle = lit ? "#FFD43B" : "rgba(255,255,255,.12)"; g.strokeStyle = lit ? "#FFD43B" : "rgba(255,255,255,.45)"; g.lineWidth = 2;
+      roundRect(g, x - s / 2, y - s / 2, s, s, 8); g.fill(); g.stroke();
+      g.fillStyle = lit ? "#173A5E" : "#fff"; g.font = `800 ${Math.round(s * .62)}px "Baloo 2", sans-serif`; g.fillText(ch, x, y + 2);
+    });
+    if (spelled) { g.fillStyle = "#FFD43B"; g.font = `800 18px "Baloo 2", sans-serif`; g.fillText(`×${spelled}`, x0 + n * (s + 6) + 4, y); }
+  }
   function draw(t) {
     g.fillStyle = "#14213D"; g.fillRect(0, 0, W, H);
     stars.forEach(s => { s.y += s.s * .4; if (s.y > H) s.y = 0; g.fillStyle = `rgba(255,255,255,${.3 + s.s * .3})`; g.fillRect(s.x, s.y, s.s, s.s); });
+    if (word) drawWordBar();
     aliens.forEach(a => a.alive && drawAlien(a, t));
     g.fillStyle = "#FFD43B"; bullets.forEach(b => { roundRect(g, b.x - 3, b.y - 9, 6, 18, 3); g.fill(); });
     g.fillStyle = "#FF86C8"; bombs.forEach(b => { g.beginPath(); g.arc(b.x, b.y, 6, 0, 7); g.fill(); });
@@ -2767,16 +2809,21 @@ function gameSpace(root, tools) {
   cv.addEventListener("pointerdown", e => {
     e.preventDefault();
     if (state === "over") reset();
-    if (state === "ready") { state = "play"; overlay(ovl, ""); say("Wave", wave); }
+    if (state === "ready") intro();
+    else if (state === "intro" && introT < 2.4) introT = 0; // a tap skips the end of the intro
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     aim(e);
   });
   cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") aim(e); });
   onWin("keydown", e => { if (e.key === "ArrowLeft") ship.tx = Math.max(26, ship.tx - 40); if (e.key === "ArrowRight") ship.tx = Math.min(W - 26, ship.tx + 40); });
-  loop((dt, t) => { if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => {
+    if (state === "intro") { introT -= dt; ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12); if (introT <= 0) { state = "play"; overlay(ovl, ""); } }
+    if (state === "play") update(dt);
+    draw(t);
+  });
   reset();
   say("Drag to move your ship. It shoots by itself!");
-  onWin("resize", () => { if (state !== "play") reset(); else fit(); });
+  onWin("resize", () => { if (state !== "play" && state !== "intro") reset(); else fit(); });
 }
 
 /* ---------- Maze: a bunny collects berries in a garden maze while bees buzz around ---------- */
@@ -2923,6 +2970,472 @@ function gameMaze(root, tools) {
   onWin("resize", () => { if (state !== "play") newLevel(false); });
 }
 
+/* ======================================================================
+   FUN-FIRST ARCADE GAMES: Stack, Slice, Flap, Runner.
+   Learning rides along inside the play (counting floors, making ten, picking
+   the bigger number, math gates) and never stops the game or punishes a choice.
+   ====================================================================== */
+// "Juice": screen shake (trauma squared), particles, floating text, hit-stop and combo pitch.
+function makeJuice() {
+  const J = { trauma: 0, parts: [], texts: [], stop: 0, combo: 0, comboT: 0, saved: false };
+  J.shake = a => { J.trauma = Math.min(1, J.trauma + a); };
+  J.burst = (x, y, color, n = 14, sp = 240, size = 6, grav = 500) => {
+    for (let i = 0; i < n; i++) { const a = rand(0, 6.28), v = rand(sp * .3, sp); J.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - sp * .3, life: rand(.4, .9), color, size: rand(size * .6, size * 1.3), grav }); }
+  };
+  J.text = (x, y, text, color = "#FFFDF6", size = 30) => J.texts.push({ x, y, text, color, size, life: 1 });
+  J.hit = ms => { J.stop = Math.max(J.stop, ms / 1000); };
+  J.chime = () => { J.combo = Math.min(12, J.combo + 1); J.comboT = 1.2; tone(523 * Math.pow(2, J.combo / 12), { d: .14, type: "triangle", v: .17 }); };
+  J.update = dt => {
+    if (J.comboT > 0 && (J.comboT -= dt) <= 0) J.combo = 0;
+    J.trauma = Math.max(0, J.trauma - dt * 1.6);
+    J.parts.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += p.grav * dt; p.life -= dt; }); J.parts = J.parts.filter(p => p.life > 0);
+    J.texts.forEach(t => { t.y -= 50 * dt; t.life -= dt * .9; }); J.texts = J.texts.filter(t => t.life > 0);
+  };
+  J.begin = (g, t) => {
+    const s = J.trauma * J.trauma;
+    if (s > .001) { g.save(); J.saved = true; g.translate(Math.sin(t * 87) * 11 * s, Math.cos(t * 73) * 11 * s); }
+  };
+  J.end = g => {
+    J.parts.forEach(p => { g.globalAlpha = Math.min(1, p.life * 2); g.fillStyle = p.color; g.beginPath(); g.arc(p.x, p.y, p.size, 0, 7); g.fill(); });
+    g.globalAlpha = 1;
+    J.texts.forEach(t => {
+      const sc = t.life > .85 ? 1 + (t.life - .85) * 2 : 1;
+      g.globalAlpha = Math.min(1, t.life * 2); g.font = `800 ${Math.round(t.size * sc)}px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+      g.lineWidth = 5; g.strokeStyle = "#173A5E"; g.strokeText(t.text, t.x, t.y); g.fillStyle = t.color; g.fillText(t.text, t.x, t.y);
+    });
+    g.globalAlpha = 1;
+    if (J.saved) { g.restore(); J.saved = false; }
+  };
+  return J;
+}
+// Shared frame: canvas + overlay + score chip; runs update only while playing and not in hit-stop.
+function arcadeShell(root, tools, cls) {
+  tools.innerHTML = '<div class="chip"></div>';
+  root.innerHTML = `<div class="field arcade ${cls}"><canvas></canvas><div class="ovl"></div></div>`;
+  const field = root.firstChild, cv = $("canvas", field), g = cv.getContext("2d");
+  return { field, cv, g, ovl: $(".ovl", field), chip: tools.firstChild, J: makeJuice(), fit: () => fitCanvas(cv, g, field) };
+}
+
+/* ---------- Stack: drop sliding blocks to build a rainbow tower (counting floors out loud) ---------- */
+function gameStack(root, tools) {
+  const { field, cv, g, ovl, chip, J, fit } = arcadeShell(root, tools, "stackf");
+  let W, H, bh, tower, cur, falling, cam, floors, state = "ready", best = store.get("stackBest", 0), overT = 0, rewarded;
+  const hue = n => (n * 23) % 360;
+  function reset() {
+    ({ W, H } = fit()); bh = Math.max(26, Math.round(H / 18));
+    const w0 = Math.round(W * .62);
+    tower = [{ x: (W - w0) / 2, w: w0, n: 0 }]; floors = 0; cam = 0; falling = []; rewarded = false;
+    spawn(); chip.textContent = `🏢 0 · best ${best}`;
+    state = "ready"; overlay(ovl, `<b>Stack</b><span>Tap to drop the block.</span><span>Tap to start</span>`);
+  }
+  function spawn() {
+    const top = tower[tower.length - 1], from = floors % 2 ? 1 : -1;
+    cur = { w: top.w, x: from < 0 ? -top.w : W, dir: -from, speed: Math.min(420, 150 + floors * 9) };
+  }
+  const yOf = i => H - 60 - (i + 1) * bh + cam; // screen y of floor i
+  function drop() {
+    const top = tower[tower.length - 1], l = Math.max(cur.x, top.x), r = Math.min(cur.x + cur.w, top.x + top.w), y = yOf(tower.length);
+    if (r - l <= 0) {
+      falling.push({ x: cur.x, y, w: cur.w, vy: 0, rot: 0, c: hue(floors + 1) }); return over();
+    }
+    let x = l, w = r - l;
+    if (Math.abs(cur.x - top.x) < 6) {
+      // Perfect drop: snap into place and grow back a little.
+      x = top.x; w = Math.min(Math.round(W * .62), top.w + 6);
+      J.chime(); J.text(W / 2, y - 20, "Perfect!", "#FFD43B", 34); J.hit(60); J.burst(x + w / 2, y + bh / 2, `hsl(${hue(floors + 1)} 85% 65%)`, 16, 260);
+    } else {
+      J.combo = 0; sfx.snap(); J.shake(.25);
+      const cutX = cur.x < l ? cur.x : r, cutW = cur.w - w;
+      falling.push({ x: cutX, y, w: cutW, vy: 0, rot: 0, c: hue(floors + 1) });
+    }
+    floors++;
+    tower.push({ x, w, n: floors });
+    chip.textContent = `🏢 ${floors} · best ${Math.max(best, floors)}`;
+    say(floors); // counts the floors out loud
+    if (floors % 10 === 0) { J.text(W / 2, y - 60, `${floors}!`, "#FF86C8", 44); celebrate(); }
+    if (!rewarded && floors === 25) { rewarded = true; state = "paused"; reward("Fantastic!", () => { state = "play"; spawn(); }); return; }
+    spawn();
+  }
+  function over() {
+    state = "over"; overT = performance.now(); sfx.boop(); J.shake(.6);
+    if (floors > best) { best = floors; store.set("stackBest", best); }
+    say("Game over! You scored", floors, "points!");
+    overlay(ovl, `<b>🏢 ${floors}</b><span>Best: ${best}</span><span>Tap to play again</span>`);
+  }
+  function update(dt) {
+    cur.x += cur.dir * cur.speed * dt;
+    if (cur.x < -cur.w * .6) { cur.x = -cur.w * .6; cur.dir = 1; }
+    if (cur.x > W - cur.w * .4) { cur.x = W - cur.w * .4; cur.dir = -1; }
+    const want = Math.max(0, (tower.length + 3) * bh - (H - 160));
+    cam += (want - cam) * Math.min(1, dt * 4);
+  }
+  function drawBlock(x, y, w, c, n) {
+    g.fillStyle = `hsl(${c} 80% 62%)`; g.strokeStyle = "#173A5E"; g.lineWidth = 3;
+    roundRect(g, x, y, w, bh - 2, 6); g.fill(); g.stroke();
+    g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(x + 6, y + 4, Math.max(0, w - 12), 4);
+    if (n && w > 26) { g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(bh * .62)}px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(n, x + w / 2, y + bh / 2); }
+  }
+  function draw(t) {
+    // Sky darkens into space as the tower climbs.
+    const k = Math.min(1, floors / 60), sky = g.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, `hsl(${210 + k * 30} 70% ${78 - k * 62}%)`); sky.addColorStop(1, `hsl(${200 + k * 30} 60% ${90 - k * 60}%)`);
+    g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    if (k > .3) for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(255,255,255,${(k - .3) * 1.2})`; g.fillRect((i * 97) % W, (i * 53 + cam * .2) % H, 2, 2); }
+    J.begin(g, t);
+    g.fillStyle = "#5CCB5F"; g.fillRect(0, H - 60 + cam, W, 60);
+    tower.forEach((b, i) => { const y = yOf(i); if (y < H + bh && y > -bh) drawBlock(b.x, y, b.w, hue(i), b.n); });
+    falling.forEach(f => { g.save(); g.translate(f.x + f.w / 2, f.y + bh / 2); g.rotate(f.rot); drawBlock(-f.w / 2, -bh / 2, f.w, f.c, 0); g.restore(); });
+    if (state === "play" || state === "ready") drawBlock(cur.x, yOf(tower.length), cur.w, hue(floors + 1), floors + 1);
+    J.end(g);
+  }
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if (state === "over") { if (performance.now() - overT > 350) reset(); return; }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); return; }
+    if (state === "play") drop();
+  });
+  loop((dt, t) => {
+    J.update(dt);
+    falling.forEach(f => { f.vy += 900 * dt; f.y += f.vy * dt; f.rot += dt * 2; }); falling = falling.filter(f => f.y < H + 200);
+    if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    draw(t);
+  });
+  reset();
+  say("Tap to drop the block.");
+  onWin("resize", () => { if (state !== "play") reset(); });
+}
+
+/* ---------- Slice: swipe through flying fruit; slice fruit that add up to ten in one swipe for a bonus ---------- */
+const FRUITS = [["🍉", "#E8473B"], ["🍊", "#FF9A3C"], ["🍋", "#FFD43B"], ["🍏", "#4CC764"], ["🍇", "#A574F2"], ["🍓", "#FF5A6E"], ["🍑", "#FFA07A"], ["🥝", "#8BC34A"]];
+function gameSlice(root, tools) {
+  const { field, cv, g, ovl, chip, J, fit } = arcadeShell(root, tools, "slicef");
+  let W, H, items, halves, trail, swipe, lives, score, state = "ready", spawnT, time, best = store.get("sliceBest", 0), tens, overT = 0;
+  function reset() {
+    ({ W, H } = fit()); items = []; halves = []; trail = []; swipe = null; lives = 3; score = 0; spawnT = .6; time = 0; tens = 0;
+    setChip(); state = "ready";
+    overlay(ovl, `<b>Slice</b><span>Swipe to slice the fruit! Don't touch the bombs.</span><span>Make 10 in one swipe for a bonus</span>`);
+  }
+  const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score}`; };
+  function toss(n, bomb) {
+    const r = Math.max(30, Math.min(46, W / 9)), x = rand(W * .15, W * .85);
+    items.push({ x, y: H + r, vx: (W / 2 - x) * rand(.3, .8), vy: -rand(H * 1.05, H * 1.35), r, rot: rand(-1, 1), spin: rand(-3, 3), n, bomb, f: pick(FRUITS) });
+  }
+  function wave() {
+    // Fruit often come in pairs that make ten, so the bonus is always within reach.
+    const lvl = Math.min(8, Math.floor(time / 15));
+    if (Math.random() < .55) { const a = ri(1, 9); toss(a); toss(10 - a); }
+    else for (let i = 0, k = ri(1, 2 + Math.floor(lvl / 2)); i < k; i++) toss(ri(1, 9));
+    if (Math.random() < .15 + lvl * .04) toss(0, true);
+    spawnT = Math.max(.75, 1.7 - lvl * .12);
+  }
+  function sliceItem(it) {
+    it.dead = true;
+    if (it.bomb) {
+      lives--; setChip(); J.shake(.9); J.hit(120); J.burst(it.x, it.y, "#555", 26, 380, 7); sfx.boop(); say("Ouch!");
+      if (lives <= 0) over();
+      return;
+    }
+    score += 1; setChip(); J.chime(); J.burst(it.x, it.y, it.f[1], 16, 300, 6);
+    [-1, 1].forEach(s => halves.push({ ...it, side: s, vx: it.vx + s * 120, vy: Math.min(it.vy, -60), life: 1.6 }));
+    swipe.hits.push(it);
+  }
+  function endSwipe() {
+    if (!swipe) return;
+    const hits = swipe.hits, sum = hits.reduce((a, h) => a + h.n, 0);
+    if (hits.length >= 2 && sum === 10) {
+      // Made ten! Big bonus and the sum read out loud.
+      tens++; score += 10; setChip(); J.shake(.35); J.hit(80); sfx.yay();
+      const last = hits[hits.length - 1]; J.text(last.x, last.y - 40, "10! +10", "#FFD43B", 40);
+      say(...hits.flatMap((h, i) => i ? ["plus", h.n] : [h.n]), "is", 10);
+      if (tens % 5 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; }), 600); }
+    } else if (hits.length >= 3) { score += hits.length; setChip(); J.text(W / 2, H * .3, `Combo ×${hits.length}`, "#FF86C8", 34); }
+    swipe = null;
+  }
+  function over() {
+    state = "over"; overT = performance.now(); if (score > best) { best = score; store.set("sliceBest", best); }
+    say("Game over! You scored", score, "points!");
+    overlay(ovl, `<b>⭐ ${score}</b><span>Best: ${best}</span><span>Tap to play again</span>`);
+  }
+  function segHits(ax, ay, bx, by, cx, cy, r) {
+    const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy || 1, tt = Math.max(0, Math.min(1, ((cx - ax) * dx + (cy - ay) * dy) / L));
+    return Math.hypot(ax + tt * dx - cx, ay + tt * dy - cy) < r;
+  }
+  const pt = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if (state === "over") { if (performance.now() - overT > 350) reset(); return; }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); }
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    const p = pt(e); swipe = { last: p, hits: [] }; trail = [{ ...p, life: .25 }];
+  });
+  cv.addEventListener("pointermove", e => {
+    if (!swipe || state !== "play") return;
+    const p = pt(e), a = swipe.last;
+    items.forEach(it => { if (!it.dead && segHits(a.x, a.y, p.x, p.y, it.x, it.y, it.r)) sliceItem(it); });
+    swipe.last = p; trail.push({ ...p, life: .25 });
+    if (Math.hypot(p.x - a.x, p.y - a.y) > 30) tone(rand(300, 500), { d: .04, v: .02, type: "sawtooth" });
+  });
+  const up = () => endSwipe();
+  cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
+  function update(dt) {
+    time += dt; spawnT -= dt; if (spawnT <= 0) wave();
+    items.forEach(it => { it.x += it.vx * dt; it.y += it.vy * dt; it.vy += H * 1.25 * dt; it.rot += it.spin * dt; });
+    items = items.filter(it => !it.dead && it.y < H + it.r * 2);
+  }
+  function drawEmoji(em, x, y, size, rot) { g.save(); g.translate(x, y); g.rotate(rot); g.font = `${Math.round(size)}px ${EMOJI_FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(em, 0, 0); g.restore(); }
+  function draw(t) {
+    const bg = g.createRadialGradient(W / 2, H * .4, 20, W / 2, H / 2, Math.max(W, H)); bg.addColorStop(0, "#7A4E2D"); bg.addColorStop(1, "#4A2E1A");
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(0,0,0,.15)"; g.lineWidth = 2; for (let x = 40; x < W; x += 60) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
+    J.begin(g, t);
+    halves.forEach(h => {
+      g.save(); g.beginPath(); g.rect(h.side < 0 ? h.x - h.r * 2 : h.x, h.y - h.r * 2, h.r * 2, h.r * 4); g.clip();
+      drawEmoji(h.f[0], h.x, h.y, h.r * 1.9, h.rot); g.restore();
+    });
+    items.forEach(it => {
+      drawEmoji(it.bomb ? "💣" : it.f[0], it.x, it.y, it.r * 1.9, it.rot);
+      if (!it.bomb) {
+        g.fillStyle = "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 3; g.beginPath(); g.arc(it.x + it.r * .55, it.y - it.r * .55, it.r * .42, 0, 7); g.fill(); g.stroke();
+        g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(it.r * .58)}px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(it.n, it.x + it.r * .55, it.y - it.r * .52);
+      }
+    });
+    if (trail.length > 1) {
+      g.lineCap = "round"; g.lineJoin = "round";
+      for (let i = 1; i < trail.length; i++) { const a = trail[i - 1], b = trail[i]; g.strokeStyle = `rgba(255,255,255,${b.life * 3.5})`; g.lineWidth = 3 + b.life * 30; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
+    }
+    J.end(g);
+  }
+  loop((dt, t) => {
+    J.update(dt);
+    halves.forEach(h => { h.x += h.vx * dt; h.y += h.vy * dt; h.vy += H * 1.25 * dt; h.rot += h.side * 3 * dt; h.life -= dt; }); halves = halves.filter(h => h.life > 0);
+    trail.forEach(p => p.life -= dt); trail = trail.filter(p => p.life > 0);
+    if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    draw(t);
+  });
+  reset();
+  say("Swipe to slice the fruit! Don't touch the bombs.");
+  onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
+}
+
+/* ---------- Flap: tap to fly through gaps; some walls have two gaps and the bigger number gives more stars ---------- */
+function gameFlap(root, tools) {
+  const { field, cv, g, ovl, chip, J, fit } = arcadeShell(root, tools, "flapf");
+  let W, H, bird, walls, lives, stars, dist, state = "ready", spawnX, best = store.get("flapBest", 0), overT = 0, count, nextReward = 40;
+  function reset() {
+    ({ W, H } = fit());
+    bird = { x: W * .28, y: H * .45, vy: 0, inv: 0, squash: 1 }; walls = []; lives = 3; stars = 0; dist = 0; spawnX = W * .9; count = 0; nextReward = 40;
+    setChip(); state = "ready";
+    overlay(ovl, `<b>Flap</b><span>Tap to flap! Fly through the gaps.</span><span>Pick the bigger number for more stars</span>`);
+  }
+  const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${stars}`; };
+  const speed = () => Math.min(230, 140 + dist / 120);
+  function addWall() {
+    count++;
+    const gapH = Math.max(H * .26, H * .38 - dist / 90), w = Math.max(56, W * .14);
+    if (count % 3 === 0 && H > 420) {
+      // Two gaps, two numbers: both are safe, the bigger one is worth 3 stars.
+      const a = ri(1, 20), b = (() => { let v; do { v = ri(1, 20); } while (v === a); return v; })();
+      const g1 = H * .3, g2 = H * .68, gh = Math.max(H * .2, gapH * .8);
+      walls.push({ x: W + 10, w, gaps: [{ y: g1, h: gh, n: a }, { y: g2, h: gh, n: b }], passed: false });
+    } else {
+      const y = rand(H * .22 + gapH / 2, H * .82 - gapH / 2);
+      walls.push({ x: W + 10, w, gaps: [{ y, h: gapH }], passed: false });
+    }
+  }
+  function flap() { bird.vy = -Math.max(380, H * .62); bird.squash = .7; tone(660, { d: .07, v: .08, to: 880 }); }
+  function hurt() {
+    if (bird.inv > 0) return;
+    lives--; setChip(); bird.inv = 1.6; J.shake(.6); J.hit(90); J.burst(bird.x, bird.y, "#FFD43B", 18, 260); sfx.boop();
+    if (lives <= 0) {
+      state = "over"; overT = performance.now(); if (stars > best) { best = stars; store.set("flapBest", best); }
+      say("Game over! You scored", stars, "points!");
+      overlay(ovl, `<b>⭐ ${stars}</b><span>Best: ${best}</span><span>Tap to play again</span>`);
+    } else { say("Ouch!"); bird.vy = -300; }
+  }
+  function update(dt) {
+    const v = speed(); dist += v * dt;
+    bird.vy += Math.max(1100, H * 1.7) * dt; bird.y += bird.vy * dt; bird.squash += (1 - bird.squash) * Math.min(1, dt * 10);
+    if (bird.inv > 0) bird.inv -= dt;
+    if (bird.y < 20) { bird.y = 20; bird.vy = 0; }
+    if (bird.y > H - 40) { bird.y = H - 40; bird.vy = -420; hurt(); }
+    spawnX -= v * dt; if (spawnX <= W) { addWall(); spawnX += Math.max(W * .55, 230); }
+    walls.forEach(w => w.x -= v * dt); walls = walls.filter(w => w.x > -w.w - 20);
+    const r = 16; // forgiving hitbox (smaller than the drawing)
+    walls.forEach(w => {
+      if (bird.x + r > w.x && bird.x - r < w.x + w.w) {
+        const inGap = w.gaps.find(gp => bird.y - r > gp.y - gp.h / 2 && bird.y + r < gp.y + gp.h / 2);
+        if (!inGap) hurt(); else w.through = inGap;
+      }
+      if (!w.passed && w.x + w.w < bird.x - r) {
+        w.passed = true;
+        const gp = w.through || w.gaps[0];
+        if (w.gaps.length > 1 && gp.n !== undefined) {
+          const other = w.gaps.find(x => x !== gp), big = gp.n > other.n, add = big ? 3 : 1;
+          stars += add; J.text(bird.x, bird.y - 40, `+${add}⭐`, big ? "#FFD43B" : "#FFFDF6", big ? 40 : 28);
+          if (big) { J.chime(); J.chime(); J.chime(); say(gp.n, "is bigger than", other.n); } else say(other.n, "is bigger than", gp.n);
+        } else { stars++; J.chime(); }
+        setChip();
+        if (stars >= nextReward) { nextReward += 40; state = "paused"; reward("Fantastic!", () => { state = "play"; }); }
+      }
+    });
+  }
+  function draw(t) {
+    const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, "#7EC8FF"); sky.addColorStop(1, "#D6F0FF"); g.fillStyle = sky; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 5; i++) { const cx = ((i * 211 - dist * .3) % (W + 200) + W + 200) % (W + 200) - 100, cy = 60 + (i * 97) % (H * .5); g.fillStyle = "rgba(255,255,255,.85)"; g.beginPath(); g.ellipse(cx, cy, 60, 22, 0, 0, 7); g.ellipse(cx + 30, cy - 12, 36, 20, 0, 0, 7); g.fill(); }
+    J.begin(g, t);
+    walls.forEach(w => {
+      let top = 0;
+      const segs = [...w.gaps].sort((a, b) => a.y - b.y);
+      [...segs, { y: H + 1e4, h: 0 }].forEach(gp => {
+        const y0 = top, y1 = gp.y - gp.h / 2;
+        if (y1 > y0) { g.fillStyle = "#5CCB5F"; g.strokeStyle = "#173A5E"; g.lineWidth = 3; roundRect(g, w.x, y0 - 10, w.w, y1 - y0 + 10, 12); g.fill(); g.stroke(); g.fillStyle = "#4CB651"; g.fillRect(w.x + 8, y0, 8, Math.max(0, y1 - y0 - 6)); }
+        top = gp.y + gp.h / 2;
+      });
+      segs.forEach(gp => {
+        if (gp.n === undefined) return;
+        const big = gp.n > segs.find(x => x !== gp).n;
+        g.fillStyle = "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 3; g.beginPath(); g.arc(w.x + w.w / 2, gp.y, Math.min(28, gp.h * .3), 0, 7); g.fill(); g.stroke();
+        g.fillStyle = w.passed && big ? "#2FB24C" : "#173A5E"; g.font = `800 ${Math.round(Math.min(30, gp.h * .32))}px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(gp.n, w.x + w.w / 2, gp.y + 2);
+      });
+    });
+    g.fillStyle = "#8ED081"; g.fillRect(0, H - 24, W, 24);
+    if (!(bird.inv > 0 && Math.floor(bird.inv * 10) % 2)) {
+      g.save(); g.translate(bird.x, bird.y); g.rotate(Math.max(-.5, Math.min(.9, bird.vy / 700))); g.scale(2 - bird.squash, bird.squash);
+      g.font = `40px ${EMOJI_FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.scale(-1, 1); g.fillText("🐤", 0, 0); g.restore();
+    }
+    J.end(g);
+  }
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if (state === "over") { if (performance.now() - overT > 350) reset(); return; }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); }
+    if (state === "play") flap();
+  });
+  onWin("keydown", e => { if (e.key === " " || e.key === "ArrowUp") { e.preventDefault(); if (state === "ready") { state = "play"; overlay(ovl, ""); } if (state === "play") flap(); } });
+  loop((dt, t) => { J.update(dt); if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  reset();
+  say("Tap to flap! Fly through the gaps.");
+  onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
+}
+
+/* ---------- Runner: steer a crowd through math gates, then smash the wall at the end ---------- */
+function gameRunner(root, tools) {
+  const { field, cv, g, ovl, chip, J, fit } = arcadeShell(root, tools, "runnerf");
+  let W, H, crowd, cx, tx, objs, dist, state = "ready", level = levelOf("runner"), wallN, trackL, trackR, nextGate, overT = 0, goal;
+  const LEN = 2600; // distance to the wall at the end of each level
+  function gateOps() {
+    // Two gates side by side; one is better. Early levels only add, later ones mix in minus and times.
+    const add = () => ({ t: "+", v: ri(2, level <= 2 ? 6 : 12) });
+    if (level <= 2) { const a = add(), b = add(); if (a.v === b.v) b.v++; return [a, b]; }
+    if (level <= 4) return shuffle([add(), { t: "−", v: ri(2, 6) }]);
+    return shuffle([pick([add(), { t: "×", v: 2 }]), pick([{ t: "−", v: ri(2, 8) }, add(), { t: "×", v: 2 }])]);
+  }
+  const apply = (n, op) => op.t === "+" ? n + op.v : op.t === "−" ? Math.max(1, n - op.v) : n * op.v;
+  function reset() {
+    ({ W, H } = fit()); trackL = W * .08; trackR = W * .92;
+    crowd = 1; cx = tx = W / 2; dist = 0; objs = []; nextGate = 380;
+    // The wall needs roughly what a good run collects, so smart gate choices win.
+    wallN = level <= 2 ? 12 + level * 6 : level <= 4 ? 14 + level * 4 : 20 + level * 8;
+    chip.textContent = `Lv ${level} · 👥 1`; state = "ready";
+    overlay(ovl, `<b>Runner · Level ${level}</b><span>Drag to steer. Go through the best gates!</span><span>Smash the 🧱${wallN} wall at the end</span>`);
+  }
+  function spawnRow(y) {
+    const [a, b] = gateOps(), mid = (trackL + trackR) / 2;
+    objs.push({ kind: "gate", y, x0: trackL, x1: mid, op: a }, { kind: "gate", y, x0: mid, x1: trackR, op: b });
+    if (Math.random() < .5 && level > 1) objs.push({ kind: "rock", y: y + 160, x: rand(trackL + 30, trackR - 30), r: 22 });
+  }
+  function update(dt) {
+    const v = 240 + level * 12; dist += v * dt;
+    cx += (tx - cx) * Math.min(1, dt * 10);
+    while (nextGate < dist + H && nextGate < LEN - 300) { spawnRow(nextGate); nextGate += 420; }
+    const runnerY = dist + 0; // world y the crowd sits at
+    objs.forEach(o => {
+      if (o.done) return;
+      if (o.kind === "gate" && runnerY >= o.y) {
+        const pair = objs.filter(p => p.kind === "gate" && p.y === o.y);
+        const chosen = pair.find(p => cx >= p.x0 && cx < p.x1) || pair[0];
+        pair.forEach(p => p.done = true);
+        const before = crowd; crowd = Math.min(999, apply(crowd, chosen.op));
+        const other = pair.find(p => p !== chosen), otherN = apply(before, other.op);
+        J.text(cx, H * .62, `${chosen.op.t}${chosen.op.v}`, crowd >= otherN ? "#FFD43B" : "#FFFDF6", 40);
+        if (crowd > before) { J.chime(); J.burst(cx, H * .7, "#FFD43B", 12, 220); } else { sfx.boop(); J.shake(.3); }
+        say(before, chosen.op.t === "+" ? "plus" : chosen.op.t === "−" ? "minus" : "times", chosen.op.v, "is", crowd);
+      }
+      if (o.kind === "rock" && Math.abs(runnerY - o.y) < 20 && Math.abs(cx - o.x) < o.r + 26) {
+        o.done = true; const lost = Math.min(crowd - 1, 3); crowd -= lost; J.shake(.4); sfx.boop(); if (lost) J.text(cx, H * .62, `−${lost}`, "#FF6B57", 34);
+      }
+    });
+    chip.textContent = `Lv ${level} · 👥 ${crowd}`;
+    if (dist >= LEN) finale();
+  }
+  function finale() {
+    state = "paused";
+    const win = crowd >= wallN;
+    J.shake(win ? 1 : .5); J.hit(150); J.burst(W / 2, H * .35, "#C77D4A", win ? 40 : 14, 420, 9);
+    if (win) {
+      sfx.yay(); J.text(W / 2, H * .3, "Smash!", "#FFD43B", 56);
+      say(crowd, "is bigger than", wallN, "Smash!");
+      level++; setLevel("runner", level);
+      later(() => reward("Level complete!", reset), 1800);
+    } else {
+      sfx.boop(); say("So close! Try again.");
+      state = "over"; overT = performance.now();
+      overlay(ovl, `<b>👥 ${crowd} vs 🧱 ${wallN}</b><span>You need ${wallN - crowd} more. Pick the bigger gates!</span><span>Tap to try again</span>`);
+    }
+  }
+  function draw(t) {
+    g.fillStyle = "#8ED081"; g.fillRect(0, 0, W, H);
+    J.begin(g, t);
+    g.fillStyle = "#F2E3C6"; g.fillRect(trackL, 0, trackR - trackL, H);
+    g.strokeStyle = "rgba(23,58,94,.15)"; g.lineWidth = 3; g.setLineDash([24, 24]); g.lineDashOffset = dist % 48; g.beginPath(); g.moveTo(W / 2, 0); g.lineTo(W / 2, H); g.stroke(); g.setLineDash([]);
+    const sy = y => H * .72 - (y - dist); // world y -> screen y (crowd sits at 72% down)
+    objs.forEach(o => {
+      const y = sy(o.y);
+      if (y < -60 || y > H + 60) return;
+      if (o.kind === "gate" && !o.done) {
+        const good = o.op.t !== "−";
+        g.fillStyle = good ? "rgba(77,168,255,.55)" : "rgba(255,107,87,.55)"; g.strokeStyle = "#173A5E"; g.lineWidth = 3;
+        roundRect(g, o.x0 + 6, y - 34, o.x1 - o.x0 - 12, 56, 14); g.fill(); g.stroke();
+        g.fillStyle = "#FFFDF6"; g.font = `800 34px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+        g.lineWidth = 5; g.strokeText(`${o.op.t}${o.op.v}`, (o.x0 + o.x1) / 2, y - 4); g.fillText(`${o.op.t}${o.op.v}`, (o.x0 + o.x1) / 2, y - 4);
+      }
+      if (o.kind === "rock" && !o.done) { g.font = `44px ${EMOJI_FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("🪨", o.x, y); }
+    });
+    // The wall at the end with its number.
+    const wy = sy(LEN);
+    if (wy > -80) {
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) { g.fillStyle = (r + c) % 2 ? "#C77D4A" : "#B86B3B"; g.strokeStyle = "#173A5E"; g.lineWidth = 2; const bw = (trackR - trackL) / 8; g.fillRect(trackL + c * bw + (r % 2 ? bw / 2 : 0) - (r % 2 && c === 7 ? bw / 2 : 0), wy - 70 + r * 24, bw, 24); g.strokeRect(trackL + c * bw + (r % 2 ? bw / 2 : 0) - (r % 2 && c === 7 ? bw / 2 : 0), wy - 70 + r * 24, bw, 24); }
+      g.font = `800 40px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.lineWidth = 6; g.strokeStyle = "#173A5E"; g.strokeText(`🧱 ${wallN}`, W / 2, wy - 34); g.fillStyle = "#FFFDF6"; g.fillText(`🧱 ${wallN}`, W / 2, wy - 34);
+    }
+    // The crowd: up to 60 little runners packed in a blob, with the exact count above.
+    const shown = Math.min(crowd, 60), rad = 9, cy = H * .72;
+    for (let i = 0; i < shown; i++) {
+      const ring = Math.floor(Math.sqrt(i)), ang = i * 2.4, rr = ring * rad * 1.5;
+      const x = cx + Math.cos(ang) * rr, y = cy + Math.sin(ang) * rr * .7 + Math.sin(t * 14 + i) * 2;
+      g.fillStyle = `hsl(${(i * 37) % 360} 75% 60%)`; g.strokeStyle = "#173A5E"; g.lineWidth = 2; g.beginPath(); g.arc(x, y, rad, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = "#173A5E"; g.beginPath(); g.arc(x - 3, y - 2, 1.6, 0, 7); g.arc(x + 3, y - 2, 1.6, 0, 7); g.fill();
+    }
+    const top = cy - Math.sqrt(shown) * rad * 1.1 - 34;
+    g.fillStyle = "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 3; roundRect(g, cx - 34, top - 18, 68, 36, 14); g.fill(); g.stroke();
+    g.fillStyle = "#173A5E"; g.font = `800 24px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(crowd, cx, top + 1);
+    J.end(g);
+  }
+  const aim = e => { const r = cv.getBoundingClientRect(); tx = Math.max(trackL + 20, Math.min(trackR - 20, e.clientX - r.left)); };
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if (state === "over") { if (performance.now() - overT > 350) reset(); return; }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); }
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    aim(e);
+  });
+  cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") aim(e); });
+  onWin("keydown", e => { if (e.key === "ArrowLeft") tx = Math.max(trackL + 20, tx - 60); if (e.key === "ArrowRight") tx = Math.min(trackR - 20, tx + 60); });
+  loop((dt, t) => { J.update(dt); if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  reset();
+  say("Drag to steer. Go through the best gates!");
+  onWin("resize", () => { if (state !== "play") reset(); });
+}
+
 /* ---------- Sticker book ---------- */
 function gameBook(root) {
   const have = store.get("stickers", []);
@@ -2967,6 +3480,10 @@ const ARCADE = [
   { id: "space", name: "Space", em: "🛸", run: gameSpace },
   { id: "maze", name: "Maze", em: "🐰", run: gameMaze, lv: true },
   { id: "blocks", name: "Blocks", em: "🧱", run: gameBlocks },
+  { id: "stack", name: "Stack", em: "🏗️", run: gameStack },
+  { id: "slice", name: "Slice", em: "🍉", run: gameSlice },
+  { id: "flap", name: "Flap", em: "🐤", run: gameFlap },
+  { id: "runner", name: "Runner", em: "🏃", run: gameRunner, lv: true },
 ];
 let hubTab = store.get("tab", "play");
 const BOOK = { id: "book", name: "Stickers", run: gameBook };
