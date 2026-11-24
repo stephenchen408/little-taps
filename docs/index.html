@@ -143,6 +143,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .sheet h2 { margin: 0 0 4px; font-size: 1.7rem; line-height: 1.1; }
 .sheet h3 { margin: 14px 0 6px; font-size: 1.15rem; }
 .sheet p { margin: 0 0 12px; }
+.sheet .ver { margin: -2px 0 6px; opacity: .6; font-size: .85rem; font-weight: 600; }
 .voices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .vrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; padding: 10px 14px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; font-weight: 600; }
 .vrow.on { background: var(--sun); }
@@ -407,6 +408,24 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .coin b { font-size: calc(var(--btn) * .36 * var(--s)); font-weight: 800; }
 .paid .coin { box-shadow: inset 0 0 0 4px rgba(0,0,0,.08); }
 
+/* ---------- Arcade ---------- */
+.arcade { display: flex; flex-direction: column; background: #14213D; }
+.snakef, .mazef { background: #E9F7DF; }
+.arcade .play { position: relative; flex: 1; min-height: 0; }
+.arcade canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; display: block; }
+.spacef canvas { position: absolute; inset: 0; }
+.ovl { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 3; pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: max-content; max-width: 86%; padding: 14px 22px; text-align: center; background: rgba(255,253,246,.94); border: 4px solid var(--ink); border-radius: 22px; box-shadow: 0 5px 0 var(--ink); }
+.ovl b { font-size: clamp(1.6rem, 7vw, 2.6rem); line-height: 1.1; }
+.ovl span { font-size: clamp(1rem, 4vw, 1.3rem); font-weight: 600; }
+.dpad { flex: none; display: grid; grid-template-columns: repeat(3, var(--dp)); grid-template-rows: repeat(2, var(--dp)); gap: 6px; justify-content: center; padding: 8px 0 10px; --dp: min(17vw, 70px); }
+.dpad button { width: var(--dp); height: var(--dp); border: 4px solid var(--ink); border-radius: 18px; background: var(--paper); box-shadow: 0 4px 0 var(--ink); font-size: calc(var(--dp) * .4); padding: 0; color: var(--ink); }
+.dpad button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); background: var(--sun); }
+.dpad [data-d="0"] { grid-column: 2; grid-row: 1; } .dpad [data-d="3"] { grid-column: 1; grid-row: 2; }
+.dpad [data-d="2"] { grid-column: 2; grid-row: 2; } .dpad [data-d="1"] { grid-column: 3; grid-row: 2; }
+.tabs { flex-wrap: wrap; }
+.tabs button { padding: 4px 12px; }
+
 /* ---------- Larger screens (iPad mini and up) ---------- */
 @media (min-width: 700px) and (min-height: 600px) {
   :root { --btn: 68px; }
@@ -438,7 +457,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 <div id="app">
   <section id="hub" class="screen hub">
     <h1 id="logo" aria-label="Little Taps"></h1>
-    <div class="tabs" id="tabs"><button data-tab="play">🐣 Play</button><button data-tab="challenge">🚀 Challenge</button></div>
+    <div class="tabs" id="tabs"><button data-tab="play">🐣 Play</button><button data-tab="challenge">🚀 Challenge</button><button data-tab="arcade">🕹️ Arcade</button></div>
     <div class="tiles" id="tiles"></div>
     <div class="hubfoot">
       <button id="book" class="pill" aria-label="Sticker book">📒 <span id="bookCount">0/40</span></button>
@@ -461,6 +480,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 <div id="sheet" class="sheet" hidden>
   <div class="sheetcard" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <h2 id="sheetTitle">Grown-ups</h2>
+    <p class="ver" id="appVersion"></p>
     <h3>Voice</h3>
     <div class="seg" id="voiceMode" style="margin-bottom:12px">
       <button data-mode="recorded">Natural (recorded)</button><button data-mode="device">Phone voice</button>
@@ -605,6 +625,10 @@ window.LT = (() => {
     // Trace
     "Now try it on your own!","Great writing!",
     "Robot","Balance","Times","Words","Puzzle","Shop","Play","Challenge",
+    // Arcade
+    "Arcade","Snake","Space","Maze","Swipe or tap the arrows to steer.","Eat the numbers in order, all the way to one hundred!",
+    "Game over! You scored","Wave","Drag to move your ship. It shoots by itself!","Ouch!",
+    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.",
   ];
   function voiceLines() {
     const L = {};
@@ -660,6 +684,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("littletaps." + k, JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
+const APP_VERSION = "6 (Nov 24, arcade)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -767,7 +792,10 @@ function say(...parts) {
 }
 // Device speech engine: the fallback, or the grown-ups' choice in settings.
 const ROBOTIC = /^(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|pipe organ|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley|fred|junior|kathy|ralph)\b/i;
-const voiceScore = v => (/premium/i.test(v.name) ? 300 : 0) + (/natural|neural/i.test(v.name) ? 260 : 0) + (/enhanced/i.test(v.name) ? 200 : 0) + (/online/i.test(v.name) ? 120 : 0)
+// iPhones and iPads often keep "premium"/"enhanced" out of the name and only in the voiceURI
+// (for example com.apple.voice.premium.en-US.Ava), so both are checked.
+const voiceId = v => `${v.name} ${v.voiceURI || ""}`;
+const voiceScore = v => (/premium/i.test(voiceId(v)) ? 300 : 0) + (/natural|neural/i.test(voiceId(v)) ? 260 : 0) + (/enhanced/i.test(voiceId(v)) ? 200 : 0) + (/online/i.test(v.name) ? 120 : 0)
   + (/google/i.test(v.name) ? 150 : 0) + (/samantha|ava|allison|susan|zoe|nicky|evan|joelle|noelle|nathan|aria|jenny|libby|sonia|serena|karen|moira|tessa|daniel|kate/i.test(v.name) ? 60 : 0)
   + (/en[-_]US/i.test(v.lang) ? 30 : /en[-_](GB|AU|IE|CA|NZ)/i.test(v.lang) ? 15 : 0);
 let voices = [], voice = null, rate = store.get("rate", .95);
@@ -778,7 +806,7 @@ function loadVoices() {
   const saved = store.get("voice", null);
   voice = (saved && voices.find(v => v.voiceURI === saved)) || voices[0] || null;
 }
-if (synth) { loadVoices(); synth.addEventListener && synth.addEventListener("voiceschanged", loadVoices); }
+if (synth) { loadVoices(); synth.addEventListener && synth.addEventListener("voiceschanged", () => { loadVoices(); if (window.__onVoices) window.__onVoices(); }); }
 function ttsSay(text) {
   if (!synth || !text) return;
   try {
@@ -2513,6 +2541,388 @@ function gameShop(root, tools) {
   next();
 }
 
+/* ======================================================================
+   ARCADE GAMES: Snake, Space (alien shooter) and Maze (chase).
+   Canvas-drawn, swipe / D-pad / drag controls, keyboard arrows on desktop.
+   ====================================================================== */
+const DPAD = '<div class="dpad"><button data-d="0" aria-label="up">▲</button><button data-d="3" aria-label="left">◀</button><button data-d="1" aria-label="right">▶</button><button data-d="2" aria-label="down">▼</button></div>';
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+function fitCanvas(cv, g, box) {
+  const W = box.clientWidth, H = box.clientHeight, dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.width = W + "px"; cv.style.height = H + "px";
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { W, H };
+}
+// Swipes on the play area, the on-screen arrows, and keyboard arrows all call onDir(0 up, 1 right, 2 down, 3 left).
+function steering(field, surface, onDir) {
+  let s = null;
+  surface.addEventListener("pointerdown", e => { e.preventDefault(); s = { x: e.clientX, y: e.clientY }; onDir(null); });
+  surface.addEventListener("pointermove", e => {
+    if (!s) return;
+    const dx = e.clientX - s.x, dy = e.clientY - s.y;
+    if (Math.hypot(dx, dy) > 20) { onDir(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0)); s = { x: e.clientX, y: e.clientY }; }
+  });
+  const end = () => { s = null; };
+  surface.addEventListener("pointerup", end); surface.addEventListener("pointercancel", end);
+  field.querySelectorAll(".dpad button").forEach(b => b.addEventListener("pointerdown", e => { e.preventDefault(); onDir(Number(b.dataset.d)); }));
+  onWin("keydown", e => { const d = { ArrowUp: 0, ArrowRight: 1, ArrowDown: 2, ArrowLeft: 3 }[e.key]; if (d !== undefined) { e.preventDefault(); onDir(d); } });
+}
+function overlay(el, html) { el.innerHTML = html; el.hidden = !html; }
+function roundRect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+/* ---------- Snake: classic, or eat the numbers in order up to 100 ---------- */
+function gameSnake(root, tools) {
+  tools.innerHTML = '<div class="chip"></div><button class="tool" data-mode aria-label="Switch between classic and numbers"></button>';
+  root.innerHTML = `<div class="field arcade snakef"><div class="play"><canvas></canvas><div class="ovl"></div></div>${DPAD}</div>`;
+  const field = root.firstChild, box = $(".play", field), cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild, modeBtn = $("[data-mode]", tools);
+  let mode = store.get("snakeMode", "classic"), W, H, cols, rows, cell, ox, oy, snake, dir, queue, foods, score, need, state, acc, stepMs, grow, best;
+  const bestKey = () => "snakeBest." + mode;
+  function fit() {
+    ({ W, H } = fitCanvas(cv, g, box));
+    cell = Math.floor(Math.min(W, H) / (Math.min(W, H) < 500 ? 15 : 19));
+    cols = Math.floor(W / cell); rows = Math.floor(H / cell); ox = (W - cols * cell) / 2; oy = (H - rows * cell) / 2;
+  }
+  const setChip = () => { chip.textContent = mode === "numbers" ? `Next: ${need}` : `⭐ ${score} · best ${best}`; modeBtn.textContent = mode === "numbers" ? "123" : "🍎"; };
+  const taken = (x, y) => snake.some(p => p.x === x && p.y === y) || foods.some(f => f.x === x && f.y === y);
+  function freeCell() { for (let i = 0; i < 800; i++) { const x = ri(0, cols - 1), y = ri(0, rows - 1); if (!taken(x, y)) return { x, y }; } return { x: 0, y: 0 }; }
+  function stock() {
+    if (mode === "classic") { if (!foods.length) foods.push(freeCell()); return; }
+    // Numbers mode: the next number is always on the board, plus a few decoys just above it.
+    if (!foods.some(f => f.n === need)) foods.push({ ...freeCell(), n: need });
+    let k = 1;
+    while (foods.length < 3) { const n = need + k++; if (n <= 100 && !foods.some(f => f.n === n)) foods.push({ ...freeCell(), n }); if (k > 8) break; }
+  }
+  function reset(keepNeed) {
+    fit();
+    const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
+    snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
+    dir = 1; queue = []; foods = []; score = 0; if (!keepNeed) need = store.get("snakeNeed", 1); stepMs = 240; grow = 0; acc = 0; best = store.get(bestKey(), 0);
+    stock(); state = "ready"; setChip();
+    overlay(ovl, `<b>${mode === "numbers" ? "Eat the numbers in order" : "Snake"}</b><span>Swipe or tap an arrow to start</span>`);
+  }
+  function turn(d) {
+    if (d === null) return;
+    if (state === "over") { reset(true); }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); }
+    if (state !== "play") return;
+    const last = queue.length ? queue[queue.length - 1] : dir;
+    if (d === last || (d + 2) % 4 === last) return;
+    if (queue.length < 2) queue.push(d);
+  }
+  function step() {
+    if (queue.length) dir = queue.shift();
+    const h = snake[0], nx = (h.x + DX[dir] + cols) % cols, ny = (h.y + DY[dir] + rows) % rows; // walls wrap around
+    if (snake.some((p, i) => i < snake.length - 1 && p.x === nx && p.y === ny)) return gameOver();
+    snake.unshift({ x: nx, y: ny });
+    const fi = foods.findIndex(f => f.x === nx && f.y === ny);
+    if (fi >= 0) {
+      const f = foods[fi]; foods.splice(fi, 1);
+      if (mode === "classic" || f.n === need) {
+        grow++; score++; stepMs = Math.max(95, stepMs - 5); sfx.note((score - 1) % 10 + 1);
+        if (mode === "numbers") {
+          say(need); need++; store.set("snakeNeed", need > 100 ? 1 : need);
+          if (need > 100) { state = "paused"; later(() => reward("You did it!", () => { need = 1; reset(true); }), 800); }
+          else if ((need - 1) % 10 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; acc = 0; }), 500); }
+        } else if (score > best) { best = score; store.set(bestKey(), best); }
+        if (mode === "classic" && score % 15 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; acc = 0; }), 400); }
+      } else { sfx.boop(); say("That's", f.n, "Find", need); }
+      stock(); setChip();
+    }
+    if (grow > 0) grow--; else snake.pop();
+  }
+  function gameOver() {
+    state = "over"; sfx.boop();
+    if (mode === "classic") say("Game over! You scored", score, "points!"); else say("Ouch!", "Find", need);
+    overlay(ovl, `<b>${mode === "classic" ? `⭐ ${score}` : "Oops!"}</b><span>Swipe to play again</span>`);
+  }
+  function draw(t) {
+    g.fillStyle = "#BFE8A8"; g.fillRect(0, 0, W, H);
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) if ((x + y) % 2) { g.fillStyle = "#B2DF99"; g.fillRect(ox + x * cell, oy + y * cell, cell, cell); }
+    foods.forEach(f => {
+      const cx = ox + f.x * cell + cell / 2, cy = oy + f.y * cell + cell / 2, bob = Math.sin(t * 4 + f.x) * cell * .05;
+      if (mode === "classic") {
+        g.fillStyle = "#E8473B"; g.beginPath(); g.arc(cx, cy + bob, cell * .38, 0, 7); g.fill();
+        g.fillStyle = "#4CC764"; g.beginPath(); g.ellipse(cx + cell * .12, cy - cell * .36 + bob, cell * .14, cell * .07, -.6, 0, 7); g.fill();
+        g.fillStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.arc(cx - cell * .12, cy - cell * .1 + bob, cell * .08, 0, 7); g.fill();
+      } else {
+        g.fillStyle = f.n === need ? "#FFC93C" : "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
+        g.beginPath(); g.arc(cx, cy + bob, cell * .48, 0, 7); g.fill(); g.stroke();
+        g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(cell * (f.n > 99 ? .42 : f.n > 9 ? .52 : .66))}px "Baloo 2", sans-serif`;
+        g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(f.n, cx, cy + bob + cell * .04);
+      }
+    });
+    snake.forEach((p, i) => {
+      const k = i / Math.max(1, snake.length - 1);
+      g.fillStyle = `hsl(${140 - k * 30} 55% ${38 + k * 14}%)`;
+      roundRect(g, ox + p.x * cell + 1.5, oy + p.y * cell + 1.5, cell - 3, cell - 3, cell * .35); g.fill();
+    });
+    const h = snake[0], hx = ox + h.x * cell + cell / 2, hy = oy + h.y * cell + cell / 2;
+    [-1, 1].forEach(side => {
+      const ex = hx + DX[dir] * cell * .15 + (DX[dir] ? 0 : side * cell * .2), ey = hy + DY[dir] * cell * .15 + (DY[dir] ? 0 : side * cell * .2);
+      g.fillStyle = "#fff"; g.beginPath(); g.arc(ex, ey, cell * .14, 0, 7); g.fill();
+      g.fillStyle = "#173A5E"; g.beginPath(); g.arc(ex + DX[dir] * cell * .05, ey + DY[dir] * cell * .05, cell * .07, 0, 7); g.fill();
+    });
+  }
+  modeBtn.addEventListener("click", () => { mode = mode === "classic" ? "numbers" : "classic"; store.set("snakeMode", mode); sfx.tap(); reset(); say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer."); });
+  steering(field, box, turn);
+  loop((dt, t) => {
+    if (state === "play") { acc += dt * 1000; while (acc >= stepMs && state === "play") { acc -= stepMs; step(); } }
+    draw(t);
+  });
+  reset();
+  say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer.");
+  onWin("resize", () => { if (state !== "play") reset(true); else fit(); });
+}
+
+/* ---------- Space: defend the planet from wobbly alien blobs ---------- */
+function gameSpace(root, tools) {
+  tools.innerHTML = '<div class="chip"></div>';
+  root.innerHTML = '<div class="field arcade spacef"><canvas></canvas><div class="ovl"></div></div>';
+  const field = root.firstChild, cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild;
+  let W, H, ship, bullets, bombs, aliens, wave, lives, score, state = "ready", fireT, dirX, stepDown, bombT, stars, bits, best = store.get("spaceBest", 0);
+  const ROW_COLORS = ["#FF86C8", "#A574F2", "#3D9BFF", "#4CC764", "#FFD43B"];
+  function fit() { ({ W, H } = fitCanvas(cv, g, field)); stars = range(1, 60).map(() => ({ x: rand(0, W), y: rand(0, H), s: rand(.5, 2) })); }
+  const shipY = () => H - Math.max(46, H * .09);
+  const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score}`; };
+  function newWave() {
+    const cols = W < 500 ? 6 : 8, rowsN = Math.min(5, 2 + Math.floor((wave + 1) / 2)), gap = Math.min(64, (W - 40) / (cols + 1));
+    aliens = [];
+    for (let r = 0; r < rowsN; r++) for (let c = 0; c < cols; c++) aliens.push({ x: 20 + gap * (c + 1) - gap / 2, y: 60 + r * gap * .8, r: gap * .3, row: r, alive: true, ph: rand(0, 6) });
+    aliens.forEach(a => a.r = gap * .36);
+    dirX = 1; stepDown = gap * .35; bullets = []; bombs = []; bombT = 1.5;
+  }
+  function reset() {
+    fit(); wave = 1; lives = 3; score = 0; bits = [];
+    ship = { x: W / 2, tx: W / 2, inv: 0 }; fireT = 0; newWave(); setChip();
+    state = "ready"; overlay(ovl, `<b>Space</b><span>Drag to move. Your ship shoots by itself!</span><span>Tap to start</span>`);
+  }
+  function boom(x, y, color, n = 12) { for (let i = 0; i < n; i++) { const a = rand(0, 6.3), v = rand(60, 200); bits.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: rand(.4, .8), color }); } }
+  function hit() {
+    lives--; ship.inv = 2; sfx.boop(); boom(ship.x, shipY(), "#FF6B57", 18); setChip();
+    if (lives <= 0) {
+      state = "over"; if (score > best) { best = score; store.set("spaceBest", best); }
+      say("Game over! You scored", score, "points!");
+      overlay(ovl, `<b>⭐ ${score}</b><span>Best: ${best}</span><span>Tap to play again</span>`);
+    } else say("Ouch!");
+  }
+  function update(dt) {
+    ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12);
+    if (ship.inv > 0) ship.inv -= dt;
+    fireT -= dt;
+    if (fireT <= 0 && bullets.length < 3) { bullets.push({ x: ship.x, y: shipY() - 22 }); fireT = .34; tone(1100, { d: .05, v: .04, type: "square", to: 700 }); }
+    bullets.forEach(b => b.y -= 560 * dt); bullets = bullets.filter(b => b.y > -20);
+    const live = aliens.filter(a => a.alive), total = aliens.length;
+    const speed = (26 + wave * 7) * (1 + (1 - live.length / total) * 2.2);
+    let edge = false;
+    live.forEach(a => { a.x += dirX * speed * dt; if (a.x < a.r + 8 || a.x > W - a.r - 8) edge = true; });
+    if (edge) { dirX *= -1; live.forEach(a => { a.x += dirX * 4; a.y += stepDown; }); }
+    bullets.forEach(b => live.forEach(a => {
+      if (a.alive && Math.hypot(a.x - b.x, a.y - b.y) < a.r + 4) {
+        a.alive = false; b.y = -99; score += 10 * (5 - a.row); boom(a.x, a.y, ROW_COLORS[a.row % 5]); sfx.pop(); setChip();
+      }
+    }));
+    bombT -= dt;
+    if (bombT <= 0 && live.length) {
+      const shooters = live.filter(a => !live.some(o => o !== a && Math.abs(o.x - a.x) < a.r && o.y > a.y));
+      const s = pick(shooters); bombs.push({ x: s.x, y: s.y + s.r }); bombT = Math.max(.35, 1.6 - wave * .12) * rand(.6, 1.3);
+    }
+    bombs.forEach(b => b.y += (150 + wave * 12) * dt); bombs = bombs.filter(b => b.y < H + 20);
+    if (ship.inv <= 0 && bombs.some(b => Math.abs(b.x - ship.x) < 20 && Math.abs(b.y - shipY()) < 18)) { bombs = []; hit(); }
+    if (live.some(a => a.y + a.r > shipY() - 18)) { hit(); if (state !== "over") newWave(); }
+    if (!aliens.some(a => a.alive) && state === "play") {
+      wave++; sfx.yay(); celebrate();
+      if (wave % 3 === 1) { state = "paused"; reward("Fantastic!", () => { newWave(); state = "play"; say("Wave", wave); }); }
+      else { newWave(); say("Wave", wave); }
+    }
+    bits.forEach(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.life -= dt; }); bits = bits.filter(p => p.life > 0);
+  }
+  function drawAlien(a, t) {
+    const wob = Math.sin(t * 6 + a.ph) * a.r * .08, col = ROW_COLORS[a.row % 5], x = a.x, y = a.y + wob, r = a.r;
+    g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
+    [-1, 1].forEach(s => { g.beginPath(); g.moveTo(x + s * r * .4, y - r * .7); g.lineTo(x + s * r * .65, y - r * 1.15); g.stroke(); g.fillStyle = col; g.beginPath(); g.arc(x + s * r * .65, y - r * 1.15, r * .16, 0, 7); g.fill(); g.stroke(); });
+    g.fillStyle = col; g.beginPath(); g.ellipse(x, y, r, r * .85, 0, 0, 7); g.fill(); g.stroke();
+    for (let i = -1; i <= 1; i++) { g.beginPath(); g.ellipse(x + i * r * .55, y + r * .8, r * .18, r * .25, 0, 0, 7); g.fill(); g.stroke(); }
+    [-1, 1].forEach(s => { g.fillStyle = "#fff"; g.beginPath(); g.arc(x + s * r * .35, y - r * .1, r * .26, 0, 7); g.fill(); g.fillStyle = "#173A5E"; g.beginPath(); g.arc(x + s * r * .35 + dirX * r * .07, y - r * .05, r * .12, 0, 7); g.fill(); });
+  }
+  function drawShip() {
+    const x = ship.x, y = shipY();
+    if (ship.inv > 0 && Math.floor(ship.inv * 10) % 2) return;
+    g.lineWidth = 3; g.strokeStyle = "#173A5E";
+    g.fillStyle = "#FF6B57"; g.beginPath(); g.moveTo(x - 24, y + 16); g.lineTo(x - 12, y - 2); g.lineTo(x - 12, y + 16); g.closePath(); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(x + 24, y + 16); g.lineTo(x + 12, y - 2); g.lineTo(x + 12, y + 16); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = "#F1F4F8"; g.beginPath(); g.moveTo(x, y - 26); g.quadraticCurveTo(x + 14, y - 8, x + 12, y + 18); g.lineTo(x - 12, y + 18); g.quadraticCurveTo(x - 14, y - 8, x, y - 26); g.fill(); g.stroke();
+    g.fillStyle = "#4DA8FF"; g.beginPath(); g.arc(x, y - 4, 5.5, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = Math.random() < .5 ? "#FFC93C" : "#FF9A3C"; g.beginPath(); g.moveTo(x - 7, y + 19); g.lineTo(x, y + 30 + Math.random() * 6); g.lineTo(x + 7, y + 19); g.fill();
+  }
+  function draw(t) {
+    g.fillStyle = "#14213D"; g.fillRect(0, 0, W, H);
+    stars.forEach(s => { s.y += s.s * .4; if (s.y > H) s.y = 0; g.fillStyle = `rgba(255,255,255,${.3 + s.s * .3})`; g.fillRect(s.x, s.y, s.s, s.s); });
+    aliens.forEach(a => a.alive && drawAlien(a, t));
+    g.fillStyle = "#FFD43B"; bullets.forEach(b => { roundRect(g, b.x - 3, b.y - 9, 6, 18, 3); g.fill(); });
+    g.fillStyle = "#FF86C8"; bombs.forEach(b => { g.beginPath(); g.arc(b.x, b.y, 6, 0, 7); g.fill(); });
+    bits.forEach(p => { g.globalAlpha = Math.max(0, p.life * 1.5); g.fillStyle = p.color; g.fillRect(p.x - 3, p.y - 3, 6, 6); }); g.globalAlpha = 1;
+    drawShip();
+  }
+  const aim = e => { const r = cv.getBoundingClientRect(); ship.tx = Math.max(26, Math.min(W - 26, e.clientX - r.left)); };
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if (state === "over") reset();
+    if (state === "ready") { state = "play"; overlay(ovl, ""); say("Wave", wave); }
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    aim(e);
+  });
+  cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") aim(e); });
+  onWin("keydown", e => { if (e.key === "ArrowLeft") ship.tx = Math.max(26, ship.tx - 40); if (e.key === "ArrowRight") ship.tx = Math.min(W - 26, ship.tx + 40); });
+  loop((dt, t) => { if (state === "play") update(dt); draw(t); });
+  reset();
+  say("Drag to move your ship. It shoots by itself!");
+  onWin("resize", () => { if (state !== "play") reset(); else fit(); });
+}
+
+/* ---------- Maze: a bunny collects berries in a garden maze while bees buzz around ---------- */
+function gameMaze(root, tools) {
+  tools.innerHTML = '<div class="chip"></div>';
+  root.innerHTML = `<div class="field arcade mazef"><div class="play"><canvas></canvas><div class="ovl"></div></div>${DPAD}</div>`;
+  const field = root.firstChild, box = $(".play", field), cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild;
+  let level = levelOf("maze"), W, H, TW, TH, tile, ox, oy, grid, dots, starsLeft, player, bees, lives, score, state = "ready", sleepy = 0, home;
+  const open = (x, y) => x >= 0 && y >= 0 && x < TW && y < TH && grid[y][x] === 0;
+  function genMaze() {
+    ({ W, H } = fitCanvas(cv, g, box));
+    const C = W < 500 ? 6 : 8, R = Math.max(6, Math.min(12, Math.round(C * H / W)));
+    TW = C * 2 + 1; TH = R * 2 + 1;
+    grid = range(1, TH).map(() => Array(TW).fill(1));
+    const seen = new Set(), stack = [[0, 0]]; seen.add("0,0"); grid[1][1] = 0;
+    while (stack.length) {
+      const [cx, cy] = stack[stack.length - 1];
+      const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [cx + dx, cy + dy, dx, dy]).filter(([x, y]) => x >= 0 && y >= 0 && x < C && y < R && !seen.has(x + "," + y));
+      if (!nb.length) { stack.pop(); continue; }
+      const [nx, ny, dx, dy] = pick(nb);
+      grid[cy * 2 + 1 + dy][cx * 2 + 1 + dx] = 0; grid[ny * 2 + 1][nx * 2 + 1] = 0; seen.add(nx + "," + ny); stack.push([nx, ny]);
+    }
+    // Knock out extra walls so there are loops to escape through (no dead ends to get trapped in).
+    for (let y = 1; y < TH - 1; y++) for (let x = 1; x < TW - 1; x++) {
+      if (grid[y][x] !== 0 || x % 2 === 0 || y % 2 === 0) continue;
+      const exits = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => grid[y + dy][x + dx] === 0);
+      if (exits.length === 1) {
+        const walls = [[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => grid[y + dy][x + dx] === 1 && x + dx * 2 > 0 && y + dy * 2 > 0 && x + dx * 2 < TW - 1 && y + dy * 2 < TH - 1);
+        if (walls.length) { const [dx, dy] = pick(walls); grid[y + dy][x + dx] = 0; }
+      }
+    }
+    for (let i = 0; i < C * R / 6; i++) { const x = ri(1, TW - 2), y = ri(1, TH - 2); if ((x + y) % 2 === 1 && grid[y][x] === 1 && (open(x - 1, y) && open(x + 1, y) || open(x, y - 1) && open(x, y + 1))) grid[y][x] = 0; }
+    tile = Math.floor(Math.min(W / TW, H / TH)); ox = (W - TW * tile) / 2; oy = (H - TH * tile) / 2;
+    dots = new Set(); starsLeft = new Set();
+    for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x] === 0) dots.add(x + "," + y);
+    [[1, 1], [TW - 2, 1], [1, TH - 2], [TW - 2, TH - 2]].forEach(([x, y]) => { dots.delete(x + "," + y); starsLeft.add(x + "," + y); });
+    // Bees start on the open tile nearest the middle.
+    let bestD = 1e9;
+    for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x] === 0) { const d = Math.hypot(x - TW / 2, y - TH / 2); if (d < bestD) { bestD = d; home = { x, y }; } }
+  }
+  function place() {
+    player = { x: 2 * Math.floor((TW - 1) / 4) + 1, y: TH - 2, dir: -1, want: -1, p: 0, speed: 4.2 };
+    dots.delete(player.x + "," + player.y);
+    const n = Math.min(4, 1 + Math.ceil(level / 2));
+    bees = range(1, n).map((_, i) => ({ x: home.x, y: home.y, dir: -1, p: 0, speed: Math.min(3.9, 2.6 + level * .18), wait: i * 1.2 }));
+  }
+  const setChip = () => { chip.textContent = `Lv ${level} ${"❤️".repeat(lives)} ⭐ ${score}`; };
+  function newLevel(fresh) {
+    if (fresh) { lives = 3; score = 0; }
+    genMaze(); place(); sleepy = 0; setChip();
+    state = "ready"; overlay(ovl, `<b>Level ${level}</b><span>Collect every berry. Stay away from the bees!</span><span>Swipe or tap an arrow to start</span>`);
+  }
+  function steer(d) {
+    if (d === null) return;
+    if (state === "over") { level = levelOf("maze"); newLevel(true); }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); }
+    player.want = d;
+    if (player.dir !== -1 && d === (player.dir + 2) % 4 && player.p > 0) { player.x += DX[player.dir]; player.y += DY[player.dir]; player.p = 1 - player.p; player.dir = d; }
+  }
+  // Moves an entity along the tile grid; choose(e) picks the direction whenever it reaches a tile centre.
+  function move(e, dt, choose) {
+    if (e.dir === -1) { choose(e); if (e.dir === -1) return; }
+    e.p += e.speed * dt;
+    while (e.p >= 1) {
+      e.x += DX[e.dir]; e.y += DY[e.dir]; e.p -= 1;
+      arrive(e);
+      choose(e);
+      if (e.dir === -1) { e.p = 0; break; }
+    }
+  }
+  function arrive(e) {
+    if (e !== player) return;
+    const k = e.x + "," + e.y;
+    if (dots.delete(k)) { score += 10; tone(880 + (score % 50) * 6, { d: .05, v: .07, type: "triangle" }); setChip(); }
+    if (starsLeft.delete(k)) { score += 50; sleepy = 7; sfx.yay(); say("Power star! The bees are sleepy."); setChip(); }
+    if (!dots.size && !starsLeft.size) {
+      state = "paused"; sfx.yay(); celebrate(); level++; setLevel("maze", level);
+      later(() => reward("Level complete!", () => newLevel(false)), 900);
+    }
+  }
+  const choosePlayer = e => {
+    if (e.want !== -1 && open(e.x + DX[e.want], e.y + DY[e.want])) e.dir = e.want;
+    else if (e.dir !== -1 && !open(e.x + DX[e.dir], e.y + DY[e.dir])) e.dir = -1;
+  };
+  const chooseBee = e => {
+    const opts = [0, 1, 2, 3].filter(d => open(e.x + DX[d], e.y + DY[d]) && (d !== (e.dir + 2) % 4 || e.dir === -1));
+    const all = opts.length ? opts : [0, 1, 2, 3].filter(d => open(e.x + DX[d], e.y + DY[d]));
+    if (!all.length) { e.dir = -1; return; }
+    const dist = d => Math.hypot(e.x + DX[d] - player.x, e.y + DY[d] - player.y);
+    const chase = Math.min(.7, .25 + level * .07);
+    if (sleepy > 0) e.dir = all.sort((a, b) => dist(b) - dist(a))[0];
+    else if (Math.random() < chase) e.dir = all.sort((a, b) => dist(a) - dist(b))[0];
+    else e.dir = pick(all);
+  };
+  const posOf = e => ({ x: e.x + (e.dir === -1 ? 0 : DX[e.dir] * e.p), y: e.y + (e.dir === -1 ? 0 : DY[e.dir] * e.p) });
+  function update(dt) {
+    if (sleepy > 0) sleepy -= dt;
+    move(player, dt, choosePlayer);
+    if (state !== "play") return;
+    const pp = posOf(player);
+    bees.forEach(b => {
+      if (b.wait > 0) { b.wait -= dt; return; }
+      const sp = b.speed; b.speed = sleepy > 0 ? sp * .55 : sp; move(b, dt, chooseBee); b.speed = sp;
+      const bp = posOf(b);
+      if (Math.hypot(bp.x - pp.x, bp.y - pp.y) < .6) {
+        if (sleepy > 0) { b.x = home.x; b.y = home.y; b.p = 0; b.dir = -1; b.wait = 2; score += 100; sfx.snap(); setChip(); }
+        else if (state === "play") caught();
+      }
+    });
+  }
+  function caught() {
+    lives--; sfx.boop(); setChip();
+    if (lives <= 0) {
+      state = "over"; say("Game over! You scored", score, "points!");
+      overlay(ovl, `<b>⭐ ${score}</b><span>Swipe to play again</span>`);
+    } else { say("Ouch!"); state = "ready"; place(); overlay(ovl, `<b>${"❤️".repeat(lives)}</b><span>Swipe to keep going</span>`); }
+  }
+  function draw(t) {
+    g.fillStyle = "#CDEFB8"; g.fillRect(0, 0, W, H);
+    for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x]) {
+      g.fillStyle = "#3E9B4F"; roundRect(g, ox + x * tile + 1, oy + y * tile + 1, tile - 2, tile - 2, tile * .3); g.fill();
+      g.fillStyle = "#58B868"; g.beginPath(); g.arc(ox + x * tile + tile * .38, oy + y * tile + tile * .38, tile * .16, 0, 7); g.fill();
+    }
+    g.fillStyle = "#E8478C";
+    dots.forEach(k => { const [x, y] = k.split(",").map(Number); g.beginPath(); g.arc(ox + x * tile + tile / 2, oy + y * tile + tile / 2, Math.max(2.5, tile * .12), 0, 7); g.fill(); });
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = `${Math.round(tile * .8 * (1 + .08 * Math.sin(t * 6)))}px ${EMOJI_FONT}`;
+    starsLeft.forEach(k => { const [x, y] = k.split(",").map(Number); g.fillText("⭐", ox + x * tile + tile / 2, oy + y * tile + tile / 2); });
+    g.font = `${Math.round(tile * .9)}px ${EMOJI_FONT}`;
+    bees.forEach(b => {
+      const p = posOf(b), bx = ox + p.x * tile + tile / 2, by = oy + p.y * tile + tile / 2 + Math.sin(t * 10 + b.speed) * tile * .06;
+      g.globalAlpha = sleepy > 0 && (sleepy > 2 || Math.floor(t * 6) % 2) ? .55 : 1;
+      g.fillText("🐝", bx, by);
+      if (sleepy > 0) { g.font = `800 ${Math.round(tile * .45)}px "Baloo 2", sans-serif`; g.fillStyle = "#173A5E"; g.fillText("z", bx + tile * .35, by - tile * .4); g.font = `${Math.round(tile * .9)}px ${EMOJI_FONT}`; }
+      g.globalAlpha = 1;
+    });
+    const pp = posOf(player);
+    g.fillText("🐰", ox + pp.x * tile + tile / 2, oy + pp.y * tile + tile / 2 + (player.dir !== -1 ? Math.abs(Math.sin(t * 12)) * -tile * .08 : 0));
+  }
+  steering(field, box, steer);
+  loop((dt, t) => { if (state === "play") update(dt); if (grid) draw(t); });
+  lives = 3; score = 0; newLevel(false);
+  say("Collect all the berries! Stay away from the bees.");
+  onWin("resize", () => { if (state !== "play") newLevel(false); });
+}
+
 /* ---------- Sticker book ---------- */
 function gameBook(root) {
   const have = store.get("stickers", []);
@@ -2552,6 +2962,12 @@ const CHALLENGE = [
   { id: "puzzle", name: "Puzzle", em: "🧩", run: gamePuzzle, lv: true },
   { id: "shop", name: "Shop", em: "🛒", run: gameShop, lv: true },
 ];
+const ARCADE = [
+  { id: "snake", name: "Snake", em: "🐍", run: gameSnake },
+  { id: "space", name: "Space", em: "🛸", run: gameSpace },
+  { id: "maze", name: "Maze", em: "🐰", run: gameMaze, lv: true },
+  { id: "blocks", name: "Blocks", em: "🧱", run: gameBlocks },
+];
 let hubTab = store.get("tab", "play");
 const BOOK = { id: "book", name: "Stickers", run: gameBook };
 const TILE_COLORS = ["--tomato", "--sun", "--sky", "--leaf", "--grape", "--bubble"];
@@ -2583,7 +2999,7 @@ const tilesEl = $("#tiles");
 function renderHub() {
   tilesEl.innerHTML = "";
   $("#tabs").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.tab === hubTab));
-  (hubTab === "challenge" ? CHALLENGE : GAMES).forEach((gm, i) => {
+  (hubTab === "challenge" ? CHALLENGE : hubTab === "arcade" ? ARCADE : GAMES).forEach((gm, i) => {
     // Color order keeps neighbours different in 3, 4 and 6 column layouts.
     const ci = (5 * i + 2 * Math.floor(i / 6)) % 6, b = document.createElement("button"), lv = levelOf(gm.id);
     b.className = "tile"; b.style.setProperty("--c", `var(${TILE_COLORS[ci]})`);
@@ -2595,7 +3011,7 @@ function renderHub() {
   $("#bookCount").textContent = `${store.get("stickers", []).length}/${STICKERS.length}`;
 }
 renderHub();
-$("#tabs").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { hubTab = b.dataset.tab; store.set("tab", hubTab); sfx.tap(); say(hubTab === "challenge" ? "Challenge" : "Play"); renderHub(); }));
+$("#tabs").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { hubTab = b.dataset.tab; store.set("tab", hubTab); sfx.tap(); say(hubTab === "challenge" ? "Challenge" : hubTab === "arcade" ? "Arcade" : "Play"); renderHub(); }));
 $("#book").addEventListener("click", () => openGame(BOOK));
 
 // Home: one tap asks "Go home?", the check mark confirms.
@@ -2607,19 +3023,23 @@ $("#homeNo").addEventListener("click", () => { clearTimeout(homeT); homeAsk.hidd
 /* ---------- Grown-ups sheet ---------- */
 const sheet = $("#sheet"), voicesEl = $("#voices"), speedEl = $("#speed"), modeEl = $("#voiceMode"), noteEl = $("#voiceNote");
 function renderSheet() {
+  loadVoices();
   modeEl.querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.mode === voiceMode));
   const recorded = voiceMode === "recorded";
   $("#deviceVoices").hidden = recorded;
   noteEl.textContent = recorded
     ? (CLIPS.index ? "A natural recorded voice says every word in the games." : "The recorded voice is still loading. Until it's ready, the phone's voice is used.")
-    : "Uses a voice installed on this device. For the most natural one, download an Enhanced or Premium voice in Settings → Accessibility → Spoken Content → Voices.";
+    : `Uses a voice installed on this device. This page can see ${voices.length} English voice${voices.length === 1 ? "" : "s"}. ` +
+      "If a voice you downloaded isn't listed, open the games in Safari or the home-screen app. The Claude app may not share downloaded voices with web pages.";
+  $("#appVersion").textContent = `Version ${APP_VERSION}`;
   loadVoices(); voicesEl.innerHTML = "";
   if (!recorded) {
-    if (!voices.length) voicesEl.innerHTML = "<p>No voices found on this device.</p>";
-    voices.slice(0, 14).forEach(v => {
-      const b = document.createElement("button"), tier = voiceScore(v) >= 200 ? "Best" : voiceScore(v) >= 120 ? "Good" : "Basic";
+    if (!voices.length) voicesEl.innerHTML = "<p>No voices found yet. Close this and open it again in a moment.</p>";
+    voices.forEach(v => {
+      const id = voiceId(v), tier = /premium/i.test(id) ? "Premium" : /enhanced/i.test(id) ? "Enhanced" : voiceScore(v) >= 120 ? "Good" : "Basic";
+      const b = document.createElement("button");
       b.className = "vrow" + (voice && v.voiceURI === voice.voiceURI ? " on" : "");
-      b.innerHTML = `<span>${v.name.replace(/\s*\(.*\)$/, "")} <span style="opacity:.6">${v.lang}</span></span><small class="${tier === "Best" ? "best" : ""}">${tier}</small>`;
+      b.innerHTML = `<span>${v.name.replace(/\s*\(.*\)$/, "")} <span style="opacity:.6">${v.lang}</span></span><small class="${/Premium|Enhanced/.test(tier) ? "best" : ""}">${tier}</small>`;
       b.addEventListener("click", () => { voice = v; store.set("voice", v.voiceURI); renderSheet(); say("Hi! Let's play!"); });
       voicesEl.appendChild(b);
     });
@@ -2629,6 +3049,7 @@ function renderSheet() {
 modeEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { voiceMode = b.dataset.mode; store.set("voiceMode", voiceMode); audio(); renderSheet(); say("Hi! Let's play!"); }));
 speedEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rate = Number(b.dataset.rate); store.set("rate", rate); renderSheet(); say("Hi! Let's play!"); }));
 $("#gear").addEventListener("click", () => { audio(); renderSheet(); sheet.hidden = false; });
+window.__onVoices = () => { if (!sheet.hidden) renderSheet(); };
 $("#sheetDone").addEventListener("click", () => { sheet.hidden = true; stopSpeech(); });
 let resetArmed = false;
 $("#resetAll").addEventListener("click", e => {
