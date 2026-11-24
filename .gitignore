@@ -2,3 +2,6 @@ tools/.venv/
 tools/.cache/
 .claude/
 __pycache__/
+
+tools/voice_check.json
+tools/voice_report.json

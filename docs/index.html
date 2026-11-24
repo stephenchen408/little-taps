@@ -144,6 +144,9 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .sheet h3 { margin: 14px 0 6px; font-size: 1.15rem; }
 .sheet p { margin: 0 0 12px; }
 .sheet .ver { margin: -2px 0 6px; opacity: .6; font-size: .85rem; font-weight: 600; }
+.vcgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; margin-bottom: 8px; }
+.vcgrid button { height: 40px; border: 2px solid var(--ink); border-radius: 10px; background: #fff; font-weight: 800; padding: 0; }
+.vcgrid button.bad { background: var(--tomato); color: #fff; }
 .voices { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .vrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; padding: 10px 14px; border: 3px solid var(--ink); border-radius: 16px; background: #fff; font-weight: 600; }
 .vrow.on { background: var(--sun); }
@@ -526,6 +529,11 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
         <div class="seg" id="speed"><button data-rate="0.82">Slower</button><button data-rate="0.95">Normal</button><button data-rate="1.05">Faster</button></div>
       </div>
     </div>
+    <h3>Check the voice</h3>
+    <p>Tap any letter or number to hear it. If one sounds wrong, switch on "Mark" and tap it, then send me the list below.</p>
+    <div class="seg" style="margin-bottom:8px"><button id="vcMark">Mark: off</button></div>
+    <div class="vcgrid" id="vcGrid"></div>
+    <p id="vcList" class="ver"></p>
     <h3>Brain breaks</h3>
     <p>Arcade games pause for 3 quick questions (numbers, letters, math). The questions get harder or easier based on how they go.</p>
     <div class="seg" id="gateMins" style="margin-bottom:8px"><button data-m="1">Every 1 min</button><button data-m="2">2 min</button><button data-m="3">3 min</button><button data-m="0">Off</button></div>
@@ -722,7 +730,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("littletaps." + k, JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "9 (Nov 24, clearer voice + how-to hands)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "10 (Nov 24, checked letters & numbers)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -3852,10 +3860,29 @@ function renderSheet() {
   $("#gateMins").querySelectorAll("button").forEach(b => b.classList.toggle("on", Number(b.dataset.m) === store.get("gateMins", 2)));
   $("#skills").textContent = `Brain-break levels: Numbers ${store.get("skill.numbers", 1)} · Letters ${store.get("skill.letters", 1)} · Math ${store.get("skill.math", 1)}`;
 }
+// Voice check: every letter (alone, big, little) and number 0-100, tap to hear, optionally mark.
+let vcMarking = false;
+const vcMarked = new Set(store.get("vcMarked", []));
+function renderVoiceCheck() {
+  const grid = $("#vcGrid"); if (grid.childElementCount) return;
+  const items = [...LETTERS.map(l => l[0]), ...LETTERS.flatMap(l => ["big " + l[0], "little " + l[0]]), ...range(0, 100).map(String)];
+  items.forEach(k => {
+    const b = document.createElement("button"); b.textContent = k.replace("big ", "↑").replace("little ", "↓"); b.title = k;
+    b.classList.toggle("bad", vcMarked.has(k));
+    b.addEventListener("click", () => {
+      if (vcMarking) { vcMarked.has(k) ? vcMarked.delete(k) : vcMarked.add(k); b.classList.toggle("bad", vcMarked.has(k)); store.set("vcMarked", [...vcMarked]); drawList(); }
+      say(isNaN(k) ? k : Number(k));
+    });
+    grid.appendChild(b);
+  });
+  const drawList = () => { $("#vcList").textContent = vcMarked.size ? `Marked: ${[...vcMarked].join(", ")}` : "Nothing marked."; };
+  drawList();
+}
+$("#vcMark").addEventListener("click", e => { vcMarking = !vcMarking; e.target.textContent = `Mark: ${vcMarking ? "on" : "off"}`; e.target.classList.toggle("on", vcMarking); });
 $("#gateMins").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { store.set("gateMins", Number(b.dataset.m)); sfx.tap(); renderSheet(); }));
 modeEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { voiceMode = b.dataset.mode; store.set("voiceMode", voiceMode); audio(); renderSheet(); say("Hi! Let's play!"); }));
 speedEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rate = Number(b.dataset.rate); store.set("rate", rate); renderSheet(); say("Hi! Let's play!"); }));
-$("#gear").addEventListener("click", () => { audio(); renderSheet(); sheet.hidden = false; });
+$("#gear").addEventListener("click", () => { audio(); renderSheet(); renderVoiceCheck(); sheet.hidden = false; });
 window.__onVoices = () => { if (!sheet.hidden) renderSheet(); };
 $("#sheetDone").addEventListener("click", () => { sheet.hidden = true; stopSpeech(); });
 let resetArmed = false;
