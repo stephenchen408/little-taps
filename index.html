@@ -349,13 +349,13 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .ansbox { min-width: 2.2em; text-align: center; border-bottom: 6px solid var(--ink); color: var(--sky); }
 .ansbox.empty { color: rgba(23,58,94,.3); } .ansbox.good { color: #2FB24C; }
 .arr { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; overflow: hidden; }
-.arow { display: flex; align-items: center; gap: 2px; border: 3px dashed rgba(23,58,94,.3); border-radius: 12px; padding: 2px 6px; background: none; font-size: var(--u, 30px); line-height: 1.05; opacity: .55; }
+.arow { flex: none; display: flex; align-items: center; gap: 2px; border: 3px dashed rgba(23,58,94,.3); border-radius: 12px; padding: 2px 6px; background: none; font-size: var(--u, 30px); line-height: 1.05; opacity: .55; }
 .arow.lit { opacity: 1; border-style: solid; border-color: var(--leaf); background: #fff; }
 .arow i { font-style: normal; }
 .arow b { min-width: 1.6em; font-size: .6em; color: var(--ink); }
 .showme { padding: 8px 18px; border: 3px solid var(--ink); border-radius: 999px; background: var(--paper); font-weight: 800; font-size: 1.1rem; }
 .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: min(100%, 420px); align-self: center; }
-.key { height: min(9vh, 64px); border: 4px solid var(--ink); border-radius: 16px; background: var(--paper); box-shadow: 0 4px 0 var(--ink); font-size: clamp(1.4rem, 6vw, 2rem); font-weight: 800; padding: 0; }
+.key { height: min(7vh, 58px); border: 4px solid var(--ink); border-radius: 16px; background: var(--paper); box-shadow: 0 4px 0 var(--ink); font-size: clamp(1.4rem, 6vw, 2rem); font-weight: 800; padding: 0; }
 .key.ok { background: var(--leaf); }
 
 /* ---------- Words ---------- */
@@ -413,6 +413,20 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .dpad [data-d="2"] { grid-column: 2; grid-row: 2; } .dpad [data-d="1"] { grid-column: 3; grid-row: 2; }
 .tabs { flex-wrap: wrap; }
 .tabs button { padding: 4px 12px; }
+
+/* ---------- Coach hand ---------- */
+.hand { position: absolute; left: 0; top: 0; z-index: 30; font-size: 52px; line-height: 1; pointer-events: none;
+  transform: translate(var(--x0), var(--y0)); filter: drop-shadow(0 4px 0 rgba(23,58,94,.35)); }
+.hand.tap.run { animation: handtap 1s ease-in-out 3; }
+@keyframes handtap { 0%, 100% { transform: translate(var(--x0), var(--y0)) scale(1); } 45% { transform: translate(var(--x0), calc(var(--y0) + 14px)) scale(.82); } }
+.hand.drag.run { animation: handdrag 1.5s ease-in-out 2; }
+@keyframes handdrag {
+  0% { transform: translate(var(--x0), var(--y0)) scale(1); opacity: 0; }
+  15% { transform: translate(var(--x0), var(--y0)) scale(.85); opacity: 1; }
+  80% { transform: translate(var(--x1), var(--y1)) scale(.85); opacity: 1; }
+  100% { transform: translate(var(--x1), var(--y1)) scale(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .hand.run { animation-duration: 2s; animation-iteration-count: 1; } }
 
 /* ---------- Spelled words, brain breaks ---------- */
 .sword { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; --fs: min(2.4rem, calc(78vw / var(--n) / 1.5)); }
@@ -636,7 +650,7 @@ window.LT = (() => {
     // Arcade
     "Arcade","Snake","Space","Maze","Swipe or tap the arrows to steer.","Eat the numbers in order, all the way to one hundred!",
     "Game over! You scored","Wave","Drag to move your ship. It shoots by itself!","Ouch!",
-    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.","Shoot the letters in order!","Brain break!","Back to the game!","Power up!","Catch the answer!","Stack","Slice","Flap","Runner","Tap to drop the block.","Swipe to slice the fruit! Don't touch the bombs.","Tap to flap! Fly through the gaps.","Drag to steer. Go through the best gates!","Smash!","So close! Try again.",
+    "Collect all the berries! Stay away from the bees.","Power star! The bees are sleepy.","Shoot the letters in order!","Brain break!","Back to the game!","Power up!","Catch the answer!","Let's spell it!","Drag a block onto the board.","Drag each shape into the picture.","Listen, then tap the answer.","Tap the letters to spell the word.","Put your finger on the green dot and follow the arrows.","Tap the balloons to pop them!","Tap two cards to find a match.","Draw with your finger!","Tap a letter in the word, then tap the new letter.","Tap coins to pay. Then press Pay.","Stack","Slice","Flap","Runner","Tap to drop the block.","Swipe to slice the fruit! Don't touch the bombs.","Tap to flap! Fly through the gaps.","Drag to steer. Go through the best gates!","Smash!","So close! Try again.",
   ];
   function voiceLines() {
     const L = {};
@@ -692,7 +706,7 @@ const store = {
   set(k, v) { try { localStorage.setItem("littletaps." + k, JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "8 (Nov 24, brain breaks)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "9 (Nov 24, clearer voice + how-to hands)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -775,6 +789,8 @@ function numKeys(n) {
   return [String(n)];
 }
 const keysOf = parts => parts.flat().filter(p => p !== null && p !== undefined && p !== "").flatMap(p => typeof p === "number" ? numKeys(p) : [p]);
+const P = s => ({ pause: s }); // a silent gap inside a spoken sequence
+const isPause = k => typeof k === "object";
 function stopSpeech() {
   speaking.forEach(s => { try { s.stop(); } catch (e) {} }); speaking = [];
   if (synth) try { synth.cancel(); } catch (e) {}
@@ -783,12 +799,13 @@ function say(...parts) {
   stopSpeech();
   const keys = keysOf(parts);
   if (!keys.length) return;
-  if (window.__missing) keys.forEach(k => { if (!(k in LINES)) window.__missing.add(k); });
+  if (window.__missing) keys.forEach(k => { if (!isPause(k) && !(k in LINES)) window.__missing.add(k); });
   const idx = CLIPS.index;
-  if (voiceMode === "recorded" && idx && keys.every(k => idx.clips[k])) {
+  if (voiceMode === "recorded" && idx && keys.every(k => isPause(k) || idx.clips[k])) {
     const a = audio();
     let t = a.currentTime + .03;
     for (const k of keys) {
+      if (isPause(k)) { t += k.pause; continue; }
       const [sp, st, du] = idx.clips[k], src = a.createBufferSource();
       src.buffer = CLIPS.buffers[sp]; src.connect(a.destination);
       src.start(t, Math.max(0, st + CLIPS.shift[sp]), du);
@@ -796,13 +813,13 @@ function say(...parts) {
     }
     return;
   }
-  ttsSay(keys.map(k => LINES[k] || k).join(" "));
+  ttsSay(keys.map(k => isPause(k) ? "..." : LINES[k] || k).join(" "));
 }
 // When each spoken part starts (seconds from now), so letters can light up in time with the voice.
 function partTimes(parts) {
-  const keys = keysOf(parts), idx = CLIPS.index, rec = voiceMode === "recorded" && idx && keys.every(k => idx.clips[k]);
+  const keys = keysOf(parts), idx = CLIPS.index, rec = voiceMode === "recorded" && idx && keys.every(k => isPause(k) || idx.clips[k]);
   let t = .03;
-  const out = keys.map(k => { const st = t; t += rec ? idx.clips[k][2] + .04 : (k.length <= 2 ? .6 : .3 + k.length * .065); return st; });
+  const out = keys.map(k => { const st = t; t += isPause(k) ? k.pause : rec ? idx.clips[k][2] + .04 : (k.length <= 2 ? .6 : .3 + k.length * .065); return st; });
   out.push(t);
   return out;
 }
@@ -812,10 +829,14 @@ const spellHTML = word => `<div class="sword" style="--n:${Math.max(3, word.repl
 // Returns roughly how long it all takes, in seconds.
 function spellAloud(el, before, word, after = []) {
   const letters = [...word.toUpperCase()].filter(c => /[A-Z]/.test(c)), pre = before.filter(Boolean);
-  const parts = [...pre, ...letters, word, ...after], times = partTimes(parts), spans = el ? [...el.querySelectorAll("b")] : [];
+  const parts = [...pre, P(.3), "Let's spell it!", P(.5)], letterAt = [];
+  letters.forEach((c, i) => { letterAt.push(parts.length); parts.push(c, P(i < letters.length - 1 ? .65 : .8)); });
+  const wordAt = parts.length;
+  parts.push(word, P(.4), ...after);
+  const times = partTimes(parts), spans = el ? [...el.querySelectorAll("b")] : [];
   say(...parts);
-  letters.forEach((_, i) => later(() => { spans.forEach(x => x.classList.remove("on")); if (spans[i]) spans[i].classList.add("on", "lit"); }, times[pre.length + i] * 1000));
-  later(() => { spans.forEach(x => x.classList.remove("on")); if (el) el.classList.add("all"); }, times[pre.length + letters.length] * 1000);
+  letterAt.forEach((at, i) => later(() => { spans.forEach(x => x.classList.remove("on")); if (spans[i]) spans[i].classList.add("on", "lit"); }, times[at] * 1000));
+  later(() => { spans.forEach(x => x.classList.remove("on")); if (el) el.classList.add("all"); }, times[wordAt] * 1000);
   return times[times.length - 1];
 }
 // Device speech engine: the fallback, or the grown-ups' choice in settings.
@@ -915,6 +936,68 @@ function reward(lead, next) {
   ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > total * 1000) close(); });
   later(close, Math.max(3600, total * 1000 + 1400));
 }
+/* ---------- Coach: says how to play and shows a hand doing it; repeats when nothing happens ---------- */
+const COACH = {
+  blocks: { g: "drag", line: "Drag a block onto the board.", from: ".slot", to: ".board" },
+  build: { g: "drag", line: "Drag each shape into the picture.", from: ".parts .vpart:not(.spacer)", to: ".veh" },
+  numbers: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
+  letters: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
+  math: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
+  animals: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
+  spell: { g: "tap", line: "Tap the letters to spell the word.", from: ".letters" },
+  trace: { g: "drag", line: "Put your finger on the green dot and follow the arrows.", from: [.35, .3], to: [.5, .7], first: 9 },
+  balloons: { g: "tap", line: "Tap the balloons to pop them!", from: ".balloon" },
+  shapes: { g: "drag", line: "Put each shape in its hole!", from: ".piece:not(.done)", to: ".holes" },
+  pairs: { g: "tap", line: "Tap two cards to find a match.", from: ".card" },
+  paint: { g: "drag", line: "Draw with your finger!", from: [.3, .3], to: [.7, .55] },
+  robot: { g: "tap", line: "Tap the arrows to plan the path, then press play.", from: ".cbtn" },
+  balance: { g: "tap", line: "Tap an apple next to the box. The same comes off the other side.", from: '[data-side="L"] .un' },
+  times: { g: "tap", line: "Type the answer, then press check.", from: ".pad" },
+  words: { g: "tap", line: "Tap a letter in the word, then tap the new letter.", from: ".wt" },
+  puzzle: { g: "drag", line: "Tap a piece to turn it. Drag it to place it.", from: ".pslot", to: ".pboard" },
+  shop: { g: "tap", line: "Tap coins to pay. Then press Pay.", from: ".coins .coin" },
+  snake: { g: "drag", line: "Swipe or tap the arrows to steer.", from: [.3, .45], to: [.7, .45], once: true },
+  space: { g: "drag", line: "Drag to move your ship. It shoots by itself!", from: [.3, .85], to: [.7, .85], once: true },
+  maze: { g: "drag", line: "Swipe or tap the arrows to steer.", from: [.3, .45], to: [.7, .45], once: true },
+  stack: { g: "tap", line: "Tap to drop the block.", from: [.5, .55], once: true },
+  slice: { g: "drag", line: "Swipe to slice the fruit! Don't touch the bombs.", from: [.2, .6], to: [.8, .4], once: true },
+  flap: { g: "tap", line: "Tap to flap! Fly through the gaps.", from: [.5, .55], once: true },
+  runner: { g: "drag", line: "Drag to steer. Go through the best gates!", from: [.3, .75], to: [.7, .75], once: true },
+};
+function startCoach(id, gameEl) {
+  const c = COACH[id]; if (!c) return;
+  const hand = document.createElement("div");
+  hand.className = "hand"; hand.textContent = "👆"; hand.hidden = true; gameEl.appendChild(hand);
+  let idle = 0, shows = 0, done = false;
+  const first = c.first || (c.quiz ? 7 : c.once ? 2.5 : 4), every = c.quiz ? 22 : c.once ? 9 : 13;
+  const point = spec => {
+    const g = gameEl.getBoundingClientRect();
+    if (Array.isArray(spec)) return { x: g.width * spec[0], y: g.height * spec[1] };
+    const el = [...gameEl.querySelectorAll(spec)].find(e => e.offsetParent !== null);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.left - g.left + r.width / 2, y: r.top - g.top + r.height / 2 };
+  };
+  function show() {
+    if (stage.querySelector(".reward, .gate")) return;
+    const a = point(c.from); if (!a) return;
+    const b = (c.to && point(c.to)) || a;
+    // The fingertip of 👆 sits near the top middle of the glyph, so offset the box a little.
+    hand.style.setProperty("--x0", a.x - 24 + "px"); hand.style.setProperty("--y0", a.y - 8 + "px");
+    hand.style.setProperty("--x1", b.x - 24 + "px"); hand.style.setProperty("--y1", b.y - 8 + "px");
+    hand.className = "hand " + c.g; hand.hidden = false; replay(hand, "run");
+    say(c.line); shows++;
+    later(() => { hand.hidden = true; }, 3200);
+  }
+  gameEl.addEventListener("pointerdown", () => { idle = 0; hand.hidden = true; if (c.once) done = true; }, true);
+  const tick = () => {
+    if (done) return;
+    idle += .5;
+    if (idle >= (shows ? every : first)) { idle = 0; show(); }
+    later(tick, 500);
+  };
+  later(tick, 500);
+}
 /* ---------- Brain breaks: arcade games pause for 3 quick questions; the level adapts ---------- */
 const GATE_TRACKS = [["numbers", numberRound], ["letters", letterRound], ["math", mathRound]];
 let gateClock = 0;
@@ -968,7 +1051,13 @@ function openGate(onDone) {
       wrap.appendChild(b);
     });
     layout(); drawPips();
-    say(...(first ? ["Brain break!"] : []), ...round.ask);
+    say(...(first ? ["Brain break!", P(.4)] : []), ...round.ask);
+    const r0 = round;
+    later(function nudge() {
+      if (round !== r0 || busy || !ov.isConnected) return;
+      say(...round.ask); const h = [...wrap.children].find(x => x._val === round.answer); if (h && wrongHere) h.classList.add("hint");
+      later(nudge, 12000);
+    }, 12000);
   }
   function finish() {
     // All three right the first time: harder next time. Struggled: easier next time.
@@ -2323,7 +2412,8 @@ function gameTimes(root, tools) {
   }
   function showArray(a, b, interactive) {
     arrEl.innerHTML = "";
-    const W = arrEl.clientWidth, H = arrEl.clientHeight, u = Math.floor(Math.min(40, (W - 20) / (b + 1.5), (H - 10) / a * .9));
+    // Each row is about 1.05u tall plus 10px of border and padding, with 4px between rows; make all rows fit.
+    const W = arrEl.clientWidth, H = arrEl.clientHeight, u = Math.floor(Math.min(40, (W - 28) / (b + 1.8), (H - 14 * a) / (1.05 * a)));
     arrEl.style.setProperty("--u", Math.max(10, u) + "px");
     let total = 0;
     for (let r = 0; r < a; r++) {
@@ -2675,7 +2765,7 @@ function gameSnake(root, tools) {
     let w; do { w = pick(spelledN < 4 ? SPELL3 : [...SPELL3, ...SPELL4]); } while (recentW.includes(w[0]));
     recentW = [...recentW.slice(-5), w[0]]; [word, wordEm] = w; li = 0;
   }
-  const readWord = () => say(word, ...[...word.toUpperCase()], word);
+  const readWord = () => say(word, P(.4), ...[...word.toUpperCase()].flatMap(c => [c, P(.55)]), word);
   const bestKey = () => "snakeBest." + mode;
   function fit() {
     ({ W, H } = fitCanvas(cv, g, box));
@@ -3682,6 +3772,7 @@ function openGame(gm) {
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   say(gm.name); // speaking inside the tap unlocks audio on iPhone and iPad; the game's intro replaces it
   gm.run(gameEl, toolsEl);
+  startCoach(gm.id, gameEl);
   keepAwake();
 }
 function goHome() {

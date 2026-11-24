@@ -1,6 +1,6 @@
 // Offline support: keeps the game, icons and voice files on the device after the first visit.
 // build_site.mjs fills in the version and file list on every build, so updates download automatically.
-const CACHE = "little-taps-6805cf73bf";
+const CACHE = "little-taps-aa4c462a7c";
 const FILES = ["./","manifest.webmanifest","icons/icon-180.png","icons/icon-192.png","icons/icon-512.png","icons/icon-maskable-512.png","voice/index.json","voice/v1.mp3","voice/v2.mp3","voice/v3.mp3","voice/v4.mp3","voice/v5.mp3","voice/v6.mp3","voice/v7.mp3"];
 
 self.addEventListener("install", e => {

@@ -10,6 +10,7 @@ Clips are cached in tools/.cache/clips, so re-running only records new or change
 import hashlib
 import json
 import pathlib
+import re
 import sys
 
 import numpy as np
@@ -35,21 +36,36 @@ lines = json.loads((here / "lines.json").read_text(encoding="utf-8"))
 kokoro = Kokoro(str(here / ".cache" / "kokoro-v1.0.int8.onnx"), str(here / ".cache" / "voices-v1.0.bin"))
 
 
-def trim(a, thresh=0.006, pad=0.035):
-    idx = np.where(np.abs(a) > thresh)[0]
+def trim(a, pad=0.03):
+    # Threshold relative to the clip's own peak, so faint trailing breath/vowel tails get cut.
+    peak = float(np.max(np.abs(a))) or 1.0
+    idx = np.where(np.abs(a) > max(0.006, peak * 0.03))[0]
     if len(idx) == 0:
         return a[: int(SR * 0.1)]
     s = max(0, idx[0] - int(SR * pad))
     e = min(len(a), idx[-1] + int(SR * pad))
-    return a[s:e]
+    a = a[s:e].copy()
+    fi, fo = int(SR * 0.005), min(len(a) // 3, int(SR * 0.04))
+    a[:fi] *= np.linspace(0, 1, fi)            # no click at the start
+    a[-fo:] *= np.linspace(1, 0, fo) ** 1.5    # soft, clean ending
+    return a
+
+
+def speakable(text):
+    # A bare word (a letter name, a number, "plus") said on its own tends to get an extra "uh" at the end.
+    # Saying it as a complete sentence ("Dee.") ends it cleanly. Short items are also said a little slower.
+    short = len(text.split()) <= 2
+    t = text if not short or re.search(r"[.!?:]$", text) else text + "."
+    return t, (0.88 if short else SPEED)
 
 
 def clip_for(text):
-    h = hashlib.sha1(f"{VOICE}|{SPEED}|{text}".encode()).hexdigest()[:16]
+    t, speed = speakable(text)
+    h = hashlib.sha1(f"v2|{VOICE}|{speed}|{t}".encode()).hexdigest()[:16]
     f = cache / f"{h}.npy"
     if f.exists():
         return np.load(f)
-    samples, sr = kokoro.create(text, voice=VOICE, speed=SPEED, lang="en-us")
+    samples, sr = kokoro.create(t, voice=VOICE, speed=speed, lang="en-us")
     assert sr == SR, sr
     a = trim(np.asarray(samples, dtype=np.float32))
     peak = float(np.max(np.abs(a))) or 1.0
