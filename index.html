@@ -240,6 +240,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .card .face { background: var(--paper); transform: rotateY(180deg); container-type: size; }
 .face .em { font-size: 3rem; font-size: 60cqmin; line-height: 1; }
 .face .gl { font-size: 3rem; font-size: 66cqmin; font-weight: 800; line-height: 1; color: var(--sky); -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; }
+.face .wds { font-size: 1.4rem; font-size: min(calc(140cqw / var(--n)), 40cqh); font-weight: 800; line-height: 1; color: var(--ink); white-space: nowrap; }
 .face .wd { font-size: 1.6rem; font-size: min(34cqw, 50cqh); font-weight: 800; line-height: 1; color: var(--ink); }
 .face .dots { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 4cqmin; width: 84%; }
 .face .dots i { width: 17cqmin; height: 17cqmin; border-radius: 50%; background: var(--tomato); border: 2px solid var(--ink); }
@@ -397,6 +398,8 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.7) 0 18%, transparent 19%), var(--c); box-shadow: inset 0 0 0 5px rgba(0,0,0,.08), 0 4px 0 var(--ink); padding: 0; display: grid; place-items: center; }
 .coin b { font-size: calc(var(--btn) * .36 * var(--s)); font-weight: 800; }
 .paid .coin { box-shadow: inset 0 0 0 4px rgba(0,0,0,.08); }
+.coin.bill { width: calc(var(--btn) * 2 * var(--s)); height: calc(var(--btn) * 1.05 * var(--s)); border-radius: 10px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,.55) 0 22%, transparent 23%), var(--c); }
 
 /* ---------- Arcade ---------- */
 .arcade { display: flex; flex-direction: column; background: #14213D; }
@@ -734,6 +737,17 @@ window.LT = (() => {
     "How many syllables are in","has","syllable.","syllables.","Clap it out and try again.","Not quite.",
     ...Object.values(WORD_PROBLEMS).flat().filter(p => p.length > 1),
   ];
+  // Longer picture words for the big kid's arcade and spelling games.
+  const PRO_WORDS = [["robot","🤖"],["pizza","🍕"],["tiger","🐯"],["zebra","🦓"],["camel","🐪"],["whale","🐳"],["shark","🦈"],["snake","🐍"],["horse","🐴"],
+    ["mouse","🐭"],["apple","🍎"],["lemon","🍋"],["grapes","🍇"],["banana","🍌"],["carrot","🥕"],["cookie","🍪"],["cheese","🧀"],["donut","🍩"],["rabbit","🐰"],
+    ["monkey","🐵"],["turtle","🐢"],["parrot","🦜"],["penguin","🐧"],["dolphin","🐬"],["octopus","🐙"],["giraffe","🦒"],["elephant","🐘"],["dinosaur","🦕"],
+    ["unicorn","🦄"],["rainbow","🌈"],["volcano","🌋"],["diamond","💎"],["trophy","🏆"],["crown","👑"],["pencil","✏️"],["tomato","🍅"],["umbrella","☂️"],
+    ["balloon","🎈"],["compass","🧭"],["magnet","🧲"],["battery","🔋"],["ghost","👻"],["wizard","🧙"],["shield","🛡️"],["island","🏝️"],["tractor","🚜"],
+    ["bicycle","🚲"],["airplane","✈️"],["rocket","🚀"],["planet","🪐"],["dragon","🐉"],["castle","🏰"],["guitar","🎸"],["lizard","🦎"],["spider","🕷️"],
+    ["eagle","🦅"],["koala","🐨"],["panda","🐼"],["lobster","🦞"],["candle","🕯️"],["pumpkin","🎃"],["popcorn","🍿"],["sandwich","🥪"],["hamburger","🍔"]];
+  const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
+    "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
+    "Make the number in one swipe!","Shoot the letters in order!","Count by"];
   function voiceLines() {
     const L = {};
     const add = (k, t = k) => { if (!(k in L)) L[k] = t; };
@@ -765,7 +779,9 @@ window.LT = (() => {
     LADDERS.flat().forEach(([w]) => add(w));
     GOODS.forEach(([, n]) => add(n));
     COIN_NAMES.forEach(n => add(n));
-    PRO_PHRASES.forEach(p => add(p));
+    PRO_PHRASES.forEach(p => add(p)); PRO_PHRASES2.forEach(p => add(p));
+    PRO_WORDS.forEach(([w]) => add(w));
+    [...PRO_WORDS.map(x => x[0]), ...PRO_SPELL].forEach(w => add("spell:" + w, `Can you spell ${w}?`));
     [...PRO_SPELL, ...OPPOSITES.flat(), ...SYNONYMS.flat(), ...PLURALS.flat(), ...SYLLABLES.map(x => x[0])].forEach(w => add(w));
     Object.entries(ANIMAL_INFO).forEach(([n, [cls, d]]) => {
       add("isa:" + n, `${cap(an(n))} ${n} is ${an(cls)} ${cls}.`);
@@ -777,7 +793,7 @@ window.LT = (() => {
     Object.entries(COUNTBY).forEach(([n, w]) => add("countby:" + n, `Count by ${w}!`));
     return L;
   }
-  return { PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
+  return { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
     VEHICLE_INFO, STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
 })();
 </script>
@@ -785,7 +801,7 @@ window.LT = (() => {
 <script>
 (() => {
 "use strict";
-const { PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
 const $ = (s, el = document) => el.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
 const ri = (a, b) => Math.floor(rand(a, b + 1));
@@ -804,7 +820,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "11 (Nov 25, two players)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "12 (Nov 25, big-kid arcade & learn)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -929,7 +945,7 @@ const spellHTML = word => `<div class="sword" style="--n:${Math.max(3, word.repl
 function spellAloud(el, before, word, after = []) {
   const letters = [...word.toUpperCase()].filter(c => /[A-Z]/.test(c)), pre = before.filter(Boolean);
   const parts = [...pre, P(.3), "Let's spell it!", P(.5)], letterAt = [];
-  letters.forEach((c, i) => { letterAt.push(parts.length); parts.push(c, P(i < letters.length - 1 ? .65 : .8)); });
+  letters.forEach((c, i) => { letterAt.push(parts.length); parts.push(c, P(i < letters.length - 1 ? (PRO ? .3 : .65) : .8)); });
   const wordAt = parts.length;
   parts.push(word, P(.4), ...after);
   const times = partTimes(parts), spans = el ? [...el.querySelectorAll("b")] : [];
@@ -1014,7 +1030,7 @@ function floatUp(parent, x, y, content) {
 
 /* ---------- Rewards: stickers and stars, saved on the device ---------- */
 // The big kid starts the shared games further along.
-const PRO_START = { robot: 6, balance: 5, words: 4, puzzle: 5, maze: 3, runner: 5, times: 6, spell: 5, pairs: 6, shop: 6 };
+const PRO_START = { robot: 6, balance: 5, words: 4, puzzle: 5, runner: 5 };
 const levelOf = id => store.get("lvl." + id, PRO ? (PRO_START[id] || 1) : 1);
 const setLevel = (id, v) => store.set("lvl." + id, v);
 // Shows a new sticker (or a star once the book is full), then calls next().
@@ -1784,25 +1800,27 @@ function gameSpell(root, tools) {
   let level = levelOf("spell"), done = 0, word = "", pos = 0, busy = false, recent = [], wrongHere = 0, idleT = 0;
   const drawChip = () => { chip.innerHTML = `Lv ${level} ` + range(1, PER_LEVEL).map(i => `<i class="${i <= done ? "on" : ""}"></i>`).join(""); };
   tools.lastChild.addEventListener("click", () => { if (word) say("spell:" + word); });
+  pic.addEventListener("click", () => { if (word) say("spell:" + word); });
   function hint() { const t = [...tilesEl.children].find(b => !b.classList.contains("used") && b.textContent === word[pos]); if (t) t.classList.add("hint"); }
   function armIdle() { clearTimeout(idleT); idleT = later(() => { if (!busy) { say("spell:" + word); hint(); } }, 14000); }
   function sizes(n, tiles) {
     const W = field.clientWidth - 24, H = field.clientHeight;
     field.style.setProperty("--sl", Math.floor(Math.min(110, (W - (n - 1) * 10) / n, H * .18)) + "px");
-    const per = Math.min(tiles, 5);
+    const per = Math.min(tiles, PRO ? 6 : 5);
     field.style.setProperty("--tl", Math.floor(Math.min(92, (W - (per - 1) * 10) / per, H * .15)) + "px");
   }
   function markNext() { [...slotsEl.children].forEach((s, i) => s.classList.toggle("next", i === pos)); }
   function next() {
     busy = false; pos = 0; wrongHere = 0;
-    const pool = level <= 2 ? SPELL3 : level <= 4 ? [...SPELL3, ...SPELL4] : SPELL4;
+    const pool = PRO ? (level <= 2 ? PRO_WORDS.filter(([x]) => x.length <= 6) : level <= 4 ? PRO_WORDS : [...PRO_WORDS, ...PRO_SPELL.map(x => [x, "🔊"])])
+      : level <= 2 ? SPELL3 : level <= 4 ? [...SPELL3, ...SPELL4] : SPELL4;
     let w; do { w = pick(pool); } while (recent.includes(w[0]));
     recent = [...recent.slice(-8), w[0]];
     word = w[0]; pic.textContent = w[1];
-    const hints = level <= 1;
+    const hints = !PRO && level <= 1;
     slotsEl.innerHTML = [...word].map(c => `<span class="sl">${hints ? `<i>${c}</i>` : ""}</span>`).join("");
     const extra = [];
-    while (extra.length < (level <= 2 ? 2 : 3)) { const c = "abcdefghklmnoprstuw"[ri(0, 18)]; if (!word.includes(c) && !extra.includes(c)) extra.push(c); }
+    while (extra.length < (PRO ? 4 : level <= 2 ? 2 : 3)) { const c = "abcdefghklmnoprstuw"[ri(0, 18)]; if (!word.includes(c) && !extra.includes(c)) extra.push(c); }
     const letters = shuffle([...word, ...extra]);
     sizes(word.length, letters.length);
     tilesEl.innerHTML = "";
@@ -1840,6 +1858,15 @@ function gameSpell(root, tools) {
 
 /* ---------- Game: Pairs ---------- */
 function pairSet(type, n) {
+  const wd = t => `<span class="wds" style="--n:${Math.max(5, [...t].length)}">${t}</span>`, w = x => ({ html: wd(x), say: [x] });
+  if (type === "times") {
+    const facts = [], seen = new Set();
+    while (facts.length < n) { const a = ri(3, 12), b = ri(3, 12); if (!seen.has(a * b)) { seen.add(a * b); facts.push([a, b]); } }
+    return facts.map(([a, b]) => [{ html: wd(`${a}×${b}`), say: [a, "times", b] }, { html: wd(String(a * b)), say: [a * b] }]);
+  }
+  if (type === "opposite") return shuffle(OPPOSITES).slice(0, n).map(([a, b]) => [w(a), w(b)]);
+  if (type === "synonym") return shuffle(SYNONYMS).slice(0, n).map(([a, b]) => [w(a), w(b)]);
+  if (type === "plural") return shuffle(PLURALS.filter(([a, b]) => a !== b)).slice(0, n).map(([a, b]) => [w(b), w(a)]);
   if (type === "case") return shuffle(LETTERS).slice(0, n).map(([L]) => [{ html: `<span class="gl">${L}</span>`, say: ["big " + L] }, { html: `<span class="gl">${L.toLowerCase()}</span>`, say: ["little " + L] }]);
   if (type === "count") return shuffle(range(1, 10)).slice(0, n).map(k => [{ html: `<span class="gl">${k}</span>`, say: [k] }, { html: `<span class="dots">${"<i></i>".repeat(k)}</span>`, say: [k, k > 1 ? "dots" : "dot"] }]);
   if (type === "word") return shuffle(SPELL3).slice(0, n).map(([w, em]) => [{ html: `<span class="em">${em}</span>`, say: [w] }, { html: `<span class="wd">${w}</span>`, say: [w] }]);
@@ -1853,9 +1880,11 @@ function gameMemory(root, tools) {
   const layout = () => fitGrid(grid, size, .85);
   function next() {
     tools.firstChild.textContent = `Lv ${level}`;
-    size = level <= 2 ? 8 : level <= 5 ? 12 : 16;
-    const type = ["same", "case", "count", "word"][(level - 1) % 4];
-    const deck = shuffle(pairSet(type, size / 2).flatMap((pair, id) => pair.map(face => ({ id, face }))));
+    size = PRO ? (level <= 4 ? 12 : 16) : level <= 2 ? 8 : level <= 5 ? 12 : 16;
+    const type = PRO ? ["times", "opposite", "plural", "synonym"][(level - 1) % 4] : ["same", "case", "count", "word"][(level - 1) % 4];
+    const sets = pairSet(type, size / 2);
+    const LINK = { times: "is", opposite: "is the opposite of", plural: "is the plural of", synonym: "means the same as" }[type];
+    const deck = shuffle(sets.flatMap((pair, id) => pair.map(face => ({ id, face }))));
     grid.innerHTML = ""; layout();
     let open = [], found = 0, lock = false;
     deck.forEach((d, i) => {
@@ -1870,7 +1899,7 @@ function gameMemory(root, tools) {
         if (open.length < 2) return;
         const [a, b] = open; open = [];
         if (a.d.id === b.d.id) {
-          later(() => { a.c.classList.add("matched"); b.c.classList.add("matched"); sfx.snap(); say("Match!", ...(type === "same" ? [] : [...a.d.face.say, "and", ...b.d.face.say])); }, 500);
+          later(() => { a.c.classList.add("matched"); b.c.classList.add("matched"); sfx.snap(); say("Match!", ...(type === "same" ? [] : LINK ? [...sets[a.d.id][0].say, LINK, ...sets[a.d.id][1].say] : [...a.d.face.say, "and", ...b.d.face.say])); }, 500);
           if (++found === size / 2) { level++; setLevel("pairs", level); later(() => reward("You found them all!", next), 2300); }
         } else {
           lock = true;
@@ -1879,7 +1908,8 @@ function gameMemory(root, tools) {
       });
       grid.appendChild(c);
     });
-    say({ same: "Find the matching pairs!", case: "Match big letters with little letters!", count: "Match each number with its dots!", word: "Match each word with its picture!" }[type]);
+    say({ same: "Find the matching pairs!", case: "Match big letters with little letters!", count: "Match each number with its dots!", word: "Match each word with its picture!",
+      times: "Match each fact with its answer!", opposite: "Match each word with its opposite!", plural: "Match each word with its plural!", synonym: "Match the words that mean the same!" }[type]);
   }
   next();
   onWin("resize", layout);
@@ -2676,14 +2706,24 @@ function gameBalance(root, tools) {
 
 /* ---------- Times: multiplication with arrays, then recall with spaced review ---------- */
 const TIMES_TABLES = [2, 10, 5, 3, 4, 6, 7, 8, 9];
+const TIMES_PRO = [6, 7, 8, 9, 11, 12]; // big kid: the hard tables up to 12, then mixed facts with division
 function gameTimes(root, tools) {
   tools.innerHTML = '<div class="chip"></div><button class="tool big" aria-label="Say it again">🔊</button>';
   root.innerHTML = `<div class="field timesf"><div class="tq"><span class="fact"></span><span class="ansbox"></span></div><div class="arr"></div><div class="pad"></div></div>`;
   const field = root.firstChild, factEl = $(".fact", field), ansEl = $(".ansbox", field), arrEl = $(".arr", field), padEl = $(".pad", field);
   let level = levelOf("times"), queue = [], typed = "", cur = null, correct = 0, mistakes = 0, busy = false, seen = new Set();
   const NEED = 8;
-  tools.lastChild.addEventListener("click", () => cur && say("What is", cur[0], "times", cur[1]));
+  const qParts = ([a, b, op]) => op ? [a * b, "divided by", b] : [a, "times", b];
+  tools.lastChild.addEventListener("click", () => cur && say("What is", ...qParts(cur)));
   function buildQueue() {
+    if (PRO) {
+      if (level <= TIMES_PRO.length) {
+        const t = TIMES_PRO[level - 1], facts = shuffle(range(2, 12)).slice(0, 7).map(m => [m, t]);
+        for (let i = 0; i < 3; i++) facts.push([ri(2, 12), ri(3, 12)]);
+        queue = shuffle(facts);
+      } else queue = range(1, 10).map(i => [ri(3, 12), ri(3, 12), i % 2 ? "÷" : null]);
+      return;
+    }
     const t = level <= TIMES_TABLES.length ? TIMES_TABLES[level - 1] : pick(TIMES_TABLES);
     const facts = shuffle(range(1, 10)).slice(0, 7).map(m => [m, t]);
     const prev = TIMES_TABLES.slice(0, Math.min(level - 1, TIMES_TABLES.length));
@@ -2706,10 +2746,11 @@ function gameTimes(root, tools) {
   function ask() {
     if (!queue.length) buildQueue();
     cur = queue.shift(); typed = ""; busy = false; drawAns();
-    const [a, b] = cur, key = a + "x" + b;
-    factEl.textContent = `${a} × ${b} =`;
-    // New facts start with a picture to count; known ones go straight to recall.
-    if (!seen.has(key) && level <= TIMES_TABLES.length) { showArray(a, b, true); say(a, a === 1 ? "row of" : "rows of", b, "Tap each row to count."); }
+    const [a, b, op] = cur, key = a + "x" + b + (op || "");
+    factEl.textContent = op ? `${a * b} ÷ ${b} =` : `${a} × ${b} =`;
+    // New facts start with a picture to count; known ones go straight to recall. The big kid always recalls.
+    if (PRO) { arrEl.innerHTML = '<button class="showme">🌷 Show me</button>'; $(".showme", arrEl).addEventListener("click", () => showArray(a, b, true)); say("What is", ...qParts(cur)); }
+    else if (!seen.has(key) && level <= TIMES_TABLES.length) { showArray(a, b, true); say(a, a === 1 ? "row of" : "rows of", b, "Tap each row to count."); }
     else { arrEl.innerHTML = '<button class="showme">🌷 Show me</button>'; $(".showme", arrEl).addEventListener("click", () => showArray(a, b, true)); say("What is", a, "times", b); }
     seen.add(key);
     levelChip(tools, level, " " + range(1, NEED).map(i => `<i class="${i <= correct ? "on" : ""}"></i>`).join(""));
@@ -2717,14 +2758,14 @@ function gameTimes(root, tools) {
   const drawAns = () => { ansEl.textContent = typed || "?"; ansEl.classList.toggle("empty", !typed); };
   function check() {
     if (busy || !typed) return;
-    const [a, b] = cur, ans = a * b;
+    const [a, b, op] = cur, ans = op ? a : a * b;
     if (Number(typed) === ans) {
       busy = true; correct++; sfx.yay(); celebrate(); ansEl.classList.add("good");
-      say(praise(), a, "times", b, "is", ans);
+      say(praise(), ...qParts(cur), "is", ans);
       later(() => { ansEl.classList.remove("good"); if (correct >= NEED) levelDone(); else ask(); }, 2300);
     } else {
       mistakes++; sfx.boop(); replay(ansEl, "wiggle");
-      showArray(a, b, false); say("Not quite.", a, "times", b, "is", ans);
+      showArray(a, b, false); say("Not quite.", ...qParts(cur), "is", ans);
       queue.splice(Math.min(2, queue.length), 0, cur); // a missed fact comes back soon
       busy = true; later(ask, 3200);
     }
@@ -2949,7 +2990,16 @@ function gamePuzzle(root, tools) {
 }
 
 /* ---------- Shop: pay with coins, then make change (money and adding) ---------- */
-const COINS = [{ v: 1, n: "penny", c: "#D08A55", s: .8 }, { v: 5, n: "nickel", c: "#C9CED6", s: .92 }, { v: 10, n: "dime", c: "#DDE1E6", s: .74 }, { v: 25, n: "quarter", c: "#C2C8D0", s: 1 }];
+const COINS = [{ v: 1, n: "penny", c: "#D08A55", s: .8 }, { v: 5, n: "nickel", c: "#C9CED6", s: .92 }, { v: 10, n: "dime", c: "#DDE1E6", s: .74 }, { v: 25, n: "quarter", c: "#C2C8D0", s: 1 },
+  { v: 100, n: "one dollar bill", c: "#B5DDA9", s: 1, bill: true }, { v: 500, n: "five dollar bill", c: "#9FD08F", s: 1, bill: true }];
+const money = c => `$${(c / 100).toFixed(2)}`;
+function moneySay(c) {
+  const d = Math.floor(c / 100), r = c % 100, out = [];
+  if (d) out.push(d, d === 1 ? "dollar" : "dollars");
+  if (d && r) out.push("and");
+  if (r || !d) out.push(r, "cents");
+  return out;
+}
 function fewestCoins(amount, vals) { let n = 0; for (const v of [...vals].sort((a, b) => b - a)) { n += Math.floor(amount / v); amount %= v; } return n; }
 function gameShop(root, tools) {
   tools.innerHTML = '<div class="chip"></div><button class="tool big" aria-label="Say it again">🔊</button>';
@@ -2957,34 +3007,42 @@ function gameShop(root, tools) {
     <div class="paid" aria-label="Coins you are paying"></div><div class="total"></div><div class="coins"></div><button class="bigbtn pay">Pay ✔</button></div>`;
   const field = root.firstChild, goodEl = $(".good", field), tagEl = $(".tag", field), msgEl = $(".msg", field), paidEl = $(".paid", field), totalEl = $(".total", field), coinsEl = $(".coins", field);
   let level = levelOf("shop"), served = 0, C = null, paid = [], busy = false;
-  const cfg = () => level <= 1 ? { lo: 2, hi: 10, vals: [1, 5] } : level === 2 ? { lo: 5, hi: 30, vals: [1, 5, 10] } : level === 3 ? { lo: 10, hi: 60, vals: [1, 5, 10, 25] }
+  // Big kid: dollars and cents, $1 and $5 bills, and change from $5 or $10.
+  const cfg = () => PRO ? (level <= 1 ? { lo: 105, hi: 495, vals: [1, 5, 10, 25, 100] } : level === 2 ? { lo: 150, hi: 995, vals: [1, 5, 10, 25, 100, 500], fewest: true }
+      : level === 3 ? { lo: 105, hi: 495, vals: [1, 5, 10, 25, 100], change: true, from: 500 } : { lo: 110, hi: 990, vals: [1, 5, 10, 25, 100, 500], change: true, from: 1000, fewest: true })
+    : level <= 1 ? { lo: 2, hi: 10, vals: [1, 5] } : level === 2 ? { lo: 5, hi: 30, vals: [1, 5, 10] } : level === 3 ? { lo: 10, hi: 60, vals: [1, 5, 10, 25] }
     : level === 4 ? { lo: 20, hi: 99, vals: [1, 5, 10, 25], fewest: true } : { lo: 5, hi: 95, vals: [1, 5, 10, 25], change: true, fewest: level >= 6 };
   const sum = () => paid.reduce((a, c) => a + c, 0);
-  const showTotal = () => level <= 3;
+  const showTotal = () => PRO ? level <= 1 : level <= 3;
   tools.lastChild.addEventListener("click", intro);
-  function intro() { if (!C) return; say(C.change ? ["That costs", C.price, "cents.", "The customer paid one dollar.", "How much change do they get?"] : ["That costs", C.price, "cents.", "Pay the exact amount."]); }
+  function intro() {
+    if (!C) return;
+    if (PRO) return say("That costs", ...moneySay(C.price), P(.3), ...(C.change ? ["The customer paid", C.from === 500 ? "five dollars" : "ten dollars", "How much change do they get?"] : ["Pay the exact amount."]));
+    say(C.change ? ["That costs", C.price, "cents.", "The customer paid one dollar.", "How much change do they get?"] : ["That costs", C.price, "cents.", "Pay the exact amount."]);
+  }
   function coinEl(v, big) {
     const c = COINS.find(x => x.v === v), el = document.createElement("button");
-    el.className = "coin"; el.style.setProperty("--c", c.c); el.style.setProperty("--s", c.s * (big ? 1 : .8)); el.innerHTML = `<b>${v}¢</b>`; el.setAttribute("aria-label", c.n);
+    el.className = "coin" + (c.bill ? " bill" : ""); el.style.setProperty("--c", c.c); el.style.setProperty("--s", c.s * (big ? 1 : .8)); el.innerHTML = `<b>${c.bill ? "$" + v / 100 : v + "¢"}</b>`; el.setAttribute("aria-label", c.n);
     return el;
   }
   function draw() {
     paidEl.innerHTML = "";
     paid.forEach((v, i) => { const el = coinEl(v, false); el.addEventListener("click", () => { if (busy) return; paid.splice(i, 1); sfx.flip(); draw(); }); paidEl.appendChild(el); });
     if (!paid.length) paidEl.innerHTML = `<span class="ph">${C.change ? "Tap coins to give change" : "Tap coins to pay"}</span>`;
-    totalEl.textContent = showTotal() ? `${C.change ? "Change" : "Paid"}: ${sum()}¢` : "";
+    totalEl.textContent = showTotal() ? `${C.change ? "Change" : "Paid"}: ${PRO ? money(sum()) : sum() + "¢"}` : "";
     levelChip(tools, level, " " + range(1, 5).map(i => `<i class="${i <= served % 5 ? "on" : ""}"></i>`).join(""));
   }
   function next() {
     const k = cfg(), [em, name] = pick(GOODS), price = ri(k.lo, k.hi);
-    C = { em, name, price, change: !!k.change, target: k.change ? 100 - price : price, vals: k.vals, fewest: !!k.fewest };
+    const from = k.from || 100;
+    C = { em, name, price, from, change: !!k.change, target: k.change ? from - price : price, vals: k.vals, fewest: !!k.fewest };
     paid = []; busy = false;
-    goodEl.textContent = em; tagEl.textContent = `${price}¢`;
-    msgEl.textContent = C.change ? "They paid $1. Give the change." : "Pay the exact amount.";
+    goodEl.textContent = em; tagEl.textContent = PRO ? money(price) : `${price}¢`;
+    msgEl.textContent = C.change ? `They paid ${PRO ? money(from).replace(".00", "") : "$1"}. Give the change.` : "Pay the exact amount.";
     coinsEl.innerHTML = "";
     C.vals.forEach(v => {
       const el = coinEl(v, true);
-      el.addEventListener("click", () => { if (busy || paid.length >= 20) return; paid.push(v); sfx.tap(); draw(); if (showTotal()) say(sum(), "cents"); else say(COINS.find(c => c.v === v).n); });
+      el.addEventListener("click", () => { if (busy || paid.length >= 30) return; paid.push(v); sfx.tap(); draw(); if (showTotal()) say(...(PRO ? moneySay(sum()) : [sum(), "cents"])); else say(COINS.find(c => c.v === v).n); });
       coinsEl.appendChild(el);
     });
     draw(); intro();
@@ -2997,7 +3055,7 @@ function gameShop(root, tools) {
     busy = true; served++;
     const best = fewestCoins(C.target, C.vals), perfect = paid.length <= best;
     sfx.yay(); celebrate(); floatUp(field, field.clientWidth / 2, field.clientHeight / 3, C.em);
-    say(praise(), C.target, "cents", C.fewest ? (perfect ? "Perfect! The fewest coins!" : "Can you use fewer coins?") : null);
+    say(praise(), ...(PRO ? moneySay(C.target) : [C.target, "cents"]), C.fewest ? (perfect ? "Perfect! The fewest coins!" : "Can you use fewer coins?") : null);
     if (served % 5 === 0) { level++; setLevel("shop", level); later(() => reward("Level complete!", next), 2600); }
     else later(next, 2800);
     draw();
@@ -3040,9 +3098,11 @@ function gameSnake(root, tools) {
   root.innerHTML = `<div class="field arcade snakef"><div class="play"><canvas></canvas><div class="ovl"></div></div>${DPAD}</div>`;
   const field = root.firstChild, box = $(".play", field), cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild, modeBtn = $("[data-mode]", tools);
   let mode = store.get("snakeMode", "classic"), W, H, cols, rows, cell, ox, oy, snake, dir, queue, foods, score, need, state, acc, stepMs, grow, best;
-  let word = "cat", wordEm = "🐱", li = 0, spelledN = 0, recentW = [];
+  let word = "cat", wordEm = "🐱", li = 0, spelledN = 0, recentW = [], stepN = store.get("snakeStep", 2);
+  // Big kid: numbers mode skip-counts (by 2s up to 24, then 3s up to 36 ... 12s), words are longer and nothing glows.
+  const sayIntro = () => mode === "letters" ? spellAloud($(".sword", ovl), [], word) : say(mode === "numbers" ? (PRO ? "countby:" + stepN : "Eat the numbers in order, all the way to one hundred!") : "Swipe or tap the arrows to steer.");
   function newWord() {
-    let w; do { w = pick(spelledN < 4 ? SPELL3 : [...SPELL3, ...SPELL4]); } while (recentW.includes(w[0]));
+    let w; do { w = pick(PRO ? PRO_WORDS : spelledN < 4 ? SPELL3 : [...SPELL3, ...SPELL4]); } while (recentW.includes(w[0]));
     recentW = [...recentW.slice(-5), w[0]]; [word, wordEm] = w; li = 0;
   }
   const readWord = () => say(word, P(.4), ...[...word.toUpperCase()].flatMap(c => [c, P(.55)]), word);
@@ -3053,7 +3113,7 @@ function gameSnake(root, tools) {
     cols = Math.floor(W / cell); rows = Math.floor(H / cell); ox = (W - cols * cell) / 2; oy = (H - rows * cell) / 2;
   }
   const setChip = () => {
-    chip.textContent = mode === "numbers" ? `Next: ${need}` : mode === "letters" ? `${wordEm} ${[...word.toUpperCase()].map((c, i) => i < li ? c : "_").join(" ")}` : `⭐ ${score} · best ${best}`;
+    chip.textContent = mode === "numbers" ? (PRO ? `By ${stepN}s: ${need > stepN ? need - stepN : "…"} → ?` : `Next: ${need}`) : mode === "letters" ? `${wordEm} ${[...word.toUpperCase()].map((c, i) => i < li ? c : "_").join(" ")}` : `⭐ ${score} · best ${best}`;
     modeBtn.textContent = mode === "numbers" ? "123" : mode === "letters" ? "ABC" : "🍎";
   };
   const taken = (x, y) => snake.some(p => p.x === x && p.y === y) || foods.some(f => f.x === x && f.y === y);
@@ -3070,6 +3130,11 @@ function gameSnake(root, tools) {
     }
     // Numbers mode: the next number is always on the board, plus a few decoys just above it.
     if (!foods.some(f => f.n === need)) foods.push({ ...freeCell(), n: need });
+    if (PRO) {
+      for (const n of shuffle([need - 1, need + 1, need + stepN, need - 2, need + 2, need + stepN + 1]))
+        if (foods.length < 4 && n > 0 && n !== need && !foods.some(f => f.n === n)) foods.push({ ...freeCell(), n });
+      return;
+    }
     let k = 1;
     while (foods.length < 3) { const n = need + k++; if (n <= 100 && !foods.some(f => f.n === n)) foods.push({ ...freeCell(), n }); if (k > 8) break; }
   }
@@ -3077,11 +3142,11 @@ function gameSnake(root, tools) {
     fit();
     const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
     snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
-    dir = 1; queue = []; foods = []; score = 0; if (!keepNeed) need = store.get("snakeNeed", 1); stepMs = 240; grow = 0; acc = 0; best = store.get(bestKey(), 0);
+    dir = 1; queue = []; foods = []; score = 0; if (!keepNeed) need = store.get("snakeNeed", PRO ? stepN : 1); stepMs = PRO ? 200 : 240; grow = 0; acc = 0; best = store.get(bestKey(), 0);
     if (mode === "letters" && (!keepNeed || li >= word.length)) newWord();
     stock(); state = "ready"; setChip();
     overlay(ovl, mode === "letters" ? `<b style="font-size:2.6rem">${wordEm}</b>${spellHTML(word)}<span>Eat the letters in order</span><span>Swipe or tap an arrow to start</span>`
-      : `<b>${mode === "numbers" ? "Eat the numbers in order" : "Snake"}</b><span>Swipe or tap an arrow to start</span>`);
+      : `<b>${mode === "numbers" ? (PRO ? `Count by ${stepN}s` : "Eat the numbers in order") : "Snake"}</b><span>Swipe or tap an arrow to start</span>`);
   }
   function turn(d) {
     if (d === null) return;
@@ -3101,7 +3166,7 @@ function gameSnake(root, tools) {
     if (fi >= 0) {
       const f = foods[fi]; foods.splice(fi, 1);
       if (mode === "classic" || (mode === "numbers" && f.n === need) || (mode === "letters" && f.ch === word[li])) {
-        grow++; score++; stepMs = Math.max(95, stepMs - 5); sfx.note((score - 1) % 10 + 1);
+        grow++; score++; stepMs = Math.max(PRO ? 80 : 95, stepMs - 5); sfx.note((score - 1) % 10 + 1);
         if (mode === "letters") {
           const C = f.ch.toUpperCase(); li++;
           if (li >= word.length) {
@@ -3110,6 +3175,12 @@ function gameSnake(root, tools) {
             if (spelledN % 3 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { nextWord(); state = "play"; acc = 0; }), 1800); }
             else later(nextWord, 1800);
           } else say(C);
+        } else if (mode === "numbers" && PRO) {
+          say(need); need += stepN;
+          if (need > stepN * 12) {
+            stepN = stepN >= 12 ? 2 : stepN + 1; need = stepN; store.set("snakeStep", stepN); store.set("snakeNeed", need); state = "paused";
+            later(() => reward("Fantastic!", () => { foods = []; stock(); setChip(); state = "play"; acc = 0; say("countby:" + stepN); }), 800);
+          } else store.set("snakeNeed", need);
         } else if (mode === "numbers") {
           say(need); need++; store.set("snakeNeed", need > 100 ? 1 : need);
           if (need > 100) { state = "paused"; later(() => reward("You did it!", () => { need = 1; reset(true); }), 800); }
@@ -3136,7 +3207,7 @@ function gameSnake(root, tools) {
         g.fillStyle = "#4CC764"; g.beginPath(); g.ellipse(cx + cell * .12, cy - cell * .36 + bob, cell * .14, cell * .07, -.6, 0, 7); g.fill();
         g.fillStyle = "rgba(255,255,255,.6)"; g.beginPath(); g.arc(cx - cell * .12, cy - cell * .1 + bob, cell * .08, 0, 7); g.fill();
       } else {
-        const label = mode === "letters" ? f.ch.toUpperCase() : f.n, isNext = mode === "letters" ? f.ch === word[li] : f.n === need;
+        const label = mode === "letters" ? f.ch.toUpperCase() : f.n, isNext = !PRO && (mode === "letters" ? f.ch === word[li] : f.n === need);
         g.fillStyle = isNext ? "#FFC93C" : "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
         g.beginPath(); g.arc(cx, cy + bob, cell * .48, 0, 7); g.fill(); g.stroke();
         g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(cell * (f.n > 99 ? .42 : f.n > 9 ? .52 : .66))}px "Baloo 2", sans-serif`;
@@ -3157,7 +3228,7 @@ function gameSnake(root, tools) {
   }
   modeBtn.addEventListener("click", () => {
     mode = mode === "classic" ? "numbers" : mode === "numbers" ? "letters" : "classic"; store.set("snakeMode", mode); sfx.tap(); reset();
-    if (mode === "letters") spellAloud($(".sword", ovl), [], word); else say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer.");
+    sayIntro();
   });
   steering(field, box, turn);
   loop((dt, t) => {
@@ -3166,7 +3237,7 @@ function gameSnake(root, tools) {
     draw(t);
   });
   reset();
-  if (mode === "letters") spellAloud($(".sword", ovl), [], word); else say(mode === "numbers" ? "Eat the numbers in order, all the way to one hundred!" : "Swipe or tap the arrows to steer.");
+  sayIntro();
   onWin("resize", () => { if (state !== "play") reset(true); else fit(); });
 }
 
@@ -3183,7 +3254,7 @@ function gameSpace(root, tools) {
   const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score}`; };
   // Each wave is a word: every row of aliens spells it, one letter per alien.
   function pickWord() {
-    const pool = wave <= 3 ? SPELL3 : wave <= 6 ? [...SPELL3, ...SPELL4] : SPELL4;
+    const pool = PRO ? PRO_WORDS.filter(([w]) => w.length <= (wave <= 3 ? 6 : 7)) : wave <= 3 ? SPELL3 : wave <= 6 ? [...SPELL3, ...SPELL4] : SPELL4;
     let w; do { w = pick(pool); } while (recent.includes(w[0]));
     recent = [...recent.slice(-6), w[0]];
     [word, wordEm] = w;
@@ -3193,15 +3264,17 @@ function gameSpace(root, tools) {
     const cols = word.length, rowsN = Math.min(4, 1 + Math.ceil(wave / 2)), gap = Math.min(86, (W - 40) / (cols + 1.8));
     aliens = [];
     const x0 = (W - gap * cols) / 2 + gap / 2;
-    for (let r = 0; r < rowsN; r++) for (let c = 0; c < cols; c++)
-      aliens.push({ x: x0 + gap * c, y: 116 + r * gap * .82, r: gap * .36, row: r, ch: word[c].toUpperCase(), alive: true, ph: rand(0, 6) });
+    for (let r = 0; r < rowsN; r++) {
+      const order = PRO ? shuffle(range(0, cols - 1)) : range(0, cols - 1); // big kid: each row is scrambled
+      for (let c = 0; c < cols; c++) aliens.push({ x: x0 + gap * c, y: 116 + r * gap * .82, r: gap * .36, row: r, ch: word[order[c]].toUpperCase(), alive: true, ph: rand(0, 6) });
+    }
     dirX = 1; stepDown = gap * .3; bullets = []; bombs = []; bombT = 2; spellIdx = 0; spelled = 0; caps = []; capQ = null;
   }
   function intro() {
     // Show and read the word before the wave starts: "Cat. C, A, T. Cat."
     state = "intro";
     overlay(ovl, `<b style="font-size:3rem">${wordEm}</b>${spellHTML(word)}<span>Shoot the letters in order!</span>`);
-    introT = spellAloud($(".sword", ovl), [word], word, ["Shoot the letters in order!"]) + .4;
+    introT = PRO ? (say(word, P(.3), "Shoot the letters in order!"), 3.2) : spellAloud($(".sword", ovl), [word], word, ["Shoot the letters in order!"]) + .4;
   }
   function reset() {
     fit(); wave = 1; lives = 3; score = 0; bits = [];
@@ -3229,20 +3302,31 @@ function gameSpace(root, tools) {
   }
   // Power-ups: two capsules fall with answers to a sum. Catching the right one gives a big weapon for 10 seconds.
   function spawnPower(x, y) {
+    if (PRO) {
+      // Big kid: times and division facts; the wrong capsule is a near miss (one group off, or one off).
+      const lvl = store.get("skill.math", 1), a = ri(3, lvl < 3 ? 9 : 12), b = ri(3, lvl < 3 ? 9 : 12), div = lvl >= 2 && Math.random() < .4;
+      const ans = div ? a : a * b;
+      let wrong; do { wrong = ans + pick(div ? [-2, -1, 1, 2] : [-b, b, -a, a, -1, 1]); } while (wrong <= 0 || wrong === ans);
+      capQ = div ? { ans, text: `${a * b} ÷ ${b}`, parts: [a * b, "divided by", b] } : { ans, text: `${a} × ${b}`, parts: [a, "times", b] };
+      const xs = [Math.max(40, Math.min(W - 40, x - 50)), Math.max(40, Math.min(W - 40, x + 50))];
+      caps = shuffle([ans, wrong]).map((v, i) => ({ x: xs[i], y, v, ok: v === ans }));
+      say("Catch the answer!", "What is", ...capQ.parts);
+      return;
+    }
     const lvl = store.get("skill.math", 1), add = lvl < 3 || Math.random() < .6, max = lvl <= 1 ? 5 : lvl === 2 ? 10 : 20;
     const a = add ? ri(1, max - 1) : ri(3, max), b = add ? ri(1, max - a) : ri(1, a - 1), ans = add ? a + b : a - b;
     let wrong; do { wrong = ans + pick([-2, -1, 1, 2]); } while (wrong < 0 || wrong === ans);
-    capQ = { a, b, add, ans, text: `${a} ${add ? "+" : "−"} ${b}` };
+    capQ = { ans, text: `${a} ${add ? "+" : "−"} ${b}`, parts: [a, add ? "plus" : "minus", b] };
     const xs = [Math.max(40, Math.min(W - 40, x - 50)), Math.max(40, Math.min(W - 40, x + 50))];
     caps = shuffle([ans, wrong]).map((v, i) => ({ x: xs[i], y, v, ok: v === ans }));
-    say("Catch the answer!", "What is", a, add ? "plus" : "minus", b);
+    say("Catch the answer!", "What is", ...capQ.parts);
   }
   function catchCap(c) {
     const q = capQ;
     if (c.ok && q) {
       power = { type: pick(["spread", "giant"]), t: 10 }; caps.forEach(x => x.gone = true); capQ = null;
       sfx.yay(); boom(ship.x, shipY() - 20, "#7CF5FF", 24);
-      say(praise(), q.a, q.add ? "plus" : "minus", q.b, "is", q.ans, "Power up!");
+      say(praise(), ...q.parts, "is", q.ans, "Power up!");
     } else { c.gone = true; sfx.boop(); say("That's", c.v); }
   }
   function update(dt) {
@@ -3261,7 +3345,7 @@ function gameSpace(root, tools) {
     caps.forEach(c => { c.y += 105 * dt; if (!c.gone && Math.abs(c.x - ship.x) < 34 && Math.abs(c.y - shipY()) < 28) catchCap(c); });
     caps = caps.filter(c => !c.gone && c.y < H + 30); if (!caps.length) capQ = null;
     const live = aliens.filter(a => a.alive), total = aliens.length;
-    const speed = (24 + wave * 6) * (1 + (1 - live.length / total) * 2);
+    const speed = (24 + wave * 6) * (1 + (1 - live.length / total) * 2) * (PRO ? 1.3 : 1);
     let edge = false;
     live.forEach(a => { a.x += dirX * speed * dt; if (a.x < a.r + 8 || a.x > W - a.r - 8) edge = true; });
     if (edge) { dirX *= -1; live.forEach(a => { a.x += dirX * 4; a.y += stepDown; }); }
@@ -3269,7 +3353,7 @@ function gameSpace(root, tools) {
     bombT -= dt;
     if (bombT <= 0 && live.length) {
       const shooters = live.filter(a => !live.some(o => o !== a && Math.abs(o.x - a.x) < a.r && o.y > a.y));
-      const s = pick(shooters); bombs.push({ x: s.x, y: s.y + s.r }); bombT = Math.max(.45, 1.7 - wave * .12) * rand(.6, 1.3);
+      const s = pick(shooters); bombs.push({ x: s.x, y: s.y + s.r }); bombT = Math.max(.45, 1.7 - wave * .12) * rand(.6, 1.3) * (PRO ? .75 : 1);
     }
     bombs.forEach(b => b.y += (140 + wave * 12) * dt); bombs = bombs.filter(b => b.y < H + 20);
     if (ship.inv <= 0 && bombs.some(b => Math.abs(b.x - ship.x) < 20 && Math.abs(b.y - shipY()) < 18)) { bombs = []; hit(); }
@@ -3283,7 +3367,7 @@ function gameSpace(root, tools) {
   }
   function drawAlien(a, t) {
     const wob = Math.sin(t * 6 + a.ph) * a.r * .08, col = ROW_COLORS[a.row % 5], x = a.x, y = a.y + wob, r = a.r;
-    const next = state === "play" && a.ch === word[spellIdx].toUpperCase();
+    const next = !PRO && state === "play" && a.ch === word[spellIdx].toUpperCase();
     g.strokeStyle = "#173A5E"; g.lineWidth = 2.5;
     [-1, 1].forEach(s => { g.beginPath(); g.moveTo(x + s * r * .4, y - r * .7); g.lineTo(x + s * r * .65, y - r * 1.15); g.stroke(); g.fillStyle = col; g.beginPath(); g.arc(x + s * r * .65, y - r * 1.15, r * .16, 0, 7); g.fill(); g.stroke(); });
     if (next) { g.fillStyle = "rgba(255,212,59,.35)"; g.beginPath(); g.arc(x, y, r * 1.35 + Math.sin(t * 8) * r * .08, 0, 7); g.fill(); }
@@ -3369,7 +3453,7 @@ function gameMaze(root, tools) {
   const open = (x, y) => x >= 0 && y >= 0 && x < TW && y < TH && grid[y][x] === 0;
   function genMaze() {
     ({ W, H } = fitCanvas(cv, g, box));
-    const C = W < 500 ? 6 : 8, R = Math.max(6, Math.min(12, Math.round(C * H / W)));
+    const C = PRO ? (W < 500 ? 7 : 10) : W < 500 ? 6 : 8, R = Math.max(6, Math.min(PRO ? 14 : 12, Math.round(C * H / W)));
     TW = C * 2 + 1; TH = R * 2 + 1;
     grid = range(1, TH).map(() => Array(TW).fill(1));
     const seen = new Set(), stack = [[0, 0]]; seen.add("0,0"); grid[1][1] = 0;
@@ -3395,17 +3479,17 @@ function gameMaze(root, tools) {
     for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x] === 0) dots.add(x + "," + y);
     [[1, 1], [TW - 2, 1], [1, TH - 2], [TW - 2, TH - 2]].forEach(([x, y]) => { dots.delete(x + "," + y); starsLeft.add(x + "," + y); });
     // A word's letters hide among the berries; collecting them in order spells it for a bonus.
-    [mword, mem] = pick(level <= 3 ? SPELL3 : [...SPELL3, ...SPELL4]); mli = 0; mletters = new Map();
+    [mword, mem] = pick(PRO ? PRO_WORDS : level <= 3 ? SPELL3 : [...SPELL3, ...SPELL4]); mli = 0; mletters = new Map();
     shuffle([...dots]).slice(0, mword.length).forEach((k, i) => { dots.delete(k); mletters.set(k, i); });
     // Bees start on the open tile nearest the middle.
     let bestD = 1e9;
     for (let y = 0; y < TH; y++) for (let x = 0; x < TW; x++) if (grid[y][x] === 0) { const d = Math.hypot(x - TW / 2, y - TH / 2); if (d < bestD) { bestD = d; home = { x, y }; } }
   }
   function place() {
-    player = { x: 2 * Math.floor((TW - 1) / 4) + 1, y: TH - 2, dir: -1, want: -1, p: 0, speed: 4.2 };
+    player = { x: 2 * Math.floor((TW - 1) / 4) + 1, y: TH - 2, dir: -1, want: -1, p: 0, speed: PRO ? 4.8 : 4.2 };
     dots.delete(player.x + "," + player.y);
-    const n = Math.min(4, 1 + Math.ceil(level / 2));
-    bees = range(1, n).map((_, i) => ({ x: home.x, y: home.y, dir: -1, p: 0, speed: Math.min(3.9, 2.6 + level * .18), wait: i * 1.2 }));
+    const n = PRO ? Math.min(5, 2 + Math.ceil(level / 2)) : Math.min(4, 1 + Math.ceil(level / 2));
+    bees = range(1, n).map((_, i) => ({ x: home.x, y: home.y, dir: -1, p: 0, speed: PRO ? Math.min(4.5, 3 + level * .2) : Math.min(3.9, 2.6 + level * .18), wait: i * 1.2 }));
   }
   const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score} · ${[...mword.toUpperCase()].map((c, i) => i < mli ? c : "_").join("")}`; };
   function newLevel(fresh) {
@@ -3458,7 +3542,7 @@ function gameMaze(root, tools) {
     const all = opts.length ? opts : [0, 1, 2, 3].filter(d => open(e.x + DX[d], e.y + DY[d]));
     if (!all.length) { e.dir = -1; return; }
     const dist = d => Math.hypot(e.x + DX[d] - player.x, e.y + DY[d] - player.y);
-    const chase = Math.min(.7, .25 + level * .07);
+    const chase = PRO ? Math.min(.8, .4 + level * .07) : Math.min(.7, .25 + level * .07);
     if (sleepy > 0) e.dir = all.sort((a, b) => dist(b) - dist(a))[0];
     else if (Math.random() < chase) e.dir = all.sort((a, b) => dist(a) - dist(b))[0];
     else e.dir = pick(all);
@@ -3496,7 +3580,7 @@ function gameMaze(root, tools) {
     dots.forEach(k => { const [x, y] = k.split(",").map(Number); g.beginPath(); g.arc(ox + x * tile + tile / 2, oy + y * tile + tile / 2, Math.max(2.5, tile * .12), 0, 7); g.fill(); });
     g.textAlign = "center"; g.textBaseline = "middle";
     mletters.forEach((i, k) => {
-      const [x, y] = k.split(",").map(Number), next = i === mli, px = ox + x * tile + tile / 2, py = oy + y * tile + tile / 2, sz = tile * (next ? .86 + .06 * Math.sin(t * 8) : .74);
+      const [x, y] = k.split(",").map(Number), next = !PRO && i === mli, px = ox + x * tile + tile / 2, py = oy + y * tile + tile / 2, sz = tile * (next ? .86 + .06 * Math.sin(t * 8) : .74);
       g.fillStyle = next ? "#FFD43B" : "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2; roundRect(g, px - sz / 2, py - sz / 2, sz, sz, sz * .25); g.fill(); g.stroke();
       g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(sz * .72)}px "Baloo 2", sans-serif`; g.fillText(mword[i].toUpperCase(), px, py + 1);
     });
@@ -3662,11 +3746,12 @@ function gameStack(root, tools) {
 const FRUITS = [["🍉", "#E8473B"], ["🍊", "#FF9A3C"], ["🍋", "#FFD43B"], ["🍏", "#4CC764"], ["🍇", "#A574F2"], ["🍓", "#FF5A6E"], ["🍑", "#FFA07A"], ["🥝", "#8BC34A"]];
 function gameSlice(root, tools) {
   const { field, cv, g, ovl, chip, J, fit } = arcadeShell(root, tools, "slicef");
-  let W, H, items, halves, trail, swipe, lives, score, state = "ready", spawnT, time, best = store.get("sliceBest", 0), tens, overT = 0;
+  // Big kid: the target changes (12 to 40) and sums can need three fruit.
+  let W, H, items, halves, trail, swipe, lives, score, state = "ready", spawnT, time, best = store.get("sliceBest", 0), tens, overT = 0, target = 10;
   function reset() {
-    ({ W, H } = fit()); items = []; halves = []; trail = []; swipe = null; lives = 3; score = 0; spawnT = .6; time = 0; tens = 0;
+    ({ W, H } = fit()); items = []; halves = []; trail = []; swipe = null; lives = 3; score = 0; spawnT = .6; time = 0; tens = 0; target = PRO ? ri(12, 18) : 10;
     setChip(); state = "ready";
-    overlay(ovl, `<b>Slice</b><span>Swipe to slice the fruit! Don't touch the bombs.</span><span>Make 10 in one swipe for a bonus</span>`);
+    overlay(ovl, `<b>Slice</b><span>Swipe to slice the fruit! Don't touch the bombs.</span><span>Make ${target} in one swipe for a bonus</span>`);
   }
   const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score}`; };
   function toss(n, bomb) {
@@ -3676,6 +3761,15 @@ function gameSlice(root, tools) {
   function wave() {
     // Fruit often come in pairs that make ten, so the bonus is always within reach.
     const lvl = Math.min(8, Math.floor(time / 15));
+    if (PRO) {
+      const r = Math.random();
+      if (r < .4) { const a = ri(2, target - 2); toss(a); toss(target - a); }
+      else if (r < .6 && target >= 9) { const a = ri(2, Math.floor(target / 2)), b = ri(2, target - a - 2); toss(a); toss(b); toss(target - a - b); }
+      else for (let i = 0, k = ri(2, 3 + Math.floor(lvl / 2)); i < k; i++) toss(ri(2, target - 2));
+      if (Math.random() < .25 + lvl * .05) toss(0, true);
+      spawnT = Math.max(.65, 1.5 - lvl * .12);
+      return;
+    }
     if (Math.random() < .55) { const a = ri(1, 9); toss(a); toss(10 - a); }
     else for (let i = 0, k = ri(1, 2 + Math.floor(lvl / 2)); i < k; i++) toss(ri(1, 9));
     if (Math.random() < .15 + lvl * .04) toss(0, true);
@@ -3695,11 +3789,12 @@ function gameSlice(root, tools) {
   function endSwipe() {
     if (!swipe) return;
     const hits = swipe.hits, sum = hits.reduce((a, h) => a + h.n, 0);
-    if (hits.length >= 2 && sum === 10) {
-      // Made ten! Big bonus and the sum read out loud.
-      tens++; score += 10; setChip(); J.shake(.35); J.hit(80); sfx.yay();
-      const last = hits[hits.length - 1]; J.text(last.x, last.y - 40, "10! +10", "#FFD43B", 40);
-      say(...hits.flatMap((h, i) => i ? ["plus", h.n] : [h.n]), "is", 10);
+    if (hits.length >= 2 && sum === target) {
+      // Made the target! Big bonus and the sum read out loud.
+      tens++; const bonus = PRO ? 5 * hits.length : 10; score += bonus; setChip(); J.shake(.35); J.hit(80); sfx.yay();
+      const last = hits[hits.length - 1]; J.text(last.x, last.y - 40, `${target}! +${bonus}`, "#FFD43B", 40);
+      say(...hits.flatMap((h, i) => i ? ["plus", h.n] : [h.n]), "is", target);
+      if (PRO && tens % 3 === 0) { target = ri(12, Math.min(40, 18 + tens * 2)); later(() => { say("Make", target); J.text(W / 2, H * .25, `Make ${target}!`, "#7CF5FF", 44); }, 2200); }
       if (tens % 5 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; }), 600); }
     } else if (hits.length >= 3) { score += hits.length; setChip(); J.text(W / 2, H * .3, `Combo ×${hits.length}`, "#FF86C8", 34); }
     swipe = null;
@@ -3717,7 +3812,7 @@ function gameSlice(root, tools) {
   cv.addEventListener("pointerdown", e => {
     e.preventDefault();
     if (state === "over") { if (performance.now() - overT > 350) reset(); return; }
-    if (state === "ready") { state = "play"; overlay(ovl, ""); }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); if (PRO) say("Make", target); }
     try { cv.setPointerCapture(e.pointerId); } catch (err) {}
     const p = pt(e); swipe = { last: p, hits: [] }; trail = [{ ...p, life: .25 }];
   });
@@ -3755,6 +3850,10 @@ function gameSlice(root, tools) {
     if (trail.length > 1) {
       g.lineCap = "round"; g.lineJoin = "round";
       for (let i = 1; i < trail.length; i++) { const a = trail[i - 1], b = trail[i]; g.strokeStyle = `rgba(255,255,255,${b.life * 3.5})`; g.lineWidth = 3 + b.life * 30; g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.stroke(); }
+    }
+    if (PRO && state !== "ready") {
+      g.font = `800 28px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.lineWidth = 5; g.strokeStyle = "#173A5E";
+      g.strokeText(`Make ${target}`, W / 2, 30); g.fillStyle = "#FFD43B"; g.fillText(`Make ${target}`, W / 2, 30);
     }
     J.end(g);
   }
@@ -3894,22 +3993,36 @@ function gameRunner(root, tools) {
     if (level <= 4) return shuffle([add(), { t: "−", v: ri(2, 6) }]);
     return shuffle([pick([add(), { t: "×", v: 2 }]), pick([{ t: "−", v: ri(2, 8) }, add(), { t: "×", v: 2 }])]);
   }
-  const apply = (n, op) => op.t === "+" ? n + op.v : op.t === "−" ? Math.max(1, n - op.v) : n * op.v;
+  const apply = (n, op) => op.t === "+" ? n + op.v : op.t === "−" ? Math.max(1, n - op.v) : op.t === "÷" ? Math.max(1, Math.floor(n / op.v)) : n * op.v;
+  // Big kid: + vs × vs ÷ choices where the best one depends on the crowd size (+12 beats ×2 only while the crowd is small).
+  function gateOpsPro() {
+    const pool = [() => ({ t: "+", v: ri(4, 15) }), () => ({ t: "×", v: 2 }), () => ({ t: "−", v: ri(3, 12) })];
+    if (level >= 6) pool.push(() => ({ t: "×", v: 3 }), () => ({ t: "÷", v: 2 }));
+    let a, b; do { a = pick(pool)(); b = pick(pool)(); } while (a.t === b.t && a.v === b.v);
+    return [a, b];
+  }
+  let plan = [], planI = 0;
   function reset() {
     ({ W, H } = fit()); trackL = W * .08; trackR = W * .92;
     crowd = 1; cx = tx = W / 2; dist = 0; objs = []; nextGate = 380;
     // The wall needs roughly what a good run collects, so smart gate choices win.
     wallN = level <= 2 ? 12 + level * 6 : level <= 4 ? 14 + level * 4 : 20 + level * 8;
+    if (PRO) {
+      // Plan every gate up front and set the wall just under the best possible run (greedy is best: every op only grows with n).
+      plan = []; planI = 0; let best = 1;
+      for (let y = 380; y < LEN - 300; y += 420) { const ops = gateOpsPro(); plan.push(ops); best = Math.max(...ops.map(o => apply(best, o))); }
+      wallN = Math.max(10, Math.round(best * .85));
+    }
     chip.textContent = `Lv ${level} · 👥 1`; state = "ready";
     overlay(ovl, `<b>Runner · Level ${level}</b><span>Drag to steer. Go through the best gates!</span><span>Smash the 🧱${wallN} wall at the end</span>`);
   }
   function spawnRow(y) {
-    const [a, b] = gateOps(), mid = (trackL + trackR) / 2;
+    const [a, b] = PRO && plan[planI] ? plan[planI++] : gateOps(), mid = (trackL + trackR) / 2;
     objs.push({ kind: "gate", y, x0: trackL, x1: mid, op: a }, { kind: "gate", y, x0: mid, x1: trackR, op: b });
     if (Math.random() < .5 && level > 1) objs.push({ kind: "rock", y: y + 160, x: rand(trackL + 30, trackR - 30), r: 22 });
   }
   function update(dt) {
-    const v = 240 + level * 12; dist += v * dt;
+    const v = (PRO ? 280 : 240) + level * 12; dist += v * dt;
     cx += (tx - cx) * Math.min(1, dt * 10);
     while (nextGate < dist + H && nextGate < LEN - 300) { spawnRow(nextGate); nextGate += 420; }
     const runnerY = dist + 0; // world y the crowd sits at
@@ -3923,7 +4036,7 @@ function gameRunner(root, tools) {
         const other = pair.find(p => p !== chosen), otherN = apply(before, other.op);
         J.text(cx, H * .62, `${chosen.op.t}${chosen.op.v}`, crowd >= otherN ? "#FFD43B" : "#FFFDF6", 40);
         if (crowd > before) { J.chime(); J.burst(cx, H * .7, "#FFD43B", 12, 220); } else { sfx.boop(); J.shake(.3); }
-        say(before, chosen.op.t === "+" ? "plus" : chosen.op.t === "−" ? "minus" : "times", chosen.op.v, "is", crowd);
+        say(before, chosen.op.t === "+" ? "plus" : chosen.op.t === "−" ? "minus" : chosen.op.t === "÷" ? "divided by" : "times", chosen.op.v, "is", crowd);
       }
       if (o.kind === "rock" && Math.abs(runnerY - o.y) < 20 && Math.abs(cx - o.x) < o.r + 26) {
         o.done = true; const lost = Math.min(crowd - 1, 3); crowd -= lost; J.shake(.4); sfx.boop(); if (lost) J.text(cx, H * .62, `−${lost}`, "#FF6B57", 34);
@@ -3957,7 +4070,7 @@ function gameRunner(root, tools) {
       const y = sy(o.y);
       if (y < -60 || y > H + 60) return;
       if (o.kind === "gate" && !o.done) {
-        const good = o.op.t !== "−";
+        const good = o.op.t === "+" || o.op.t === "×";
         g.fillStyle = good ? "rgba(77,168,255,.55)" : "rgba(255,107,87,.55)"; g.strokeStyle = "#173A5E"; g.lineWidth = 3;
         roundRect(g, o.x0 + 6, y - 34, o.x1 - o.x0 - 12, 56, 14); g.fill(); g.stroke();
         g.fillStyle = "#FFFDF6"; g.font = `800 34px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
