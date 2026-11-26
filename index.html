@@ -220,6 +220,10 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .animals-bg { background: radial-gradient(ellipse 60% 22% at 25% 22%, #fff 40%, transparent 42%), radial-gradient(ellipse 45% 16% at 80% 34%, #fff 40%, transparent 42%),
   radial-gradient(ellipse 80% 40% at 30% 100%, #9ED97F 60%, transparent 61%), radial-gradient(ellipse 80% 45% at 85% 105%, #B6E58F 60%, transparent 61%), linear-gradient(#BFE6FF, #E6F7FF 58%, #C8EBA3 58%); }
 .prompt { flex: 1 1 40%; min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; container-type: size; }
+.prompt.withq { flex-direction: column; gap: 6px; container-type: normal; }
+.qtext { flex: none; max-width: 100%; text-align: center; font-weight: 800; line-height: 1.2; font-size: clamp(1.15rem, 4.8vw, 1.9rem); color: var(--ink);
+  background: rgba(255,255,255,.75); border: 3px solid var(--ink); border-radius: 18px; padding: 6px 14px; box-shadow: 0 4px 0 rgba(23,58,94,.25); text-wrap: balance; }
+.pbody { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; container-type: size; }
 .choices { flex: 1 1 60%; min-width: 0; min-height: 0; display: grid; grid-auto-rows: 1fr; gap: 12px; }
 .choice { min-width: 0; min-height: 0; padding: 0; border: 4px solid var(--ink); border-radius: 24px; background: var(--paper);
   box-shadow: 0 6px 0 var(--ink); display: grid; place-items: center; container-type: size; transition: opacity .3s; }
@@ -511,9 +515,38 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .gpips i.on { background: var(--sun); }
 .gbody { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
 .gbody.land { flex-direction: row; }
+.gready { align-items: center; justify-content: center; text-align: center; gap: 14px; }
+.gready b { font-size: clamp(2rem, 9vw, 3.2rem); line-height: 1; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; color: var(--sun); text-shadow: 0 4px 0 var(--ink); }
+.gready span { font-size: clamp(1.1rem, 4.6vw, 1.5rem); font-weight: 700; opacity: .8; }
+.gstars { font-size: clamp(2rem, 9vw, 3rem); letter-spacing: .1em; }
+.gogo { width: min(46vw, 200px); height: min(46vw, 200px); border-radius: 50%; border: 5px solid var(--ink); padding: 0 0 0 .12em; font-size: min(22vw, 96px); line-height: 1; color: #fff;
+  background: radial-gradient(circle at 35% 30%, #B4F0A8, var(--leaf) 55%, #2E9B3E); box-shadow: 0 8px 0 var(--ink), 0 0 0 0 rgba(92,203,95,.6); animation: gogo 1.4s ease-in-out infinite;
+  -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; }
+.gogo:active { transform: translateY(5px) scale(.97); box-shadow: 0 3px 0 var(--ink); }
+@keyframes gogo { 0%, 100% { transform: scale(1); box-shadow: 0 8px 0 var(--ink), 0 0 0 0 rgba(92,203,95,.6); } 50% { transform: scale(1.06); box-shadow: 0 8px 0 var(--ink), 0 0 0 22px rgba(92,203,95,0); } }
+.gcount { font-size: min(40vw, 220px); font-weight: 800; line-height: 1; color: var(--paper); -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 var(--ink); }
+.countpop { animation: countpop .7s cubic-bezier(.3,1.6,.5,1); }
+@keyframes countpop { from { transform: scale(2.2); opacity: 0; } 40% { opacity: 1; } to { transform: scale(1); } }
+
+/* ---------- Missions ---------- */
+.mpanel { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 30; width: min(92%, 440px); padding: 10px 14px 12px; border: 4px solid var(--ink); border-radius: 20px;
+  background: linear-gradient(#FFFFFF, var(--paper)); box-shadow: 0 6px 0 var(--ink), 0 14px 30px rgba(23,58,94,.3); display: flex; flex-direction: column; gap: 6px; animation: dropin .4s cubic-bezier(.3,1.5,.5,1); }
+.mpanel[hidden] { display: none; }
+.mpanel > b { font-size: 1.2rem; }
+.mrow { display: grid; grid-template-columns: 1fr 70px auto; align-items: center; gap: 8px; font-weight: 700; font-size: clamp(.85rem, 3.6vw, 1.05rem); line-height: 1.15; }
+.mbar { height: 12px; border-radius: 99px; background: #E6E0D2; border: 2px solid var(--ink); overflow: hidden; }
+.mbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--leaf), #9BE49D); }
+.mrow em { font-style: normal; font-weight: 800; font-variant-numeric: tabular-nums; font-size: .9em; }
+.mtoast { position: absolute; left: 50%; top: 14px; z-index: 31; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 8px 20px; border: 4px solid var(--ink); border-radius: 20px; background: linear-gradient(#FFF3B0, var(--sun)); box-shadow: 0 6px 0 var(--ink), 0 0 30px rgba(255,201,60,.8);
+  font-weight: 800; font-size: clamp(1.1rem, 5vw, 1.5rem); pointer-events: none; animation: dropin .45s cubic-bezier(.3,1.6,.5,1), toastout .4s ease-in 2.7s forwards; }
+.mtoast small { font-size: .7em; font-weight: 700; }
+@keyframes dropin { from { transform: translate(-50%, -140%); } }
+@keyframes toastout { to { transform: translate(-50%, -140%); opacity: 0; } }
 
 /* ---------- Drop ---------- */
 .dropf { background: #14213D; }
+.hopf { background: #2C86DB; }
 .dropbar { flex: none; display: flex; justify-content: center; gap: 10px; padding: 8px 0 10px; --db: min(20vw, 84px); }
 .dropf.pro .dropbar { --db: min(18vw, 70px); }
 .dropbar button { width: var(--db); height: var(--db); border: 4px solid var(--ink); border-radius: 18px; background: var(--paper); box-shadow: 0 4px 0 var(--ink);
@@ -820,6 +853,32 @@ window.LT = (() => {
     "How many syllables are in","has","syllable.","syllables.","Clap it out and try again.","Not quite.",
     ...Object.values(WORD_PROBLEMS).flat().filter(p => p.length > 1),
   ];
+  // Missions: three small goals at a time per arcade game. "run" = within one game; otherwise they add up over many games.
+  const MISSIONS = {
+    stack: [["floor", "Build {n} floors", [10, 15]], ["perfect", "Get {n} perfect drops", [3, 5]], ["floor", "Build {n} floors in one game", [15, 25], "run"],
+      ["streak", "Get {n} perfect drops in a row", [2, 3], "run"], ["perfect", "Get {n} perfect drops", [10, 20]], ["floor", "Build {n} floors in one game", [25, 40], "run"], ["floor", "Build {n} floors", [100, 150]]],
+    flap: [["wall", "Fly past {n} walls", [10, 15]], ["bigger", "Pick the bigger number {n} times", [3, 5]], ["wall", "Fly past {n} walls in one game", [10, 20], "run"],
+      ["stars", "Get {n} stars in one game", [15, 30], "run"], ["bigger", "Pick the bigger number {n} times", [10, 20]], ["wall", "Fly past {n} walls", [50, 80]]],
+    drop: [["line", "Clear {n} lines", [5, 10]], ["multi", "Clear two lines together {n} times", [1, 3]], ["line", "Clear {n} lines in one game", [8, 16], "run"],
+      ["level", "Reach level {n}", [null, 3], "run"], ["four", "Clear four lines at once", [null, 1]], ["line", "Clear {n} lines", [25, 50]]],
+    snake: [["eat", "Eat {n} snacks", [10, 20]], ["long", "Grow to {n} long", [8, 15], "run"], ["eat", "Eat {n} snacks in one game", [15, 30], "run"],
+      ["spell", "Spell {n} words", [2, 4]], ["eat", "Eat {n} snacks", [50, 100]]],
+    space: [["alien", "Pop {n} aliens", [20, 40]], ["word", "Spell {n} words", [2, 4]], ["power", "Catch {n} power-ups", [1, 3]],
+      ["wave", "Reach wave {n}", [3, 5], "run"], ["alien", "Pop {n} aliens", [100, 200]]],
+    slice: [["fruit", "Slice {n} fruit", [20, 40]], ["target", ["Make ten {n} times", "Hit the target number {n} times"], [2, 4]], ["combo", "Slice three fruit in one swipe {n} times", [1, 3]],
+      ["fruit", "Slice {n} fruit in one game", [25, 50], "run"], ["fruit", "Slice {n} fruit", [150, 300]]],
+    runner: [["win", "Smash {n} walls", [1, 3]], ["crowd", "Get a crowd of {n}", [20, 100], "run"], ["best", "Pick the better gate {n} times", [5, 10]], ["win", "Smash {n} walls", [5, 10]]],
+    maze: [["berry", "Eat {n} berries", [50, 100]], ["level", "Finish {n} mazes", [1, 2]], ["bee", "Catch {n} sleepy bees", [1, 3]],
+      ["word", "Collect a whole word {n} times", [1, 3]], ["level", "Finish {n} mazes", [5, 8]]],
+    hop: [["pad", "Hop on {n} right lily pads", [10, 20]], ["bank", "Cross the river {n} times", [2, 3]], ["pad", "Hop on {n} right lily pads in one game", [15, 30], "run"],
+      ["bank", "Cross the river {n} times", [10, 15]]],
+  };
+  const missionText = (m, big) => {
+    const t = Array.isArray(m[1]) ? m[1][big ? 1 : 0] : m[1], n = m[2][big ? 1 : 0];
+    if (n == null) return null;
+    if (n !== 1) return t.replace("{n}", n);
+    return t.replace("{n} times", "once").replace("{n}", 1).replace("1 power-ups", "1 power-up").replace("1 walls", "1 wall").replace("1 mazes", "1 maze").replace("1 sleepy bees", "1 sleepy bee");
+  };
   // Longer picture words for the big kid's arcade and spelling games.
   const PRO_WORDS = [["robot","🤖"],["pizza","🍕"],["tiger","🐯"],["zebra","🦓"],["camel","🐪"],["whale","🐳"],["shark","🦈"],["snake","🐍"],["horse","🐴"],
     ["mouse","🐭"],["apple","🍎"],["lemon","🍋"],["grapes","🍇"],["banana","🍌"],["carrot","🥕"],["cookie","🍪"],["cheese","🧀"],["donut","🍩"],["rabbit","🐰"],
@@ -831,7 +890,7 @@ window.LT = (() => {
   const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
     "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
     "Make the number in one swipe!","Shoot the letters in order!","Count by",
-    "Drop","Too high! Let's clear the board.","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
+    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
     "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.","Fill rows to clear them. Each line is worth the times table number!"];
   function voiceLines() {
     const L = {};
@@ -865,6 +924,8 @@ window.LT = (() => {
     GOODS.forEach(([, n]) => add(n));
     COIN_NAMES.forEach(n => add(n));
     PRO_PHRASES.forEach(p => add(p)); PRO_PHRASES2.forEach(p => add(p));
+    ["Mission complete!", "Missions!", "Mission master!"].forEach(p => add(p));
+    Object.values(MISSIONS).flat().forEach(m => [false, true].forEach(big => { const t = missionText(m, big); if (t) add("mis:" + t, t + "."); }));
     PRO_WORDS.forEach(([w]) => add(w));
     [...PRO_WORDS.map(x => x[0]), ...PRO_SPELL].forEach(w => add("spell:" + w, `Can you spell ${w}?`));
     [...PRO_SPELL, ...OPPOSITES.flat(), ...SYNONYMS.flat(), ...PLURALS.flat(), ...SYLLABLES.map(x => x[0])].forEach(w => add(w));
@@ -878,7 +939,7 @@ window.LT = (() => {
     Object.entries(COUNTBY).forEach(([n, w]) => add("countby:" + n, `Count by ${w}!`));
     return L;
   }
-  return { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
+  return { MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
     VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
 })();
 </script>
@@ -886,7 +947,7 @@ window.LT = (() => {
 <script>
 (() => {
 "use strict";
-const { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const { MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
 const stickerSet = () => PRO ? PRO_STICKERS : STICKERS;
 const $ = (s, el = document) => el.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -906,7 +967,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "15 (Nov 26, new graphics)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "16 (Nov 26, missions + Hop)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1171,6 +1232,64 @@ function reward(lead, next) {
   ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > total * 1000) close(); });
   later(close, Math.max(3600, total * 1000 + 1400));
 }
+/* ---------- Missions: three small goals at a time per arcade game. Finishing one shows a banner;
+   every three finished earn a sticker at the next pause (never mid-action, no timers, nothing resets). ---------- */
+let MIS = null;
+const mis = (ev, inc = 1, runVal) => { if (MIS) MIS.ev(ev, inc, runVal); };
+const misRun = () => { if (MIS) MIS.run(); };
+const pauseDue = dt => gateTick(dt) || !!(MIS && MIS.due);
+function runPause(cb) { if (MIS && MIS.due) { MIS.due = false; reward("Mission master!", cb); } else openGate(cb); }
+function missionsFor(id) {
+  const all = (MISSIONS[id] || []).map(m => { const text = missionText(m, PRO); return text && { ev: m[0], n: m[2][PRO ? 1 : 0], text, run: m[3] === "run" }; }).filter(Boolean);
+  if (all.length < 4) return null;
+  let st = store.get("mis." + id, null);
+  if (!st || !Array.isArray(st.i) || st.i.length !== 3) st = { i: [0, 1, 2], p: [0, 0, 0], next: 3, done: 0 };
+  let runCount = {}, panel = null, btn = null, hideT = 0;
+  const M = { due: false }, save = () => store.set("mis." + id, st), m = k => all[st.i[k] % all.length];
+  function render() {
+    if (!panel) return;
+    panel.innerHTML = `<b>🎯 Missions</b>` + st.i.map((_, k) => {
+      const ms = m(k), pct = Math.min(100, Math.round(st.p[k] / ms.n * 100));
+      return `<div class="mrow"><span>${ms.text}</span><i class="mbar"><i style="width:${pct}%"></i></i><em>${Math.min(st.p[k], ms.n)}/${ms.n}</em></div>`;
+    }).join("");
+  }
+  function show(ms) { if (!panel) return; render(); panel.hidden = false; clearTimeout(hideT); hideT = later(() => { panel.hidden = true; }, ms); }
+  function complete(k) {
+    const ms = m(k);
+    do { st.i[k] = st.next++; } while (st.i.filter(x => x % all.length === st.i[k] % all.length).length > 1);
+    st.p[k] = 0; st.done++;
+    if (st.done % 3 === 0) M.due = true;
+    const host = $("#game");
+    if (host) {
+      const t = document.createElement("div"); t.className = "mtoast"; t.innerHTML = `🎯 Mission complete!<small>${ms.text}</small>`;
+      host.appendChild(t); setTimeout(() => t.remove(), 3200);
+    }
+    celebrate(); sfx.yay(); later(() => say("Mission complete!", "mis:" + ms.text), 500);
+    if (btn) replay(btn, "hop");
+  }
+  M.ev = (ev, inc, runVal) => {
+    runCount[ev] = (runCount[ev] || 0) + inc;
+    let changed = false;
+    st.i.forEach((_, k) => {
+      const ms = m(k); if (ms.ev !== ev) return;
+      const before = st.p[k];
+      st.p[k] = ms.run ? Math.max(st.p[k], runVal ?? runCount[ev]) : st.p[k] + inc;
+      if (st.p[k] !== before) changed = true;
+      if (st.p[k] >= ms.n) complete(k);
+    });
+    if (changed) { save(); if (panel && !panel.hidden) render(); }
+  };
+  M.run = () => { runCount = {}; st.i.forEach((_, k) => { if (m(k).run) st.p[k] = 0; }); save(); render(); };
+  M.attach = (tools, game) => {
+    btn = document.createElement("button"); btn.className = "tool big mis"; btn.textContent = "🎯"; btn.setAttribute("aria-label", "Missions");
+    tools.prepend(btn);
+    panel = document.createElement("div"); panel.className = "mpanel"; panel.hidden = true; game.appendChild(panel);
+    btn.addEventListener("click", () => { if (panel.hidden) { show(9000); say("Missions!", ...st.i.map((_, k) => "mis:" + m(k).text)); } else panel.hidden = true; });
+    panel.addEventListener("pointerdown", () => { panel.hidden = true; });
+    later(() => show(4500), 700);
+  };
+  return M;
+}
 /* ---------- Coach: says how to play and shows a hand doing it; repeats when nothing happens ---------- */
 const COACH = {
   blocks: { g: "drag", line: "Drag a block onto the board.", from: ".slot", to: ".board" },
@@ -1198,6 +1317,7 @@ const COACH = {
   maze: { g: "drag", line: "Swipe or tap the arrows to steer.", from: [.3, .45], to: [.7, .45], once: true },
   stack: { g: "tap", line: "Tap to drop the block.", from: [.5, .55], once: true },
   drop: { g: "tap", line: "Tap to turn. Use the buttons to move and drop.", from: [.5, .4], once: true },
+  hop: { g: "tap", line: "Tap a lily pad to hop on it.", from: [.5, .5], once: true },
   slice: { g: "drag", line: "Swipe to slice the fruit! Don't touch the bombs.", from: [.2, .6], to: [.8, .4], once: true },
   flap: { g: "tap", line: "Tap to flap! Fly through the gaps.", from: [.5, .55], once: true },
   runner: { g: "drag", line: "Drag to steer. Go through the best gates!", from: [.3, .75], to: [.7, .75], once: true },
@@ -1263,7 +1383,7 @@ function openGate(onDone) {
   }
   function next(first) {
     busy = false; wrongHere = 0; round = make(lvl);
-    promptEl.innerHTML = round.prompt;
+    showPrompt(promptEl, round);
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", ask);
     wrap.innerHTML = "";
     const cols = shuffle(COLORS);
@@ -1290,20 +1410,40 @@ function openGate(onDone) {
       wrap.appendChild(b);
     });
     layout(); drawPips();
-    say(...(first ? ["Brain break!", P(.4)] : []), ...round.ask);
+    // The little kid hears every question; the big kid reads it (the 🔊 button still reads it out).
+    if (PRO) { if (first) say("Brain break!"); } else say(...(first ? ["Brain break!", P(.4)] : []), ...round.ask);
     const r0 = round;
     later(function nudge() {
       if (round !== r0 || busy || !ov.isConnected) return;
-      say(...round.ask); const h = [...wrap.children].find(x => x._val === round.answer); if (h && wrongHere) h.classList.add("hint");
-      later(nudge, 12000);
-    }, 12000);
+      if (!PRO) say(...round.ask); const h = [...wrap.children].find(x => x._val === round.answer); if (h && wrongHere) h.classList.add("hint");
+      later(nudge, PRO ? 20000 : 12000);
+    }, PRO ? 20000 : 12000);
   }
   function finish() {
     // All three right the first time: harder next time. Struggled: easier next time.
     if (firstTry === Q) lvl++; else if (firstTry <= Q - 2) lvl = Math.max(1, lvl - 1);
     store.set("skill." + track, lvl);
-    celebrate(); sfx.yay(); say("Back to the game!");
-    later(() => { ov.remove(); onDone(); }, 1600);
+    celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
+    // Wait for a tap, then count down so the player is ready when the game starts moving again.
+    later(() => {
+      $(".ghead .tool", ov).remove(); pips.innerHTML = range(1, Q).map(() => '<i class="on"></i>').join("");
+      body.className = "gbody gready";
+      body.innerHTML = `<div class="gstars">${"⭐".repeat(firstTry)}${"✨".repeat(Q - firstTry)}</div><b>Get ready!</b><button class="gogo" aria-label="I'm ready">▶</button><span>Tap when you're ready</span>`;
+      const go = $(".gogo", body);
+      let started = false;
+      later(function nudge() { if (started || !ov.isConnected) return; say("Tap when you're ready!"); replay(go, "hop"); later(nudge, 10000); }, 10000);
+      go.addEventListener("pointerdown", e => {
+        e.preventDefault(); if (started) return; started = true; sfx.tap();
+        const steps = ["3", "2", "1", "Go!"];
+        body.innerHTML = '<div class="gcount"></div>';
+        const el = $(".gcount", body);
+        steps.forEach((s, i) => later(() => {
+          el.textContent = s; replay(el, "countpop"); say(s);
+          tone(i < 3 ? 660 : 990, { d: i < 3 ? .12 : .3, v: .14, type: "triangle" });
+          if (i === 3) { celebrate(); later(() => { ov.remove(); onDone(); }, 650); }
+        }, i * 750));
+      });
+    }, 1400);
   }
   next(true);
 }
@@ -1336,7 +1476,7 @@ function quizGame(root, tools, id, bg, makeRound) {
   const drawChip = () => { chip.innerHTML = `Lv ${level} ` + range(1, PER_LEVEL).map(i => `<i class="${i <= done ? "on" : ""}"></i>`).join(""); };
   const ask = () => { if (round && !busy) say(...round.ask); };
   const hint = () => { const b = [...wrap.children].find(x => x._val === round.answer); if (b) b.classList.add("hint"); };
-  function armIdle() { clearTimeout(idleT); idleT = later(() => { if (!busy) { ask(); hint(); } }, 14000); }
+  function armIdle() { clearTimeout(idleT); idleT = later(() => { if (!busy) { if (!PRO) ask(); hint(); } }, PRO ? 25000 : 14000); }
   tools.lastChild.addEventListener("click", () => { ask(); armIdle(); });
   function layout() {
     const n = wrap.children.length, land = field.clientWidth > field.clientHeight;
@@ -1354,7 +1494,7 @@ function quizGame(root, tools, id, bg, makeRound) {
   function next() {
     busy = false; wrongHere = 0;
     round = makeRound(level);
-    promptEl.innerHTML = round.prompt;
+    showPrompt(promptEl, round);
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", () => { ask(); armIdle(); });
     wrap.innerHTML = "";
     const cols = shuffle(COLORS);
@@ -1388,10 +1528,20 @@ function quizGame(root, tools, id, bg, makeRound) {
       wrap.appendChild(b);
     });
     layout(); drawChip();
-    say(...round.ask); armIdle();
+    if (!PRO) say(...round.ask); armIdle();
   }
   next();
   onWin("resize", layout);
+}
+// The big kid reads questions himself: the spoken parts become a line of text above the picture.
+function askText(parts) {
+  return parts.filter(p => p != null && !isPause(p)).map(p => typeof p === "number" || /^\d+$/.test(p) ? fmtN(+p) : /^[A-Z]$/.test(p) ? p : (LINES[p] ?? String(p)))
+    .join(" ").replace(/\s+([?.!,:])/g, "$1").replace(/\s+/g, " ").trim().replace(/^((what|which|how|who|where|is|can|does)\b.*[^?.!])$/i, "$1?");
+}
+function showPrompt(promptEl, round) {
+  const text = PRO && !/class="wp"/.test(round.prompt) ? askText(round.ask) : "";
+  promptEl.classList.toggle("withq", !!text);
+  promptEl.innerHTML = text ? `<div class="qtext">${text.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c])}</div><div class="pbody">${round.prompt}</div>` : round.prompt;
 }
 const someOf = (answer, pool, k) => { const s = new Set([answer]); for (const x of shuffle(pool)) { if (s.size >= k) break; s.add(x); } return shuffle([...s]); };
 
@@ -3262,7 +3412,7 @@ function gameSnake(root, tools) {
     fit();
     const cx = Math.floor(cols / 2), cy = Math.floor(rows / 2);
     snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
-    dir = 1; queue = []; foods = []; score = 0; if (!keepNeed) need = store.get("snakeNeed", PRO ? stepN : 1); stepMs = PRO ? 200 : 240; grow = 0; acc = 0; best = store.get(bestKey(), 0);
+    misRun(); dir = 1; queue = []; foods = []; score = 0; if (!keepNeed) need = store.get("snakeNeed", PRO ? stepN : 1); stepMs = PRO ? 200 : 240; grow = 0; acc = 0; best = store.get(bestKey(), 0);
     if (mode === "letters" && (!keepNeed || li >= word.length)) newWord();
     stock(); state = "ready"; setChip();
     overlay(ovl, mode === "letters" ? `<b style="font-size:2.6rem">${wordEm}</b>${spellHTML(word)}<span>Eat the letters in order</span><span>Swipe or tap an arrow to start</span>`
@@ -3288,11 +3438,11 @@ function gameSnake(root, tools) {
       const f = foods[fi]; foods.splice(fi, 1);
       J.ring(ox + f.x * cell + cell / 2, oy + f.y * cell + cell / 2, "#FFFFFF", cell * 1.8, .35, 4); J.sparks(ox + f.x * cell + cell / 2, oy + f.y * cell + cell / 2, "#FFD43B", 8, 260);
       if (mode === "classic" || (mode === "numbers" && f.n === need) || (mode === "letters" && f.ch === word[li])) {
-        grow++; score++; stepMs = Math.max(PRO ? 80 : 95, stepMs - 5); sfx.note((score - 1) % 10 + 1);
+        grow++; score++; mis("eat"); mis("long", 0, snake.length + grow); stepMs = Math.max(PRO ? 80 : 95, stepMs - 5); sfx.note((score - 1) % 10 + 1);
         if (mode === "letters") {
           const C = f.ch.toUpperCase(); li++;
           if (li >= word.length) {
-            spelledN++; score += 5; sfx.yay(); celebrate(); say(C, "You spelled it!", word);
+            spelledN++; score += 5; mis("spell"); sfx.yay(); celebrate(); say(C, "You spelled it!", word);
             const nextWord = () => { newWord(); foods = []; stock(); setChip(); readWord(); };
             if (spelledN % 3 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { nextWord(); state = "play"; acc = 0; }), 1800); }
             else later(nextWord, 1800);
@@ -3387,7 +3537,7 @@ function gameSnake(root, tools) {
   });
   steering(field, box, turn);
   loop((dt, t) => {
-    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } 
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } 
     J.update(dt); tongue = (tongue + dt) % 2.6;
     if (state === "play") { acc += dt * 1000; while (acc >= stepMs && state === "play") { acc -= stepMs; step(); } }
     draw(t);
@@ -3444,7 +3594,7 @@ function gameSpace(root, tools) {
     introT = PRO ? (say(word, P(.3), "Shoot the letters in order!"), 3.2) : spellAloud($(".sword", ovl), [word], word, ["Shoot the letters in order!"]) + .4;
   }
   function reset() {
-    fit(); wave = 1; lives = 3; score = 0; bits = [];
+    misRun(); fit(); wave = 1; lives = 3; score = 0; bits = [];
     ship = { x: W / 2, tx: W / 2, inv: 0 }; fireT = 0; newWave(); setChip();
     state = "ready"; overlay(ovl, `<b>Space</b><span>Drag to move. Your ship shoots by itself!</span><span>Tap to start</span>`);
   }
@@ -3458,11 +3608,11 @@ function gameSpace(root, tools) {
     } else say("Ouch!");
   }
   function shootAlien(a) {
-    a.alive = false; score += 10; boom(a.x, a.y, ROW_COLORS[a.row % 5]); sfx.pop();
+    a.alive = false; score += 10; mis("alien"); boom(a.x, a.y, ROW_COLORS[a.row % 5]); sfx.pop();
     if (a.ch === word[spellIdx].toUpperCase()) {
       // In spelling order: say the letter, light it up, and finish the word for a bonus.
       spellIdx++; say(a.ch); sfx.note(spellIdx);
-      if (spellIdx >= word.length) { spellIdx = 0; spelled++; score += 100; sfx.yay(); say("You spelled it!", word); boom(W / 2, 40, "#FFD43B", 24); }
+      if (spellIdx >= word.length) { spellIdx = 0; spelled++; score += 100; mis("word"); sfx.yay(); say("You spelled it!", word); boom(W / 2, 40, "#FFD43B", 24); }
     }
     if (!caps.length && power.t <= 0 && state === "play" && Math.random() < .16) spawnPower(a.x, a.y);
     setChip();
@@ -3491,7 +3641,7 @@ function gameSpace(root, tools) {
   function catchCap(c) {
     const q = capQ;
     if (c.ok && q) {
-      power = { type: pick(["spread", "giant"]), t: 10 }; caps.forEach(x => x.gone = true); capQ = null;
+      power = { type: pick(["spread", "giant"]), t: 10 }; mis("power"); caps.forEach(x => x.gone = true); capQ = null;
       sfx.yay(); boom(ship.x, shipY() - 20, "#7CF5FF", 24);
       say(praise(), ...q.parts, "is", q.ans, "Power up!");
     } else { c.gone = true; sfx.boop(); say("That's", c.v); }
@@ -3526,7 +3676,7 @@ function gameSpace(root, tools) {
     if (ship.inv <= 0 && bombs.some(b => Math.abs(b.x - ship.x) < 20 && Math.abs(b.y - shipY()) < 18)) { bombs = []; hit(); }
     if (live.some(a => a.y + a.r > shipY() - 18)) { hit(); if (state !== "over") { newWave(); intro(); } }
     if (!aliens.some(a => a.alive) && state === "play") {
-      wave++; celebrate(); J.flash("#FFFFFF", .22);
+      wave++; celebrate(); J.flash("#FFFFFF", .22); mis("wave", 0, wave);
       if (wave % 3 === 1) { state = "paused"; reward("Fantastic!", () => { newWave(); intro(); }); }
       else { newWave(); intro(); }
     }
@@ -3611,7 +3761,7 @@ function gameSpace(root, tools) {
   loop((dt, t) => {
     J.update(dt);
     if (state === "intro") { introT -= dt; ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12); if (introT <= 0) { state = "play"; overlay(ovl, ""); } }
-    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } 
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } 
     if (state === "play") update(dt);
     draw(t);
   });
@@ -3670,7 +3820,7 @@ function gameMaze(root, tools) {
   }
   const setChip = () => { chip.textContent = `${"❤️".repeat(lives)} ⭐ ${score} · ${[...mword.toUpperCase()].map((c, i) => i < mli ? c : "_").join("")}`; };
   function newLevel(fresh) {
-    if (fresh) { lives = 3; score = 0; }
+    if (fresh) { lives = 3; score = 0; misRun(); }
     genMaze(); place(); sleepy = 0; setChip();
     state = "ready"; overlay(ovl, `<b>Level ${level}</b><span>Collect every berry. Stay away from the bees!</span><span>Find the letters in order:</span><b style="font-size:2.2rem">${mem}</b>${spellHTML(mword)}<span>Swipe or tap an arrow to start</span>`);
     const el = $(".sword", ovl);
@@ -3700,13 +3850,13 @@ function gameMaze(root, tools) {
     if (mletters.get(k) === mli) {
       mletters.delete(k); mli++; score += 30;
       const C = mword[mli - 1].toUpperCase();
-      if (mli >= mword.length) { score += 200; sfx.yay(); celebrate(); say(C, "You spelled it!", mword); } else { sfx.note(mli); say(C); }
+      if (mli >= mword.length) { mis("word"); score += 200; sfx.yay(); celebrate(); say(C, "You spelled it!", mword); } else { sfx.note(mli); say(C); }
       setChip();
     }
-    if (dots.delete(k)) { score += 10; tone(880 + (score % 50) * 6, { d: .05, v: .07, type: "triangle" }); setChip(); }
+    if (dots.delete(k)) { mis("berry"); score += 10; tone(880 + (score % 50) * 6, { d: .05, v: .07, type: "triangle" }); setChip(); }
     if (starsLeft.delete(k)) { score += 50; sleepy = 7; sfx.yay(); say("Power star! The bees are sleepy."); setChip(); }
     if (!dots.size && !starsLeft.size) {
-      state = "paused"; sfx.yay(); celebrate(); level++; setLevel("maze", level);
+      state = "paused"; sfx.yay(); celebrate(); level++; setLevel("maze", level); mis("level");
       later(() => reward("Level complete!", () => newLevel(false)), 900);
     }
   }
@@ -3735,7 +3885,7 @@ function gameMaze(root, tools) {
       const sp = b.speed; b.speed = sleepy > 0 ? sp * .55 : sp; move(b, dt, chooseBee); b.speed = sp;
       const bp = posOf(b);
       if (Math.hypot(bp.x - pp.x, bp.y - pp.y) < .6) {
-        if (sleepy > 0) { b.x = home.x; b.y = home.y; b.p = 0; b.dir = -1; b.wait = 2; score += 100; sfx.snap(); setChip(); }
+        if (sleepy > 0) { mis("bee"); b.x = home.x; b.y = home.y; b.p = 0; b.dir = -1; b.wait = 2; score += 100; sfx.snap(); setChip(); }
         else if (state === "play") caught();
       }
     });
@@ -3805,7 +3955,7 @@ function gameMaze(root, tools) {
     GFX.vignette(g, W, H, .22);
   }
   steering(field, box, steer);
-  loop((dt, t) => { if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (state === "play") update(dt); if (grid) draw(t); });
+  loop((dt, t) => { if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (state === "play") update(dt); if (grid) draw(t); });
   lives = 3; score = 0; newLevel(false);
   say("Collect all the berries! Stay away from the bees.");
   onWin("resize", () => { if (state !== "play") newLevel(false); });
@@ -4011,7 +4161,7 @@ function gameStack(root, tools) {
   function reset() {
     ({ W, H } = fit()); bh = Math.max(26, Math.round(H / 18));
     const w0 = Math.round(W * (PRO ? .5 : .62));
-    tower = [{ x: (W - w0) / 2, w: w0, n: 0 }]; floors = 0; cam = 0; falling = []; rewarded = false;
+    misRun(); J.streak = 0; tower = [{ x: (W - w0) / 2, w: w0, n: 0 }]; floors = 0; cam = 0; falling = []; rewarded = false;
     spawn(); chip.textContent = `🏢 0 · best ${best}`;
     state = "ready"; overlay(ovl, `<b>Stack</b><span>Tap to drop the block.</span><span>Tap to start</span>`);
   }
@@ -4029,18 +4179,19 @@ function gameStack(root, tools) {
     if (Math.abs(cur.x - top.x) < (PRO ? 4 : 6)) {
       // Perfect drop: snap into place and grow back a little.
       x = top.x; w = Math.min(Math.round(W * (PRO ? .5 : .62)), top.w + 6);
-      J.chime(); J.text(W / 2, y - 26, J.combo > 1 ? `Perfect ×${J.combo}` : "Perfect!", "#FFD43B", 34 + Math.min(14, J.combo * 2)); J.hit(60);
+      J.streak = (J.streak || 0) + 1; mis("perfect"); mis("streak", 0, J.streak);
+      J.chime(); J.text(W / 2, y - 26, J.streak > 1 ? `Perfect ×${J.streak}` : "Perfect!", "#FFD43B", 34 + Math.min(14, J.streak * 2)); J.hit(60);
       J.burst(x + w / 2, y + bh / 2, `hsl(${hue(floors + 1)} 85% 65%)`, 16, 260);
       J.ring(x + w / 2, y + bh / 2, "#FFFFFF", w * .75, .5, 7); J.ring(x + w / 2, y + bh / 2, `hsl(${hue(floors + 1)} 90% 70%)`, w * 1.1, .7, 5); J.flash("#FFFFFF", .14);
       for (let k = 0; k < 8; k++) J.sparks(x + (k + .5) * w / 8, y, "#FFF6C0", 2, 260);
       tower.forEach((b, j) => { b.pulse = -(tower.length - j) * .045; }); // light ripples down the tower
     } else {
-      J.combo = 0; sfx.snap(); J.shake(.25);
+      J.combo = 0; J.streak = 0; sfx.snap(); J.shake(.25);
       const cutX = cur.x < l ? cur.x : r, cutW = cur.w - w;
       J.sparks(cur.x < l ? l : r, y + bh / 2, "#FFFFFF", 10, 320); J.puff(cur.x < l ? l : r, y + bh, "#FFFFFF", 4, 8);
       falling.push({ x: cutX, y, w: cutW, vy: 0, rot: 0, c: hue(floors + 1) });
     }
-    floors++;
+    floors++; mis("floor", 1, floors);
     tower.push({ x, w, n: stackLabel(floors), pulse: 0 });
     chip.textContent = `🏢 ${floors} · best ${Math.max(best, floors)}`;
     // Counts the floors out loud (the big kid skip-counts: 2s for 12 floors, then 3s, 4s ... 9s).
@@ -4173,7 +4324,7 @@ function gameStack(root, tools) {
     J.update(dt);
     falling.forEach(f => { f.vy += 900 * dt; f.y += f.vy * dt; f.rot += dt * (f.x > W / 2 ? 2.4 : -2.4); }); falling = falling.filter(f => f.y < H + 200);
     tower.forEach(b => { if (b.pulse != null && b.pulse < .4) b.pulse += dt; });
-    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
   if (window.__debug) window.__debug.stack = { grow(n) { for (let i = 0; i < n; i++) { const t = tower[tower.length - 1]; floors++; tower.push({ x: t.x + rand(-4, 4), w: t.w, n: stackLabel(floors) }); } cam = Math.max(0, (tower.length + 3) * bh - (H - 160)); spawn(); } };
@@ -4189,7 +4340,7 @@ function gameSlice(root, tools) {
   // Big kid: the target changes (12 to 40) and sums can need three fruit.
   let W, H, items, halves, trail, swipe, lives, score, state = "ready", spawnT, time, best = store.get("sliceBest", 0), tens, overT = 0, target = 10, splats = [];
   function reset() {
-    ({ W, H } = fit()); items = []; halves = []; trail = []; splats = []; swipe = null; lives = 3; score = 0; spawnT = .6; time = 0; tens = 0; target = PRO ? ri(12, 18) : 10;
+    misRun(); ({ W, H } = fit()); items = []; halves = []; trail = []; splats = []; swipe = null; lives = 3; score = 0; spawnT = .6; time = 0; tens = 0; target = PRO ? ri(12, 18) : 10;
     setChip(); state = "ready";
     overlay(ovl, `<b>Slice</b><span>Swipe to slice the fruit! Don't touch the bombs.</span><span>Make ${target} in one swipe for a bonus</span>`);
   }
@@ -4222,7 +4373,7 @@ function gameSlice(root, tools) {
       if (lives <= 0) over();
       return;
     }
-    score += 1; setChip(); J.chime(); J.burst(it.x, it.y, it.f[1], 16, 300, 6); J.ring(it.x, it.y, "#FFFFFF", it.r * 1.7, .3, 4);
+    score += 1; setChip(); J.chime(); J.burst(it.x, it.y, it.f[1], 16, 300, 6); mis("fruit"); J.ring(it.x, it.y, "#FFFFFF", it.r * 1.7, .3, 4);
     splats.push({ x: it.x, y: it.y, c: it.f[1], r: it.r * rand(1, 1.4), life: 3.5, seed: rand(0, 6) }); if (splats.length > 14) splats.shift();
     [-1, 1].forEach(s => halves.push({ ...it, side: s, vx: it.vx + s * 120, vy: Math.min(it.vy, -60), life: 1.6 }));
     swipe.hits.push(it);
@@ -4230,9 +4381,10 @@ function gameSlice(root, tools) {
   function endSwipe() {
     if (!swipe) return;
     const hits = swipe.hits, sum = hits.reduce((a, h) => a + h.n, 0);
+    if (hits.length >= 3) mis("combo");
     if (hits.length >= 2 && sum === target) {
       // Made the target! Big bonus and the sum read out loud.
-      tens++; const bonus = PRO ? 5 * hits.length : 10; score += bonus; setChip(); J.shake(.35); J.hit(80); sfx.yay();
+      tens++; mis("target"); const bonus = PRO ? 5 * hits.length : 10; score += bonus; setChip(); J.shake(.35); J.hit(80); sfx.yay();
       const last = hits[hits.length - 1]; J.text(last.x, last.y - 40, `${target}! +${bonus}`, "#FFD43B", 40);
       say(...hits.flatMap((h, i) => i ? ["plus", h.n] : [h.n]), "is", target);
       if (PRO && tens % 3 === 0) { target = ri(12, Math.min(40, 18 + tens * 2)); later(() => { say("Make", target); J.text(W / 2, H * .25, `Make ${target}!`, "#7CF5FF", 44); }, 2200); }
@@ -4317,7 +4469,7 @@ function gameSlice(root, tools) {
     halves.forEach(h => { h.x += h.vx * dt; h.y += h.vy * dt; h.vy += H * 1.25 * dt; h.rot += h.side * 3 * dt; h.life -= dt; }); halves = halves.filter(h => h.life > 0);
     trail.forEach(p => p.life -= dt); trail = trail.filter(p => p.life > 0);
     splats.forEach(sp => { sp.life -= dt; }); splats = splats.filter(sp => sp.life > 0);
-    if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
   reset();
@@ -4339,7 +4491,7 @@ function gameFlap(root, tools) {
   let W, H, bird, walls, lives, stars, dist, state = "ready", spawnX, best = store.get("flapBest", 0), overT = 0, count, nextReward = 40, wallHue = 0;
   function reset() {
     ({ W, H } = fit());
-    bird = { x: W * .28, y: H * .45, vy: 0, inv: 0, squash: 1 }; walls = []; lives = 3; stars = 0; dist = 0; spawnX = W * .9; count = 0; nextReward = 40;
+    misRun(); bird = { x: W * .28, y: H * .45, vy: 0, inv: 0, squash: 1 }; walls = []; lives = 3; stars = 0; dist = 0; spawnX = W * .9; count = 0; nextReward = 40;
     setChip(); state = "ready";
     overlay(ovl, `<b>Flap</b><span>Tap to flap! Fly through the gaps.</span><span>Pick the bigger number for more stars</span>`);
   }
@@ -4383,14 +4535,15 @@ function gameFlap(root, tools) {
         if (!inGap) hurt(); else w.through = inGap;
       }
       if (!w.passed && w.x + w.w < bird.x - r) {
-        w.passed = true;
+        w.passed = true; mis("wall");
         const gp = w.through || w.gaps[0];
         if (w.gaps.length > 1 && gp.n !== undefined) {
           const other = w.gaps.find(x => x !== gp), big = gp.n > other.n, add = big ? 3 : 1;
           stars += add; J.text(bird.x, bird.y - 40, `+${add}⭐`, big ? "#FFD43B" : "#FFFDF6", big ? 40 : 28);
-          if (big) { J.chime(); J.chime(); J.chime(); J.ring(w.x + w.w / 2, gp.y, "#FFD43B", 80, .5, 7); J.sparks(w.x + w.w / 2, gp.y, "#FFD43B", 14, 380); say(gp.n, "is bigger than", other.n); } else say(other.n, "is bigger than", gp.n);
+          if (big) { mis("bigger"); J.chime(); J.chime(); J.chime(); J.ring(w.x + w.w / 2, gp.y, "#FFD43B", 80, .5, 7); J.sparks(w.x + w.w / 2, gp.y, "#FFD43B", 14, 380); say(gp.n, "is bigger than", other.n); } else say(other.n, "is bigger than", gp.n);
         } else { stars++; J.chime(); J.sparks(bird.x, bird.y, "#FFF6C0", 5, 220); }
         setChip();
+        mis("stars", 0, stars);
         if (stars >= nextReward) { nextReward += 40; state = "paused"; reward("Fantastic!", () => { state = "play"; }); }
       }
     });
@@ -4491,7 +4644,7 @@ function gameFlap(root, tools) {
     if (state === "play") flap();
   });
   onWin("keydown", e => { if (e.key === " " || e.key === "ArrowUp") { e.preventDefault(); if (state === "ready") { state = "play"; overlay(ovl, ""); } if (state === "play") flap(); } });
-  loop((dt, t) => { J.update(dt); if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
   reset();
   say("Tap to flap! Fly through the gaps.");
   onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
@@ -4520,7 +4673,7 @@ function gameRunner(root, tools) {
   let plan = [], planI = 0;
   function reset() {
     ({ W, H } = fit()); trackL = W * .08; trackR = W * .92;
-    crowd = 1; cx = tx = W / 2; dist = 0; objs = []; nextGate = 380;
+    misRun(); crowd = 1; cx = tx = W / 2; dist = 0; objs = []; nextGate = 380;
     // The wall needs roughly what a good run collects, so smart gate choices win.
     wallN = level <= 2 ? 12 + level * 6 : level <= 4 ? 14 + level * 4 : 20 + level * 8;
     if (PRO) {
@@ -4550,6 +4703,7 @@ function gameRunner(root, tools) {
         pair.forEach(p => p.done = true);
         const before = crowd; crowd = Math.min(999, apply(crowd, chosen.op));
         const other = pair.find(p => p !== chosen), otherN = apply(before, other.op);
+        if (crowd >= otherN) mis("best"); mis("crowd", 0, crowd);
         J.text(cx, H * .62, `${chosen.op.t}${chosen.op.v}`, crowd >= otherN ? "#FFD43B" : "#FFFDF6", 40);
         if (crowd > before) { J.chime(); J.burst(cx, H * .7, "#FFD43B", 12, 220); } else { sfx.boop(); J.shake(.3); }
         say(before, chosen.op.t === "+" ? "plus" : chosen.op.t === "−" ? "minus" : chosen.op.t === "÷" ? "divided by" : "times", chosen.op.v, "is", crowd);
@@ -4566,7 +4720,7 @@ function gameRunner(root, tools) {
     const win = crowd >= wallN;
     J.shake(win ? 1 : .5); J.hit(150); J.burst(W / 2, H * .35, "#C77D4A", win ? 40 : 14, 420, 9);
     if (win) {
-      sfx.yay(); J.text(W / 2, H * .3, "Smash!", "#FFD43B", 56);
+      mis("win"); sfx.yay(); J.text(W / 2, H * .3, "Smash!", "#FFD43B", 56);
       say(crowd, "is bigger than", wallN, "Smash!");
       level++; setLevel("runner", level);
       later(() => reward("Level complete!", reset), 1800);
@@ -4669,7 +4823,7 @@ function gameRunner(root, tools) {
   });
   cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") aim(e); });
   onWin("keydown", e => { if (e.key === "ArrowLeft") tx = Math.max(trackL + 20, tx - 60); if (e.key === "ArrowRight") tx = Math.min(trackR - 20, tx + 60); });
-  loop((dt, t) => { J.update(dt); if (state === "play" && gateTick(dt)) { state = "gate"; openGate(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
   reset();
   say("Drag to steer. Go through the best gates!");
   onWin("resize", () => { if (state !== "play") reset(); });
@@ -4719,7 +4873,7 @@ function gameDrop(root, tools) {
     J.text(W / 2, H * .4, "Fresh start!", "#FFD43B", 40);
   }
   function reset() {
-    fit(); grid = blank(); lines = 0; score = 0; level = 1; bag = []; nextP = null; clearing = null; spawn(); state = "ready"; setChip();
+    misRun(); fit(); grid = blank(); lines = 0; score = 0; level = 1; bag = []; nextP = null; clearing = null; spawn(); state = "ready"; setChip();
     overlay(ovl, PRO
       ? `<b>Drop</b><span>Tap to turn. Swipe or use the buttons.</span><span>Each level is a times table: lines × ${table()}!</span><span>Tap to start</span>`
       : `<b>Drop</b><span>Fill a row to clear it!</span><span>Tap to turn. Use the buttons to move and drop.</span><span>Tap to start</span>`);
@@ -4760,6 +4914,7 @@ function gameDrop(root, tools) {
     const rows = clearing.rows, k = rows.length; clearing = null;
     rows.forEach(r => grid[r].forEach((c, x) => J.burst(bx + x * cell + cell / 2, by + r * cell + cell / 2, c, 3, 180, Math.max(3, cell * .18))));
     grid = grid.filter((_, r) => !rows.includes(r)); while (grid.length < ROWS) grid.unshift(Array(COLS).fill(null));
+    mis("line", k); if (k >= 2) mis("multi"); if (k >= 4) mis("four");
     lines += k; J.shake(.15 + k * .1); J.hit(60); J.chime(); J.flash("#FFFFFF", .1 + k * .06);
     rows.forEach(r => J.ring(bx + COLS * cell / 2, by + (r + .5) * cell, "#FFFFFF", COLS * cell * .7, .45, 5));
     const midY = by + ROWS * cell * .4;
@@ -4770,7 +4925,7 @@ function gameDrop(root, tools) {
       say(k, "times", N, "is", k * N);
       if (score > best) { best = score; store.set("dropBest", best); }
       if (lines >= level * LINES_PER_LEVEL) {
-        level++; sfx.yay();
+        level++; sfx.yay(); mis("level", 0, level);
         later(() => { J.text(bx + COLS * cell / 2, midY + cell * 2, "Level up!", "#7CF5FF", Math.max(28, cell * 1.4)); J.flash("#7CF5FF", .3); J.confetti(bx + COLS * cell / 2, by + ROWS * cell * .6, 60, 600); say("Level up!", "countby:" + table()); }, 2200);
         rewardNow = level % 2 === 1;
       }
@@ -4900,7 +5055,7 @@ function gameDrop(root, tools) {
   });
   loop((dt, t) => {
     J.update(dt); beams.forEach(b => { b.life -= dt; }); beams = beams.filter(b => b.life > 0);
-    if (state === "play" && !clearing && gateTick(dt)) { state = "gate"; release(); openGate(() => { state = "play"; }); }
+    if (state === "play" && !clearing && pauseDue(dt)) { state = "gate"; release(); runPause(() => { state = "play"; }); }
     if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
@@ -4912,6 +5067,226 @@ function gameDrop(root, tools) {
   reset();
   say(PRO ? "Fill rows to clear them. Each line is worth the times table number!" : "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.");
   onWin("resize", fit);
+}
+
+/* ---------- Hop: a frog crosses a river on drifting lily pads. Only the pad with the next number (or letter) holds; the others sink.
+   Little kid: count up or spell a picture word, slow pads, no lives (a splash just puts the frog back).
+   Big kid: skip-count by 3s to 12s, faster pads, decoys one step off, three hearts. ---------- */
+function gameHop(root, tools) {
+  const { field, cv, g, ovl, chip, J, fit } = arcadeShell(root, tools, "hopf");
+  let W, H, rowH, rowsD = [], frog, camY = 0, state = "ready", lives = 3, score = 0, banks = 0, seq = [], si = 0, mode = "count", word = "", wordEm = "", stepN = 1, cross0 = 0, overT = 0, idle = 0;
+  let best = store.get("hopBest", 0);
+  const padW = () => Math.min(150, W * (PRO ? .2 : .26));
+  const speedOf = () => PRO ? Math.min(140, 55 + banks * 10) : Math.min(62, 24 + banks * 4);
+  const sy = r => H * .8 - (r * rowH - camY);
+  function newSeq() {
+    if (PRO) { stepN = ri(3, 12); const s0 = stepN * ri(1, 5); seq = range(0, Math.min(8, 4 + banks)).map(i => s0 + i * stepN); mode = "count"; }
+    else if (banks % 2 === 1) { [word, wordEm] = pick(banks < 4 ? SPELL3 : [...SPELL3, ...SPELL4]); seq = [...word.toUpperCase()]; mode = "word"; }
+    else { const s0 = ri(1, banks < 2 ? 5 : 15); seq = range(0, Math.min(6, 3 + banks)).map(i => s0 + i); mode = "count"; stepN = 1; }
+    si = 0;
+  }
+  function decoys(v) {
+    const out = new Set();
+    if (mode === "word") { while (out.size < 4) { const c = "ABCDEFGHIKLMNOPRSTUW"[ri(0, 19)]; if (c !== v) out.add(c); } }
+    else shuffle(PRO ? [v - 1, v + 1, v + stepN, v - stepN, v + 2, v - 2, v + 10, v - 10] : [v + 1, v - 1, v + 2, v + 3, v - 2]).forEach(c => { if (c > 0 && c !== v && out.size < 4) out.add(c); });
+    return [...out];
+  }
+  function buildCrossing(start) {
+    newSeq(); cross0 = start;
+    const pw = padW(), n = PRO ? 4 : 3, span = W + pw * 1.6;
+    seq.forEach((v, i) => {
+      const labels = shuffle([v, ...decoys(v).slice(0, n - 1)]), off = rand(0, span), sp = speedOf() * rand(.8, 1.2);
+      rowsD[start + 1 + i] = { bank: false, dir: i % 2 ? 1 : -1, sp, span, need: v,
+        pads: labels.map((lab, k) => ({ x: ((off + k * span / n) % span) - pw * 1.3, lab, ok: lab === v, sink: 0, gone: 0, bloom: 0, rot: rand(0, 6) })) };
+    });
+    rowsD[start + seq.length + 1] = { bank: true, flag: true };
+  }
+  const setChip = () => {
+    chip.textContent = mode === "word" ? `${wordEm} ${seq.map((c, i) => i < si ? c : "_").join(" ")}`
+      : PRO ? `${"❤️".repeat(lives)} ×${stepN}: ${si ? seq[si - 1] : "…"} → ?` : `Next: ${si < seq.length ? seq[si] : "🏁"}`;
+  };
+  const introSay = () => PRO ? say("countby:" + stepN) : mode === "word" ? say(word, P(.3), "Hop on the letters in order!") : say("Hop on the numbers in order!", P(.3), "Start at", seq[0]);
+  function reset() {
+    ({ W, H } = fit()); rowH = Math.max(66, Math.min(116, H / 6.2)); rowsD = []; banks = 0; score = 0; lives = 3; camY = 0; misRun();
+    rowsD[0] = { bank: true }; buildCrossing(0);
+    frog = { row: 0, x: W / 2, hop: null, pad: null, off: 0, safe: 0 };
+    state = "ready"; setChip();
+    overlay(ovl, `<b>Hop</b><span>Tap a lily pad to hop on it.</span><span>${PRO ? `Count by ${stepN}s!` : mode === "word" ? "Hop on the letters in order!" : "Hop on the numbers in order!"}</span><span>Tap to start</span>`);
+  }
+  const padAt = (rd, x, slack) => { const pw = padW(); let bestP = null, bd = 1e9; rd.pads.forEach(p => { if (p.gone > 0) return; const d = Math.abs(p.x + pw / 2 - x); if (d < pw * slack && d < bd) { bd = d; bestP = p; } }); return bestP; };
+  function hopTo(row, x, pad) {
+    frog.hop = { r0: frog.row, x0: frog.x, row, x, pad, t: 0 }; frog.pad = null; idle = 0;
+    tone(520, { d: .09, v: .08, type: "triangle", to: 900 }); J.puff(frog.x, sy(frog.row) + 12, "#FFFFFF", 3, 8);
+  }
+  function respawn() {
+    const rd = rowsD[frog.safe], pw = padW();
+    frog.row = frog.safe; frog.hop = null; frog.pad = null;
+    if (!rd || rd.bank) { frog.x = W / 2; return; }
+    const p = rd.pads.find(q => q.ok) || rd.pads[0];
+    p.x = Math.max(pw * .2, Math.min(W - pw * 1.2, p.x)); p.sink = 0; p.gone = 0;
+    frog.pad = p; frog.off = 0; frog.x = p.x + pw / 2;
+  }
+  function splash() {
+    const x = frog.x, y = sy(frog.row);
+    J.ring(x, y, "#BFE9FF", 70, .5, 6); J.puff(x, y, "#E8F7FF", 10, 14); J.shake(.3); sfx.boop(); frog.pad = null;
+    if (PRO) { lives--; setChip(); if (lives <= 0) return over(); say("Splash!"); }
+    else say("Splash!", "Try again!");
+    state = "paused"; later(() => { if (state === "paused") { respawn(); state = "play"; } }, 700);
+  }
+  function reachBank(r) {
+    banks++; score += 5; mis("bank"); sfx.yay(); celebrate(); J.confetti(W / 2, sy(r), 50, 560); J.flash("#FFF3B0", .25);
+    J.text(W / 2, sy(r) - rowH * .6, "You made it!", "#FFD43B", 40);
+    rowsD[r].reached = true; buildCrossing(r); setChip();
+    if (banks % 3 === 0) { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; introSay(); }), 1200); }
+    else later(introSay, 1300);
+  }
+  function land() {
+    const h = frog.hop, rd = rowsD[h.row], pw = padW(); frog.hop = null; frog.row = h.row;
+    if (rd.bank) {
+      frog.x = Math.max(20, Math.min(W - 20, h.pad ? h.pad.x + pw / 2 : h.x)); frog.safe = h.row; J.puff(frog.x, sy(h.row) + 14, "#D9F7C9", 4, 9);
+      if (rd.flag && !rd.reached) reachBank(h.row);
+      return;
+    }
+    const pad = h.pad && h.pad.gone <= 0 ? h.pad : padAt(rd, h.x, .5);
+    if (!pad) return splash();
+    frog.pad = pad; frog.x = pad.x + pw / 2; frog.off = 0;
+    J.ring(frog.x, sy(frog.row), "#FFFFFF", pw * .7, .35, 4);
+    if (pad.ok) {
+      frog.safe = h.row;
+      if (!pad.done) {
+        pad.done = true; pad.bloom = .01; si = Math.max(si, h.row - cross0); score++; mis("pad");
+        J.chime(); J.sparks(frog.x, sy(frog.row), "#FFD43B", 10, 300); say(pad.lab); setChip();
+        J.text(frog.x, sy(frog.row) - rowH * .55, String(pad.lab), "#FFFFFF", 34);
+      }
+    } else if (!pad.sink) {
+      pad.sink = .001; sfx.boop(); J.shake(.15);
+      say("That's", pad.lab, P(.2), "Find", rd.need);
+    }
+  }
+  function over() {
+    state = "over"; overT = performance.now(); if (score > best) { best = score; store.set("hopBest", best); }
+    say("Game over! You scored", score, "points!");
+    overlay(ovl, `<b>⭐ ${score}</b><span>${banks} river${banks === 1 ? "" : "s"} crossed · Best ${best}</span><span>Tap to play again</span>`);
+  }
+  function update(dt) {
+    const pw = padW();
+    rowsD.forEach(rd => {
+      if (!rd || rd.bank) return;
+      rd.pads.forEach(p => {
+        p.x += rd.dir * rd.sp * dt;
+        if (p.x > W + pw * .3) p.x -= rd.span; else if (p.x < -pw * 1.3) p.x += rd.span;
+        if (p.sink > 0) { p.sink += dt / (PRO ? .8 : 1.6); if (p.sink >= 1) { p.sink = 0; p.gone = 2.5; if (frog.pad === p) splash(); } }
+        else if (p.gone > 0) p.gone -= dt;
+        if (p.bloom > 0 && p.bloom < 1) p.bloom = Math.min(1, p.bloom + dt * 2.5);
+      });
+    });
+    if (frog.hop) { frog.hop.t += dt / .34; if (frog.hop.t >= 1) land(); }
+    else if (frog.pad) { frog.x = frog.pad.x + pw / 2 + frog.off; if (state === "play" && (frog.x < 4 || frog.x > W - 4)) splash(); }
+    camY += (frog.row * rowH - camY) * Math.min(1, dt * 4);
+    idle += dt;
+  }
+  function drawPad(p, y, pw, t, hint) {
+    if (p.gone > 0) return;
+    const cx = p.x + pw / 2, rx = Math.min(pw * .47, rowH * .6), ry = rx * .68, a = 1 - p.sink, bob = Math.sin(t * 2 + p.rot) * 2;
+    g.globalAlpha = Math.max(0, a);
+    g.fillStyle = "rgba(8,60,110,.28)"; g.beginPath(); g.ellipse(cx, y + ry * .28 + bob, rx * 1.03, ry, 0, 0, 7); g.fill();
+    if (hint) GFX.glow(g, cx, y, rx * 1.6, "#FFE27A", .55 + .25 * Math.sin(t * 6));
+    const yy = y + bob + p.sink * ry * .6, pg = g.createRadialGradient(cx - rx * .3, yy - ry * .4, rx * .1, cx, yy, rx);
+    pg.addColorStop(0, "#9BEA82"); pg.addColorStop(.7, "#4FBF5E"); pg.addColorStop(1, "#2F9A47");
+    g.fillStyle = pg; g.strokeStyle = "#1E6B34"; g.lineWidth = 2.5;
+    g.beginPath(); g.moveTo(cx, yy); g.ellipse(cx, yy, rx, ry, 0, p.rot + .28, p.rot + Math.PI * 2 - .28); g.closePath(); g.fill(); g.stroke();
+    g.strokeStyle = "rgba(255,255,255,.22)"; g.lineWidth = 1.5;
+    for (let k = 1; k < 6; k++) { const an = p.rot + k * 1.05; g.beginPath(); g.moveTo(cx, yy); g.lineTo(cx + Math.cos(an) * rx * .85, yy + Math.sin(an) * ry * .85); g.stroke(); }
+    if (p.bloom > 0) {
+      const fx = cx + Math.cos(p.rot + 2.4) * rx * .62, fy = yy + Math.sin(p.rot + 2.4) * ry * .62, fr = rx * .22 * GFX.ease.outBack(p.bloom);
+      g.fillStyle = "#FF9AC9"; for (let k = 0; k < 6; k++) { const an = k * 1.047; g.beginPath(); g.ellipse(fx + Math.cos(an) * fr * .6, fy + Math.sin(an) * fr * .6, fr * .55, fr * .32, an, 0, 7); g.fill(); }
+      g.fillStyle = "#FFD43B"; g.beginPath(); g.arc(fx, fy, fr * .3, 0, 7); g.fill();
+    }
+    const lr = ry * .62, lab = String(p.lab);
+    g.fillStyle = "#FFFDF6"; g.strokeStyle = "#173A5E"; g.lineWidth = 2.5; g.beginPath(); g.arc(cx, yy, lr, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "#173A5E"; g.font = `800 ${Math.round(lr * (lab.length > 2 ? .95 : 1.25))}px "Baloo 2", sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(lab, cx, yy + 1);
+    if (p.sink > 0) for (let k = 0; k < 4; k++) { const bt = (t * 1.5 + k * .25) % 1; g.fillStyle = `rgba(255,255,255,${.7 * (1 - bt)})`; g.beginPath(); g.arc(cx + (k - 1.5) * rx * .4, yy - bt * ry * 1.4, 3 + k % 2 * 2, 0, 7); g.fill(); }
+    g.globalAlpha = 1;
+  }
+  function drawBank(rd, y, t) {
+    const bh = rowH * .96, gg = g.createLinearGradient(0, y - bh / 2, 0, y + bh / 2);
+    gg.addColorStop(0, "#9BE683"); gg.addColorStop(1, "#56B65E"); g.fillStyle = gg; g.fillRect(0, y - bh / 2, W, bh);
+    g.fillStyle = "#EAD49C"; g.fillRect(0, y - bh / 2 - 4, W, 6); g.fillRect(0, y + bh / 2 - 2, W, 6);
+    for (let i = 0; i < 9; i++) {
+      const x = ((i * 137 + (rd.flag ? 40 : 0)) % W), fy = y - bh * .25 + ((i * 29) % (bh * .5));
+      g.strokeStyle = "#3E9B4F"; g.lineWidth = 3; g.beginPath(); g.moveTo(x, fy + 8); g.quadraticCurveTo(x - 4, fy - 6, x + 2, fy - 14); g.stroke();
+      g.fillStyle = ["#FF8FC7", "#FFFFFF", "#FFD43B"][i % 3]; g.beginPath(); g.arc(x + 2, fy - 14, 4, 0, 7); g.fill();
+    }
+    if (rd.flag && !rd.reached) {
+      GFX.glow(g, W * .86, y, rowH * .8, "#FFE27A", .5 + .2 * Math.sin(t * 4));
+      g.font = `${Math.round(rowH * .55)}px ${EMOJI_FONT}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("🏁", W * .86, y - 4);
+    }
+  }
+  function drawFrog(x, y, s, air) {
+    g.save(); g.translate(x, y); g.scale(s, s); g.lineWidth = 3; g.strokeStyle = "#173A5E"; g.lineJoin = "round";
+    g.fillStyle = "#3FAE4C";
+    [-1, 1].forEach(sd => { g.beginPath(); g.ellipse(sd * 22, 14 + air * 12, 12, 8 + air * 7, sd * .5, 0, 7); g.fill(); g.stroke(); });
+    const bg = g.createRadialGradient(-8, -10, 4, 0, 0, 34); bg.addColorStop(0, "#B2F296"); bg.addColorStop(1, "#38A647");
+    g.fillStyle = bg; g.beginPath(); g.ellipse(0, 4, 28, 22, 0, 0, 7); g.fill(); g.stroke();
+    g.fillStyle = "rgba(255,255,220,.55)"; g.beginPath(); g.ellipse(0, 12, 16, 9, 0, 0, 7); g.fill();
+    [-1, 1].forEach(sd => {
+      g.fillStyle = "#5CCB5F"; g.beginPath(); g.arc(sd * 13, -16, 11, 0, 7); g.fill(); g.stroke();
+      g.fillStyle = "#FFFFFF"; g.beginPath(); g.arc(sd * 13, -17, 7.5, 0, 7); g.fill();
+      g.fillStyle = "#173A5E"; g.beginPath(); g.arc(sd * 13, -16 - air * 2.5, 4, 0, 7); g.fill();
+      g.fillStyle = "#FFFFFF"; g.beginPath(); g.arc(sd * 13 + 1.6, -18.6, 1.5, 0, 7); g.fill();
+    });
+    g.strokeStyle = "#173A5E"; g.lineWidth = 2.5; g.beginPath(); g.arc(0, 1, 10, .25, Math.PI - .25); g.stroke();
+    g.fillStyle = "rgba(255,120,140,.5)"; [-1, 1].forEach(sd => { g.beginPath(); g.ellipse(sd * 17, 6, 4, 2.5, 0, 0, 7); g.fill(); });
+    g.fillStyle = "#3FAE4C"; g.strokeStyle = "#173A5E"; g.lineWidth = 3; [-1, 1].forEach(sd => { g.beginPath(); g.ellipse(sd * 12, 24 - air * 4, 7, 4, 0, 0, 7); g.fill(); g.stroke(); });
+    g.restore();
+  }
+  function draw(t) {
+    const wg = g.createLinearGradient(0, 0, 0, H); wg.addColorStop(0, "#2C86DB"); wg.addColorStop(1, "#5BCBF3"); g.fillStyle = wg; g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(255,255,255,.16)"; g.lineWidth = 2;
+    for (let i = 0; i < 16; i++) {
+      const yy = ((i * 61 + camY * .6) % (H + 60)) - 30, x0 = ((i * 173 + t * 18 * (i % 2 ? 1 : -1)) % (W + 120) + W + 120) % (W + 120) - 60;
+      g.beginPath(); g.moveTo(x0, yy); g.quadraticCurveTo(x0 + 15, yy - 5, x0 + 30, yy); g.quadraticCurveTo(x0 + 45, yy + 5, x0 + 60, yy); g.stroke();
+    }
+    for (let i = 0; i < 6; i++) GFX.glow(g, ((i * 211 + t * 9) % (W + 80)) - 40, ((i * 149 + camY * .6) % H), 22, "#BFEFFF", .25 + .15 * Math.sin(t * 3 + i));
+    J.begin(g, t);
+    const pw = padW(), r0 = Math.max(0, Math.floor((camY - H * .3) / rowH) - 1), r1 = Math.ceil((camY + H) / rowH) + 1;
+    const hintRow = !PRO && idle > 5 && !frog.hop && state === "play" ? frog.row + 1 : -1;
+    for (let r = r1; r >= r0; r--) {
+      const rd = rowsD[r]; if (!rd) continue; const y = sy(r);
+      if (y < -rowH || y > H + rowH) continue;
+      if (rd.bank) drawBank(rd, y, t); else rd.pads.forEach(p => drawPad(p, y, pw, t, r === hintRow && p.ok));
+    }
+    let fx = frog.x, fy = sy(frog.row), air = 0;
+    if (frog.hop) { const h = frog.hop, k = Math.min(1, h.t), tx = h.pad ? h.pad.x + pw / 2 : h.x; fx = h.x0 + (tx - h.x0) * k; fy = sy(h.r0) + (sy(h.row) - sy(h.r0)) * k; air = Math.sin(k * Math.PI); }
+    if (state !== "paused" || frog.pad || frog.hop || rowsD[frog.row]?.bank) {
+      const fs = Math.min(rowH, pw) / 105;
+      GFX.shadow(g, fx, fy + rowH * .14, rowH * .62 * (1 - air * .35), .55);
+      drawFrog(fx, fy - air * rowH * .4, fs * (1 + air * .22), air);
+    }
+    J.end(g);
+    GFX.vignette(g, W, H, .25);
+  }
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if (state === "over") { if (performance.now() - overT > 400) reset(); return; }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); introSay(); return; }
+    if (state !== "play" || frog.hop) return;
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    let row = Math.round((H * .8 + camY - y) / rowH);
+    if (row > frog.row + 1) row = frog.row + 1;               // taps further up mean "the next row"
+    if (row < frog.row) return;
+    const rd = rowsD[row]; if (!rd) return;
+    if (row === frog.row && rd.bank) return;
+    if (rd.bank) return hopTo(row, x, null);
+    const pad = padAt(rd, x, PRO ? .65 : 1);
+    if (row === frog.row && (!pad || pad === frog.pad)) return;
+    hopTo(row, pad ? pad.x + padW() / 2 : x, pad);
+  });
+  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play" || state === "paused") update(dt); draw(t); });
+  if (window.__debug) window.__debug.hop = { rows: () => rowsD, frog: () => frog, sy, padW, state: () => state, info: () => ({ score, banks, si, lives, seq }) };
+  reset();
+  say("Tap a lily pad to hop on it.");
+  onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
 }
 
 /* ---------- Sticker book ---------- */
@@ -4960,6 +5335,7 @@ const ARCADE = [
   { id: "maze", name: "Maze", em: "🐰", run: gameMaze, lv: true },
   { id: "blocks", name: "Blocks", em: "🧱", run: gameBlocks },
   { id: "drop", name: "Drop", em: "🟪", run: gameDrop },
+  { id: "hop", name: "Hop", em: "🐸", run: gameHop },
   { id: "stack", name: "Stack", em: "🏗️", run: gameStack },
   { id: "slice", name: "Slice", em: "🍉", run: gameSlice },
   { id: "flap", name: "Flap", em: "🐤", run: gameFlap },
@@ -4987,6 +5363,7 @@ const ARCADE_PRO = [
   { id: "stack", name: "Stack", em: "🏗️", run: gameStack },
   { id: "flap", name: "Flap", em: "🐤", run: gameFlap },
   { id: "drop", name: "Drop", em: "🟪", run: gameDrop },
+  { id: "hop", name: "Hop", em: "🐸", run: gameHop },
   { id: "snake", name: "Snake", em: "🐍", run: gameSnake },
   { id: "space", name: "Space", em: "🛸", run: gameSpace },
   { id: "maze", name: "Maze", em: "🐰", run: gameMaze, lv: true },
@@ -5015,12 +5392,14 @@ function openGame(gm) {
   toolsEl.innerHTML = ""; gameEl.innerHTML = ""; fx.innerHTML = "";
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   say(gm.name); // speaking inside the tap unlocks audio on iPhone and iPad; the game's intro replaces it
+  MIS = null;
   gm.run(gameEl, toolsEl);
+  MIS = missionsFor(gm.id); if (MIS) { MIS.attach(toolsEl, gameEl); MIS.run(); }
   startCoach(gm.id, gameEl);
   keepAwake();
 }
 function goHome() {
-  endSession();
+  endSession(); MIS = null;
   gameEl.innerHTML = ""; toolsEl.innerHTML = ""; fx.innerHTML = ""; homeAsk.hidden = true;
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   stage.hidden = true; hub.hidden = false; enterAnim(hub);
