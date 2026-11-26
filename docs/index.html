@@ -700,7 +700,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
     <div class="vcgrid" id="vcGrid"></div>
     <p id="vcList" class="ver"></p>
     <h3>Brain breaks</h3>
-    <p>Arcade games pause for 3 quick questions (numbers, letters, math). The questions get harder or easier based on how they go.</p>
+    <p>Arcade games pause for a short brain break: 3 questions for the little kid, 4 for the big kid, plus one more for each miss. The timer counts arcade play time across all games and keeps running when they switch games, go home or close the app; it only resets when a break is finished. Questions get harder or easier as they go.</p>
     <div class="seg" id="gateMins" style="margin-bottom:8px"><button data-m="1">Every 1 min</button><button data-m="2">2 min</button><button data-m="3">3 min</button><button data-m="0">Off</button></div>
     <p id="skills"></p>
     <h3>Progress</h3>
@@ -1003,7 +1003,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "17 (Nov 26, smarter brain breaks)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "18 (Nov 26, brain-break timer)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1405,10 +1405,19 @@ function startCoach(id, gameEl) {
 }
 /* ---------- Brain breaks: arcade games pause for 3 quick questions; the level adapts ---------- */
 const GATE_TRACKS = [["numbers", numberRound], ["letters", letterRound], ["math", mathRound]];
-let gateClock = 0;
-function gateTick(dt) { const m = store.get("gateMins", 2); if (!m) return false; gateClock += dt; return gateClock >= m * 60; }
+// Arcade play time since the last finished brain break. It is saved per player and survives switching games,
+// going home, closing the app and leaving in the middle of a break: only finishing a break resets it.
+let gateClock = store.get("gateClock", 0), gateSaveT = 0, gateMins = store.get("gateMins", 2);
+const saveGateClock = () => { gateSaveT = 0; store.set("gateClock", Math.round(gateClock * 10) / 10); };
+function gateTick(dt) {
+  if (!gateMins) return false;
+  gateClock += dt; gateSaveT += dt; if (gateSaveT > 3) saveGateClock();
+  return gateClock >= gateMins * 60;
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) saveGateClock(); });
+window.addEventListener("pagehide", saveGateClock);
 function openGate(onDone) {
-  gateClock = 0;
+  saveGateClock();
   const tracks = PRO ? [["numbers", numberRoundPro], ["math", mathRoundPro], ["vocab", vocabRound], ["science", scienceRound]] : GATE_TRACKS;
   const n = store.get("gateNext", 0), [track, make] = tracks[n % tracks.length], Q = PRO ? 4 : 3, MAXQ = Q + 4;
   store.set("gateNext", n + 1);
@@ -1489,6 +1498,7 @@ function openGate(onDone) {
   }
   function finish() {
     store.set("skill." + track, lvl);
+    gateClock = 0; saveGateClock(); // the break counts as done only now
     const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
     // Wait for a tap, then count down so the player is ready when the game starts moving again.
@@ -5503,7 +5513,9 @@ function showPicker() {
   say("Who's playing?");
 }
 picker.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => {
+  saveGateClock(); // the current player's brain-break clock is kept separately from the other player's
   audio(); PROFILE = b.dataset.p; PRO = PROFILE === "big"; store.set("profile", PROFILE);
+  gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2);
   hubTab = null; picker.hidden = true; hub.hidden = false; sfx.tap(); renderHub();
   say(playerName(PROFILE) === NAMES_DEFAULT[PROFILE] ? (PRO ? "Challenge" : "Play") : null);
 }));
@@ -5566,7 +5578,7 @@ function renderVoiceCheck() {
   drawList();
 }
 $("#vcMark").addEventListener("click", e => { vcMarking = !vcMarking; e.target.textContent = `Mark: ${vcMarking ? "on" : "off"}`; e.target.classList.toggle("on", vcMarking); });
-$("#gateMins").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { store.set("gateMins", Number(b.dataset.m)); sfx.tap(); renderSheet(); }));
+$("#gateMins").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { gateMins = Number(b.dataset.m); store.set("gateMins", gateMins); sfx.tap(); renderSheet(); }));
 modeEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { voiceMode = b.dataset.mode; store.set("voiceMode", voiceMode); audio(); renderSheet(); say("Hi! Let's play!"); }));
 speedEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rate = Number(b.dataset.rate); store.set("rate", rate); renderSheet(); say("Hi! Let's play!"); }));
 $("#gear").addEventListener("click", () => { audio(); renderSheet(); renderVoiceCheck(); const nm = store.get("names", {}) || {}; $("#nmLittle").value = nm.little || ""; $("#nmBig").value = nm.big || ""; sheet.hidden = false; });
