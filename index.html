@@ -435,7 +435,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { .hand.run { animation-duration: 2s; animation-iteration-count: 1; } }
 
 /* ---------- Spelled words, brain breaks ---------- */
-.sword { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; --fs: min(2.4rem, calc(78vw / var(--n) / 1.5)); }
+.sword { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; margin-top: 8px; --fs: min(2.4rem, calc((84vw - var(--n) * 9px) / (var(--n) * 1.3))); }
 .sword b { font-size: var(--fs); line-height: 1.15; min-width: 1.05em; padding: 0 .12em; text-align: center; border: 3px solid var(--ink); border-radius: 12px;
   background: #fff; color: var(--ink); -webkit-text-stroke: 0; transition: transform .15s, background .2s, color .2s; }
 .sword b.lit { background: var(--sun); }
@@ -627,6 +627,13 @@ window.LT = (() => {
     ["🐬","dolphin"],["🦋","butterfly"],["🐝","bee"],["🐢","turtle"],["🦉","owl"],["🐧","penguin"],["🦒","giraffe"],["🐘","elephant"],["🦓","zebra"],["🐳","whale"],
     ["🚀","rocket"],["🚒","fire truck"],["🚂","train"],["🚁","helicopter"],["✈️","airplane"],["🚜","tractor"],["🏎️","race car"],["⛵","sailboat"],["🚌","bus"],["🚓","police car"],
     ["🌈","rainbow"],["⭐","star"],["🌙","moon"],["☀️","sun"],["🍦","ice cream"],["🍕","pizza"],["🎂","cake"],["🍩","donut"],["🎈","balloon"],["🏆","trophy"]];
+  // The big kid's sticker book: longer, trickier words to spell.
+  const PRO_STICKERS = [["🐊","crocodile"],["🦏","rhinoceros"],["🦛","hippopotamus"],["🦘","kangaroo"],["🦩","flamingo"],["🦚","peacock"],["🐆","leopard"],
+    ["🦔","hedgehog"],["🐿️","squirrel"],["🦋","butterfly"],["🐞","ladybug"],["🦂","scorpion"],["🐉","dragon"],["🦄","unicorn"],["🧜","mermaid"],["🧙","wizard"],
+    ["🚁","helicopter"],["🚀","spaceship"],["🛰️","satellite"],["🚂","locomotive"],["🚑","ambulance"],["🚲","bicycle"],["🛹","skateboard"],["🚤","speedboat"],
+    ["🌋","volcano"],["🌪️","tornado"],["🌈","rainbow"],["☄️","comet"],["🌌","galaxy"],["🏔️","mountain"],["🏝️","island"],["🌵","cactus"],["🍄","mushroom"],
+    ["🍍","pineapple"],["🍉","watermelon"],["🥦","broccoli"],["🥑","avocado"],["🍫","chocolate"],["🧁","cupcake"],["🥨","pretzel"],["🍝","spaghetti"],
+    ["🔭","telescope"],["🔬","microscope"],["🧭","compass"],["🎸","guitar"],["🎺","trumpet"],["🎻","violin"],["🏰","castle"],["💎","diamond"],["🏆","trophy"]];
   const PAIR_PICS = [["🐻","bear"],["🐳","whale"],["🦒","giraffe"],["🍌","banana"],["🚀","rocket"],["🌈","rainbow"],["🐙","octopus"],["🍉","watermelon"],
     ["🦖","dinosaur"],["🚂","train"],["🌻","sunflower"],["🐧","penguin"],["🦋","butterfly"],["🍕","pizza"]];
   const STAMPS = [["🚗","car"],["🚒","fire truck"],["🚌","bus"],["🚜","tractor"],["🚂","train"],["✈️","airplane"],["🚀","rocket"],
@@ -773,7 +780,7 @@ window.LT = (() => {
     });
     ASK_PLACES.forEach(p => add("where:" + p, p === "fly" ? "Which animal can fly?" : `Which animal ${PLACES[p][0]}?`));
     VEHICLE_INFO.forEach(([n, snd]) => { add(n); add("build:" + n, `Let's build ${an(n)} ${n}!`); add("built:" + n, `You built ${an(n)} ${n}! ${snd}`); });
-    STICKERS.forEach(([, n]) => add(n)); PAIR_PICS.forEach(([, n]) => add(n)); STAMPS.forEach(([, n]) => add(n));
+    STICKERS.forEach(([, n]) => add(n)); PRO_STICKERS.forEach(([, n]) => add(n)); PAIR_PICS.forEach(([, n]) => add(n)); STAMPS.forEach(([, n]) => add(n));
     SEQS.forEach(s => add(s.say));
     PHRASES2.forEach(p => add(p));
     LADDERS.flat().forEach(([w]) => add(w));
@@ -794,14 +801,15 @@ window.LT = (() => {
     return L;
   }
   return { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
-    VEHICLE_INFO, STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
+    VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
 })();
 </script>
 
 <script>
 (() => {
 "use strict";
-const { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const { PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const stickerSet = () => PRO ? PRO_STICKERS : STICKERS;
 const $ = (s, el = document) => el.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
 const ri = (a, b) => Math.floor(rand(a, b + 1));
@@ -820,7 +828,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "12 (Nov 25, big-kid arcade & learn)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "13 (Nov 25, big-kid stickers)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1037,7 +1045,7 @@ const setLevel = (id, v) => store.set("lvl." + id, v);
 function reward(lead, next) {
   const have = store.get("stickers", []);
   store.set("stars", store.get("stars", 0) + 1);
-  const left = STICKERS.filter(s => !have.includes(s[0]));
+  const left = stickerSet().filter(s => !have.includes(s[0]));
   const s = left.length ? pick(left) : null;
   if (s) { have.push(s[0]); store.set("stickers", have); }
   const ov = document.createElement("div");
@@ -1188,7 +1196,7 @@ function openGate(onDone) {
   }
   next(true);
 }
-if (window.__debug) Object.assign(window.__debug, { openGate, rounds: () => ({ numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
+if (window.__debug) Object.assign(window.__debug, { openGate, reward: (...a) => reward(...a), rounds: () => ({ numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
 // Picks a column count that gives the biggest cells for n items.
 const fitGrid = (el, n, aspect = 1, pad = 28, gap = 10) => {
   const W = el.clientWidth - pad, H = el.clientHeight - pad;
@@ -4116,15 +4124,16 @@ function gameRunner(root, tools) {
 /* ---------- Sticker book ---------- */
 function gameBook(root) {
   const have = store.get("stickers", []);
-  root.innerHTML = `<div class="field book"><div class="bookhead">${have.length} of ${STICKERS.length} stickers</div><div class="bookgrid"></div></div>`;
+  const set = stickerSet(), got = set.filter(([em]) => have.includes(em)).length;
+  root.innerHTML = `<div class="field book"><div class="bookhead">${got} of ${set.length} stickers</div><div class="bookgrid"></div></div>`;
   const gridEl = $(".bookgrid", root);
-  STICKERS.forEach(([em, name]) => {
+  set.forEach(([em, name]) => {
     const got = have.includes(em), b = document.createElement("button");
     b.className = "stk" + (got ? "" : " locked"); b.innerHTML = `<span>${em}</span>`; b.setAttribute("aria-label", got ? name : "locked sticker");
     b.addEventListener("click", () => { if (got) { replay(b, "hop"); sfx.tap(); say(name); } else { sfx.boop(); say("Play games to win stickers!"); } });
     gridEl.appendChild(b);
   });
-  const layout = () => fitGrid(gridEl, STICKERS.length, 1, 0, 8);
+  const layout = () => fitGrid(gridEl, set.length, 1, 0, 8);
   layout(); onWin("resize", layout);
   say("Your sticker book!");
 }
@@ -4242,7 +4251,7 @@ function renderHub() {
     b.addEventListener("click", () => openGame(gm));
     tilesEl.appendChild(b);
   });
-  $("#bookCount").textContent = `${store.get("stickers", []).length}/${STICKERS.length}`;
+  { const set = stickerSet(), have = store.get("stickers", []); $("#bookCount").textContent = `${set.filter(([em]) => have.includes(em)).length}/${set.length}`; }
 }
 // "Who's playing?" picker: shown on first launch and from the player button on the home screen.
 const picker = $("#picker");
