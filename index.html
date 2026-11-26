@@ -453,6 +453,15 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .gbody { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
 .gbody.land { flex-direction: row; }
 
+/* ---------- Drop ---------- */
+.dropf { background: #14213D; }
+.dropbar { flex: none; display: flex; justify-content: center; gap: 10px; padding: 8px 0 10px; --db: min(20vw, 84px); }
+.dropf.pro .dropbar { --db: min(18vw, 70px); }
+.dropbar button { width: var(--db); height: var(--db); border: 4px solid var(--ink); border-radius: 18px; background: var(--paper); box-shadow: 0 4px 0 var(--ink);
+  font-size: calc(var(--db) * .42); padding: 0; color: var(--ink); touch-action: none; }
+.dropbar button:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); background: var(--sun); }
+.dropbar [data-a="T"], .dropbar [data-a="D"] { background: #E6F2FF; }
+
 /* ---------- Player picker + big-kid prompts ---------- */
 .picker { justify-content: center; align-items: center; gap: 24px; }
 .picker h1 { margin: 0; font-size: clamp(2rem, 9vw, 3.4rem); text-align: center; }
@@ -754,7 +763,9 @@ window.LT = (() => {
     ["eagle","🦅"],["koala","🐨"],["panda","🐼"],["lobster","🦞"],["candle","🕯️"],["pumpkin","🎃"],["popcorn","🍿"],["sandwich","🥪"],["hamburger","🍔"]];
   const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
     "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
-    "Make the number in one swipe!","Shoot the letters in order!","Count by"];
+    "Make the number in one swipe!","Shoot the letters in order!","Count by",
+    "Drop","Too high! Let's clear the board.","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
+    "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.","Fill rows to clear them. Each line is worth the times table number!"];
   function voiceLines() {
     const L = {};
     const add = (k, t = k) => { if (!(k in L)) L[k] = t; };
@@ -828,7 +839,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "13 (Nov 25, big-kid stickers)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "14 (Nov 26, Drop)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1087,6 +1098,7 @@ const COACH = {
   space: { g: "drag", line: "Drag to move your ship. It shoots by itself!", from: [.3, .85], to: [.7, .85], once: true },
   maze: { g: "drag", line: "Swipe or tap the arrows to steer.", from: [.3, .45], to: [.7, .45], once: true },
   stack: { g: "tap", line: "Tap to drop the block.", from: [.5, .55], once: true },
+  drop: { g: "tap", line: "Tap to turn. Use the buttons to move and drop.", from: [.5, .4], once: true },
   slice: { g: "drag", line: "Swipe to slice the fruit! Don't touch the bombs.", from: [.2, .6], to: [.8, .4], once: true },
   flap: { g: "tap", line: "Tap to flap! Fly through the gaps.", from: [.5, .55], once: true },
   runner: { g: "drag", line: "Drag to steer. Go through the best gates!", from: [.3, .75], to: [.7, .75], once: true },
@@ -4121,6 +4133,208 @@ function gameRunner(root, tools) {
   onWin("resize", () => { if (state !== "play") reset(); });
 }
 
+/* ---------- Drop: falling blocks; fill a row to clear it ----------
+   Little kid: small board, 2-4 block pieces, slow, lines counted out loud, never game over (a full board just clears).
+   Big kid: 10×20 board, all seven 4-block pieces, speeds up each level; each level is a times table and
+   clearing k lines scores k × that number, read out loud ("3 times 7 is 21"). */
+const DROP_TABLES = [3, 4, 6, 7, 8, 9, 11, 12];
+function gameDrop(root, tools) {
+  tools.innerHTML = '<div class="chip"></div>';
+  root.innerHTML = `<div class="field arcade dropf${PRO ? " pro" : ""}"><div class="play"><canvas></canvas><div class="ovl"></div></div>
+    <div class="dropbar"><button data-a="L" aria-label="move left">◀</button><button data-a="T" aria-label="turn">⟳</button><button data-a="D" aria-label="drop">⤓</button><button data-a="R" aria-label="move right">▶</button></div></div>`;
+  const field = root.firstChild, box = $(".play", field), cv = $("canvas", field), g = cv.getContext("2d"), ovl = $(".ovl", field), chip = tools.firstChild, J = makeJuice();
+  const COLS = PRO ? 10 : 8, ROWS = PRO ? 20 : 14;
+  const BIG = [[[0,0],[1,0],[2,0],[3,0]], [[0,0],[1,0],[0,1],[1,1]], [[1,0],[0,1],[1,1],[2,1]], [[1,0],[2,0],[0,1],[1,1]], [[0,0],[1,0],[1,1],[2,1]], [[0,0],[0,1],[1,1],[2,1]], [[2,0],[0,1],[1,1],[2,1]]];
+  const SMALL = [[[0,0],[1,0]], [[0,0],[1,0],[2,0]], [[0,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]]];
+  const PAL = ["#FF6B57", "#FFC93C", "#4CC764", "#3D9BFF", "#A574F2", "#FF86C8", "#FF9A3C"];
+  let W, H, cell, bx, by, grid, cur = null, nextP = null, bag = [], state = "ready", fallT = 0, lockT = 0, lines = 0, score = 0, level = 1, clearing = null, overT = 0, best = store.get("dropBest", 0), holdId = 0;
+  const blank = () => range(1, ROWS).map(() => Array(COLS).fill(null));
+  const norm = cells => { const mx = Math.min(...cells.map(c => c[0])), my = Math.min(...cells.map(c => c[1])); return cells.map(([x, y]) => [x - mx, y - my]); };
+  const widthOf = cells => Math.max(...cells.map(c => c[0])) + 1;
+  const table = () => DROP_TABLES[(level - 1) % DROP_TABLES.length];
+  const LINES_PER_LEVEL = 8;
+  function newPiece() {
+    if (PRO) { if (!bag.length) bag = shuffle(range(0, 6)); const i = bag.pop(); return { cells: norm(BIG[i]), color: PAL[i] }; }
+    const sh = pick(SMALL); return { cells: norm(sh), color: pick(PAL) };
+  }
+  const fits = (cells, x, y) => cells.every(([cx, cy]) => { const gx = x + cx, gy = y + cy; return gx >= 0 && gx < COLS && gy < ROWS && (gy < 0 || !grid[gy][gx]); });
+  const setChip = () => { chip.textContent = PRO ? `Lv ${level} · ×${table()} · ⭐ ${score}` : `Lines: ${lines}`; };
+  function fit() {
+    ({ W, H } = fitCanvas(cv, g, box));
+    const side = PRO ? 4.4 : 4;
+    cell = Math.floor(Math.min(W / (COLS + side + .6), (H - 8) / ROWS));
+    bx = Math.round((W - (COLS + side) * cell) / 2); by = Math.round((H - ROWS * cell) / 2);
+  }
+  function spawn() {
+    cur = nextP || newPiece(); nextP = newPiece();
+    cur.x = Math.floor((COLS - widthOf(cur.cells)) / 2); cur.y = 0; fallT = 0; lockT = 0;
+    if (!fits(cur.cells, cur.x, cur.y)) topOut();
+  }
+  function topOut() {
+    if (PRO) return over();
+    // The little kid never loses: the board just clears and play goes on.
+    J.shake(.6); sfx.boop(); grid = blank(); say("Too high! Let's clear the board.");
+    J.text(W / 2, H * .4, "Fresh start!", "#FFD43B", 40);
+  }
+  function reset() {
+    fit(); grid = blank(); lines = 0; score = 0; level = 1; bag = []; nextP = null; clearing = null; spawn(); state = "ready"; setChip();
+    overlay(ovl, PRO
+      ? `<b>Drop</b><span>Tap to turn. Swipe or use the buttons.</span><span>Each level is a times table: lines × ${table()}!</span><span>Tap to start</span>`
+      : `<b>Drop</b><span>Fill a row to clear it!</span><span>Tap to turn. Use the buttons to move and drop.</span><span>Tap to start</span>`);
+  }
+  // Returns true when the tap only started or restarted the game.
+  function wake() {
+    if (state === "over") { if (performance.now() - overT > 400) reset(); return true; }
+    if (state === "ready") { state = "play"; overlay(ovl, ""); return true; }
+    return state !== "play" || !cur || !!clearing;
+  }
+  function move(dx) { if (fits(cur.cells, cur.x + dx, cur.y)) { cur.x += dx; lockT = 0; tone(660, { d: .03, v: .04, type: "triangle" }); return true; } return false; }
+  function turn() {
+    const w0 = widthOf(cur.cells), r = norm(cur.cells.map(([x, y]) => [-y, x])), off = Math.floor((w0 - widthOf(r)) / 2);
+    for (const [kx, ky] of [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [0, -1]]) {
+      if (fits(r, cur.x + off + kx, cur.y + ky)) { cur.cells = r; cur.x += off + kx; cur.y += ky; lockT = 0; tone(880, { d: .04, v: .05, type: "triangle" }); return; }
+    }
+  }
+  function softStep() { if (fits(cur.cells, cur.x, cur.y + 1)) { cur.y++; fallT = 0; return true; } return false; }
+  function hardDrop() { let d = 0; while (fits(cur.cells, cur.x, cur.y + 1)) { cur.y++; d++; } if (d) J.shake(.12 + Math.min(.2, d * .01)); lock(); }
+  function lock() {
+    cur.cells.forEach(([cx, cy]) => { const gy = cur.y + cy; if (gy >= 0) grid[gy][cur.x + cx] = cur.color; });
+    tone(200, { d: .07, v: .09, type: "triangle", to: 140 });
+    cur = null;
+    const full = range(0, ROWS - 1).filter(r => grid[r].every(Boolean));
+    if (full.length) { clearing = { rows: full, t: .3 }; sfx.pop(); } else spawn();
+  }
+  function finishClear() {
+    const rows = clearing.rows, k = rows.length; clearing = null;
+    rows.forEach(r => grid[r].forEach((c, x) => J.burst(bx + x * cell + cell / 2, by + r * cell + cell / 2, c, 3, 180, Math.max(3, cell * .18))));
+    grid = grid.filter((_, r) => !rows.includes(r)); while (grid.length < ROWS) grid.unshift(Array(COLS).fill(null));
+    lines += k; J.shake(.15 + k * .1); J.hit(60); J.chime();
+    const midY = by + ROWS * cell * .4;
+    let rewardNow = false;
+    if (PRO) {
+      const N = table(); score += k * N;
+      J.text(bx + COLS * cell / 2, midY, `${k} × ${N} = ${k * N}`, "#FFD43B", Math.max(26, cell * 1.3));
+      say(k, "times", N, "is", k * N);
+      if (score > best) { best = score; store.set("dropBest", best); }
+      if (lines >= level * LINES_PER_LEVEL) {
+        level++; sfx.yay();
+        later(() => { J.text(bx + COLS * cell / 2, midY + cell * 2, "Level up!", "#7CF5FF", Math.max(28, cell * 1.4)); say("Level up!", "countby:" + table()); }, 2200);
+        rewardNow = level % 2 === 1;
+      }
+    } else {
+      score = lines;
+      J.text(bx + COLS * cell / 2, midY, k > 1 ? `+${k}` : "Clear!", "#FFD43B", Math.max(30, cell * 1.2));
+      say(lines, lines === 1 ? "line!" : "lines!");
+      rewardNow = Math.floor(lines / 5) > Math.floor((lines - k) / 5);
+    }
+    setChip(); spawn();
+    if (rewardNow && state === "play") { state = "paused"; later(() => reward("Fantastic!", () => { state = "play"; }), PRO ? 4200 : 1600); }
+  }
+  function over() {
+    state = "over"; overT = performance.now(); sfx.boop(); J.shake(.5);
+    if (score > best) { best = score; store.set("dropBest", best); }
+    say("Game over! You scored", score, "points!");
+    overlay(ovl, `<b>⭐ ${score}</b><span>Level ${level} · ${lines} lines · Best ${best}</span><span>Tap to play again</span>`);
+  }
+  const interval = () => PRO ? Math.max(.09, .8 * Math.pow(.83, level - 1)) : Math.max(.5, 1.1 - lines * .015);
+  function update(dt) {
+    if (clearing) { clearing.t -= dt; if (clearing.t <= 0) finishClear(); return; }
+    if (!cur) return;
+    if (fits(cur.cells, cur.x, cur.y + 1)) { lockT = 0; fallT += dt; if (fallT >= interval()) { fallT = 0; cur.y++; } }
+    else { lockT += dt; if (lockT >= (PRO ? .5 : .8)) lock(); }
+  }
+  function drawCell(px, py, s, color) {
+    g.fillStyle = color; roundRect(g, px + 1, py + 1, s - 2, s - 2, s * .22); g.fill();
+    g.strokeStyle = "#173A5E"; g.lineWidth = Math.max(1.5, s * .07); g.stroke();
+    g.fillStyle = "rgba(255,255,255,.38)"; roundRect(g, px + s * .2, py + s * .16, s * .38, s * .15, s * .07); g.fill();
+  }
+  function draw(t) {
+    g.fillStyle = "#14213D"; g.fillRect(0, 0, W, H);
+    J.begin(g, t);
+    g.fillStyle = "#1F3260"; roundRect(g, bx - 5, by - 5, COLS * cell + 10, ROWS * cell + 10, 12); g.fill();
+    g.strokeStyle = "rgba(255,255,255,.06)"; g.lineWidth = 1;
+    for (let x = 1; x < COLS; x++) { g.beginPath(); g.moveTo(bx + x * cell, by); g.lineTo(bx + x * cell, by + ROWS * cell); g.stroke(); }
+    for (let y = 1; y < ROWS; y++) { g.beginPath(); g.moveTo(bx, by + y * cell); g.lineTo(bx + COLS * cell, by + y * cell); g.stroke(); }
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (grid[y][x]) drawCell(bx + x * cell, by + y * cell, cell, grid[y][x]);
+    if (clearing) { g.fillStyle = `rgba(255,255,255,${.5 + .5 * Math.sin(t * 40)})`; clearing.rows.forEach(r => { roundRect(g, bx, by + r * cell, COLS * cell, cell, 6); g.fill(); }); }
+    if (cur && state !== "over") {
+      let gy = cur.y; while (fits(cur.cells, cur.x, gy + 1)) gy++;
+      g.strokeStyle = "rgba(255,255,255,.45)"; g.lineWidth = 2; g.setLineDash([4, 4]);
+      cur.cells.forEach(([cx, cy]) => { roundRect(g, bx + (cur.x + cx) * cell + 3, by + (gy + cy) * cell + 3, cell - 6, cell - 6, cell * .2); g.stroke(); });
+      g.setLineDash([]);
+      cur.cells.forEach(([cx, cy]) => { if (cur.y + cy >= 0) drawCell(bx + (cur.x + cx) * cell, by + (cur.y + cy) * cell, cell, cur.color); });
+    }
+    // Side panel: the next piece, then the level's times table (big kid) or the line count (little kid).
+    const sx = bx + COLS * cell + cell * .7, sw = (PRO ? 3.7 : 3.3) * cell, ps = cell * .75;
+    g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = "#FFFDF6"; g.font = `800 ${Math.round(Math.max(14, cell * .6))}px "Baloo 2", sans-serif`;
+    g.fillText("Next", sx + sw / 2, by + cell * .5);
+    g.fillStyle = "#1F3260"; roundRect(g, sx, by + cell, sw, cell * 3, 10); g.fill();
+    if (nextP) {
+      const w = widthOf(nextP.cells), h = Math.max(...nextP.cells.map(c => c[1])) + 1;
+      nextP.cells.forEach(([cx, cy]) => drawCell(sx + sw / 2 - w * ps / 2 + cx * ps, by + cell * 2.5 - h * ps / 2 + cy * ps, ps, nextP.color));
+    }
+    g.fillStyle = "#FFD43B"; g.font = `800 ${Math.round(Math.max(22, cell * 1.3))}px "Baloo 2", sans-serif`;
+    g.fillText(PRO ? `×${table()}` : `${lines}`, sx + sw / 2, by + cell * 5.4);
+    g.fillStyle = "#FFFDF6"; g.font = `700 ${Math.round(Math.max(12, cell * .5))}px "Baloo 2", sans-serif`;
+    g.fillText(PRO ? `${level * LINES_PER_LEVEL - lines} to go` : "lines", sx + sw / 2, by + cell * 6.6);
+    if (PRO) { g.fillText("score", sx + sw / 2, by + cell * 8.4); g.fillStyle = "#FFD43B"; g.font = `800 ${Math.round(Math.max(18, cell * .9))}px "Baloo 2", sans-serif`; g.fillText(score, sx + sw / 2, by + cell * 9.4); }
+    J.end(g);
+  }
+  // Buttons: left/right repeat while held; turn; drop.
+  const release = () => { holdId++; };
+  field.querySelectorAll(".dropbar button").forEach(b => {
+    b.addEventListener("pointerdown", e => {
+      e.preventDefault(); if (wake()) return;
+      const a = b.dataset.a;
+      if (a === "T") return turn();
+      if (a === "D") return hardDrop();
+      const dx = a === "L" ? -1 : 1, my = ++holdId; move(dx);
+      later(function again() { if (holdId !== my || !cur || state !== "play") return; move(dx); later(again, 70); }, 200);
+    });
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => b.addEventListener(ev, release));
+  });
+  // On the board: tap to turn, drag sideways to move, drag down to drop faster, flick down to drop.
+  let sw = null;
+  cv.addEventListener("pointerdown", e => {
+    e.preventDefault(); if (wake()) { sw = null; return; }
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    sw = { x: e.clientX, y: e.clientY, t: performance.now(), ax: 0, ay: 0, moved: false };
+  });
+  cv.addEventListener("pointermove", e => {
+    if (!sw || !cur || state !== "play" || clearing) return;
+    const dx = (e.clientX - sw.x) / cell, dy = (e.clientY - sw.y) / cell;
+    const tx = Math.trunc(dx); while (sw.ax < tx) { sw.ax++; move(1); sw.moved = true; } while (sw.ax > tx) { sw.ax--; move(-1); sw.moved = true; }
+    const ty = Math.trunc(dy); while (sw.ay < ty) { sw.ay++; softStep(); sw.moved = true; }
+  });
+  const endSwipe = e => {
+    if (!sw) return;
+    const dt = performance.now() - sw.t, dx = e.clientX - sw.x, dy = e.clientY - sw.y; const s0 = sw; sw = null;
+    if (!cur || state !== "play" || clearing) return;
+    if (!s0.moved && Math.hypot(dx, dy) < 14 && dt < 400) turn();
+    else if (dy > cell * 2 && dy > Math.abs(dx) * 1.5 && dy / Math.max(1, dt) > .9) hardDrop();
+  };
+  cv.addEventListener("pointerup", endSwipe); cv.addEventListener("pointercancel", () => { sw = null; });
+  onWin("keydown", e => {
+    const k = e.key; if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(k)) return;
+    e.preventDefault(); if (wake()) return;
+    if (k === "ArrowLeft") move(-1); else if (k === "ArrowRight") move(1); else if (k === "ArrowUp") turn(); else if (k === "ArrowDown") softStep(); else hardDrop();
+  });
+  loop((dt, t) => {
+    J.update(dt);
+    if (state === "play" && !clearing && gateTick(dt)) { state = "gate"; release(); openGate(() => { state = "play"; }); }
+    if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    draw(t);
+  });
+  if (window.__debug) window.__debug.drop = {
+    fill(n, gapX) { for (let r = ROWS - n; r < ROWS; r++) grid[r] = grid[r].map((_, x) => x === gapX ? null : "#999"); },
+    piece(cells, x) { cur = { cells, color: "#fff", x, y: 0 }; },
+    hardDrop, setLevel: l => { level = l; setChip(); }, info: () => ({ lines, score, level, state, top: grid.findIndex(r => r.some(Boolean)) }),
+  };
+  reset();
+  say(PRO ? "Fill rows to clear them. Each line is worth the times table number!" : "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.");
+  onWin("resize", fit);
+}
+
 /* ---------- Sticker book ---------- */
 function gameBook(root) {
   const have = store.get("stickers", []);
@@ -4166,6 +4380,7 @@ const ARCADE = [
   { id: "space", name: "Space", em: "🛸", run: gameSpace },
   { id: "maze", name: "Maze", em: "🐰", run: gameMaze, lv: true },
   { id: "blocks", name: "Blocks", em: "🧱", run: gameBlocks },
+  { id: "drop", name: "Drop", em: "🟪", run: gameDrop },
   { id: "stack", name: "Stack", em: "🏗️", run: gameStack },
   { id: "slice", name: "Slice", em: "🍉", run: gameSlice },
   { id: "flap", name: "Flap", em: "🐤", run: gameFlap },
@@ -4192,6 +4407,7 @@ const CHALLENGE_PRO = [
 const ARCADE_PRO = [
   { id: "stack", name: "Stack", em: "🏗️", run: gameStack },
   { id: "flap", name: "Flap", em: "🐤", run: gameFlap },
+  { id: "drop", name: "Drop", em: "🟪", run: gameDrop },
   { id: "snake", name: "Snake", em: "🐍", run: gameSnake },
   { id: "space", name: "Space", em: "🛸", run: gameSpace },
   { id: "maze", name: "Maze", em: "🐰", run: gameMaze, lv: true },
