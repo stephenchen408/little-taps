@@ -159,6 +159,29 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .rcard .big { display: inline-block; font-size: min(34vw, 170px); line-height: 1.1; filter: drop-shadow(0 8px 0 rgba(23,58,94,.22));
   animation: spinin .9s cubic-bezier(.3,1.4,.5,1), floaty 2.6s ease-in-out .9s infinite; }
 @keyframes floaty { 50% { transform: translateY(-7%) rotate(4deg) scale(1.04); } }
+.rcard.quizzing { max-width: min(96vw, 620px); padding: 12px 16px 16px; }
+.rcard.quizzing .big { font-size: min(18vw, 84px); animation: none; }
+.rcard.quizzing .rt { font-size: clamp(1rem, 4.5vw, 1.4rem); }
+.sword.hideq { opacity: 0; max-height: 0; margin: 0; overflow: hidden; transition: opacity .4s, max-height .4s; }
+.rquiz { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 8px; }
+.rquiz[hidden] { display: none; }
+.rquiz .qt { font-size: clamp(1.15rem, 5vw, 1.6rem); }
+.qslots { display: flex; gap: 4px; justify-content: center; --sz: min(46px, calc((min(88vw, 580px) - var(--n) * 4px) / var(--n))); }
+.qs { width: var(--sz); height: calc(var(--sz) * 1.2); border: 3px solid var(--ink); border-radius: 10px; background: #fff; display: grid; place-items: center;
+  font-weight: 800; font-size: calc(var(--sz) * .62); line-height: 1; transition: background .2s; }
+.qs.next { box-shadow: 0 0 0 4px var(--sun); }
+.qs.ok { background: var(--leaf); color: #fff; -webkit-text-stroke: 1px var(--ink); }
+.qs.clue { background: #9FD0FF; }
+.qs.bad { background: var(--tomato); color: #fff; animation: wiggle .4s; }
+.qslots .gap { width: calc(var(--sz) * .45); }
+.qtiles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: min(88vw, 560px); }
+.qtile { width: min(52px, 12.5vw); height: min(56px, 13.5vw); border: 3px solid var(--ink); border-radius: 12px; background: linear-gradient(#FFFFFF, var(--paper) 60%, #EEE7D8);
+  box-shadow: 0 4px 0 var(--ink); font-weight: 800; font-size: min(28px, 7vw); padding: 0; color: var(--ink); }
+.qtile:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.qtile.used { visibility: hidden; }
+.qtile.hint { animation: glow 1s ease-in-out infinite; }
+.qbtns button { padding: 8px 16px; border: 3px solid var(--ink); border-radius: 999px; background: #fff; font-weight: 800; font-size: 1rem; box-shadow: 0 3px 0 var(--ink); }
+.qbtns .qdone { background: linear-gradient(#B4F0A8, var(--leaf)); font-size: 1.2rem; padding: 10px 24px; }
 .confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
 .rcard .rt { font-size: clamp(1.4rem, 6vw, 2.2rem); font-weight: 800; }
 @keyframes spinin { from { transform: scale(0) rotate(-200deg); } }
@@ -1197,7 +1220,7 @@ window.LT = (() => {
   const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
     "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
     "Make the number in one swipe!","Shoot the letters in order!","Count by",
-    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Adventure map","Treasure chest!","You bought it!","Not enough coins yet.","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
+    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Your turn! Spell it.","Almost! Fix the blanks.","Here's a clue.","Adventure map","Treasure chest!","You bought it!","Not enough coins yet.","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
     "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.","Fill rows to clear them. Each line is worth the times table number!"];
   function voiceLines() {
     const L = {};
@@ -1281,7 +1304,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "22 (Nov 26, parent dashboard, new icons)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "23 (Nov 26, sticker spelling test)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1578,16 +1601,85 @@ function reward(lead, next) {
   if (s) { have.push(s[0]); store.set("stickers", have); }
   const ov = document.createElement("div");
   ov.className = "reward";
-  ov.innerHTML = `<div class="rcard"><div class="big">${s ? s[0] : "⭐"}</div><div class="rt">${s ? "New sticker!" : "You earned a star!"}</div>${s ? spellHTML(s[1]) : ""}</div>`;
+  ov.innerHTML = `<div class="rcard"><div class="big">${s ? s[0] : "⭐"}</div><div class="rt">${s ? "New sticker!" : "You earned a star!"}</div>${s ? spellHTML(s[1]) : ""}<div class="rquiz" hidden></div></div>`;
   stage.appendChild(ov);
   sfx.yay(); celebrate();
-  // The sticker's name is read, spelled with each letter lighting up, then read again.
-  const total = s ? spellAloud($(".sword", ov), [lead, "You earned a sticker!"], s[1]) : (say(lead, "You earned a star!"), 2.4);
-  const t0 = performance.now();
   let closed = false;
   const close = () => { if (closed) return; closed = true; ov.remove(); if (next) next(); };
-  ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > total * 1000) close(); });
-  later(close, Math.max(3600, total * 1000 + 1400));
+  if (!s) { say(lead, "You earned a star!"); const t0 = performance.now(); ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > 1500) close(); }); later(close, 3200); return; }
+  // The sticker's name is read and spelled with each letter lighting up, then they spell it themselves.
+  const total = spellAloud($(".sword", ov), [lead, "You earned a sticker!"], s[1]);
+  later(() => spellQuiz(ov, s[1], close), total * 1000 + 400);
+}
+// Sticker spelling test, right after the word was spelled for them.
+// Big kids: the word hides; they fill every slot, then correct letters stay (green) and wrong ones go blank to try again.
+//   From the second check on, each miss also reveals one letter as a clue, so nobody gets stuck.
+// Little kid: the word stays as a model and he copies it letter by letter; the right tile glows after two wrong taps.
+function spellQuiz(ov, word, done) {
+  if (!ov.isConnected) return;
+  const W = [...word.toUpperCase()], card = $(".rcard", ov), q = $(".rquiz", ov), copy = !PRO, sword = $(".sword", ov);
+  const slotsIdx = W.map((c, i) => /[A-Z]/.test(c) ? i : -1).filter(i => i >= 0), filled = {}, locked = new Set();
+  let checks = 0, perfect = true, finished = false, wrongHere = 0;
+  card.classList.add("quizzing"); if (!copy) sword.classList.add("hideq");
+  const decoyN = copy ? 1 : slotsIdx.length > 9 ? 2 : 3, decoys = [];
+  while (decoys.length < decoyN) { const c = "ABCDEFGHIKLMNOPRSTUW"[ri(0, 19)]; if (!W.includes(c) && !decoys.includes(c)) decoys.push(c); }
+  const pool = shuffle([...slotsIdx.map(i => W[i]), ...decoys]);
+  q.hidden = false;
+  q.innerHTML = `<b class="qt">✏️ Your turn! Spell it.</b>
+    <div class="qslots" style="--n:${W.length}">${W.map((c, i) => /[A-Z]/.test(c) ? `<span class="qs" data-i="${i}"></span>` : '<i class="gap"></i>').join("")}</div>
+    <div class="qtiles">${pool.map((c, k) => `<button class="qtile" data-k="${k}">${c}</button>`).join("")}</div>
+    <div class="qbtns"><button class="qhear" aria-label="Hear the word">🔊 Hear it</button></div>`;
+  const slot = i => $(`.qs[data-i="${i}"]`, q), tiles = [...q.querySelectorAll(".qtile")];
+  const nextOpen = () => slotsIdx.find(i => !locked.has(i) && !filled[i]);
+  const mark = () => { q.querySelectorAll(".qs").forEach(el => el.classList.toggle("next", Number(el.dataset.i) === nextOpen())); };
+  $(".qhear", q).addEventListener("click", () => say(word));
+  say("Your turn! Spell it.", P(.2), word);
+  mark();
+  function win() {
+    finished = true; sfx.yay(); celebrate();
+    logAnswer("s", "stickers", { ask: ["Spell", word], answer: word, _lv: 0, _concept: "Sticker spelling" }, perfect, null);
+    say("You spelled it!", word);
+    $(".qbtns", q).innerHTML = `<button class="qdone">Done ▶</button>`;
+    $(".qdone", q).addEventListener("click", done);
+    later(done, 4500);
+  }
+  function check() {
+    if (finished || !slotsIdx.every(j => locked.has(j) || filled[j])) return;
+    checks++;
+    const wrong = slotsIdx.filter(i => !locked.has(i) && filled[i].textContent !== W[i]);
+    slotsIdx.forEach(i => { if (!locked.has(i) && !wrong.includes(i)) { locked.add(i); slot(i).classList.add("ok"); } });
+    if (!wrong.length) return win();
+    perfect = false; sfx.boop();
+    wrong.forEach(i => slot(i).classList.add("bad"));
+    say(...(checks >= 2 ? ["Almost! Fix the blanks.", P(.3), "Here's a clue."] : ["Almost! Fix the blanks."]));
+    later(() => {
+      wrong.forEach(i => { const t = filled[i]; delete filled[i]; t.classList.remove("used"); const el = slot(i); el.textContent = ""; el.classList.remove("bad"); });
+      if (checks >= 2) { // a clue: fill in the first missing letter
+        const i = wrong[0], t = tiles.find(x => !x.classList.contains("used") && x.textContent === W[i]);
+        if (t) { t.classList.add("used"); filled[i] = t; locked.add(i); const el = slot(i); el.textContent = W[i]; el.classList.add("clue"); say(W[i]); }
+        if (slotsIdx.every(j => locked.has(j))) return win();
+      }
+      mark();
+    }, 900);
+  }
+  tiles.forEach(t => t.addEventListener("pointerdown", e => {
+    e.preventDefault(); if (finished || t.classList.contains("used")) return;
+    const i = nextOpen(); if (i == null) return;
+    const c = t.textContent;
+    if (copy) { // copy mode: only the right next letter goes in
+      if (c !== W[i]) { wrongHere++; perfect = false; replay(t, "wiggle"); sfx.boop(); say("That's", c, P(.2), "Find", W[i]); if (wrongHere >= 2) { const h = tiles.find(x => !x.classList.contains("used") && x.textContent === W[i]); if (h) h.classList.add("hint"); } return; }
+      wrongHere = 0; tiles.forEach(x => x.classList.remove("hint"));
+    }
+    t.classList.add("used"); filled[i] = t; const el = slot(i); el.textContent = c; replay(el, "hop"); sfx.note(Object.keys(filled).length); say(c);
+    if (copy) { locked.add(i); el.classList.add("ok"); if (slotsIdx.every(j => locked.has(j))) return win(); mark(); return; }
+    mark();
+    if (slotsIdx.every(j => locked.has(j) || filled[j])) later(check, 350);
+  }));
+  // Big kids can tap a letter they placed to take it back out.
+  if (!copy) q.querySelectorAll(".qs").forEach(el => el.addEventListener("pointerdown", e => {
+    e.preventDefault(); const i = Number(el.dataset.i); if (finished || locked.has(i) || !filled[i]) return;
+    filled[i].classList.remove("used"); delete filled[i]; el.textContent = ""; sfx.flip(); mark();
+  }));
 }
 /* ---------- Learning record: every answer is saved per player with its topic, level and right/wrong.
    Brain breaks and Learn quizzes use it to lean toward topics that need practice; the Progress page reports on it. ---------- */
@@ -6090,7 +6182,7 @@ const CLAUDE_NOTES = {
   keira: [["Nov 26", "Keira: starts at NYS 5th-grade level with extra word problems (your request). Word problems cover the 5th-grade test types: multi-step money, fractions with unlike denominators, fraction of a number, volume, unit conversions, remainders. I'll look at which types she misses and adjust. Reading: main idea, theme, inference and figurative language."]],
 };
 const TARGET_GRADE = { little: null, big: 3, keira: 5 }, lvGrade = lv => lv <= 2 ? 3 : lv <= 4 ? 4 : lv <= 6 ? 5 : 6;
-const AREA_NAMES = { numbers: "Number sense", math: "Computation", story: "Word problems", reading: "Reading", vocab: "Grammar & vocabulary", science: "Science", letters: "Letters & sounds", animals: "Animals" };
+const AREA_NAMES = { stickers: "Sticker spelling", numbers: "Number sense", math: "Computation", story: "Word problems", reading: "Reading", vocab: "Grammar & vocabulary", science: "Science", letters: "Letters & sounds", animals: "Animals" };
 // Claude's proficiency scoring per subject area: grade level being worked at + accuracy, compared with the child's grade.
 function proficiency(p, S) {
   const by = {}; S.log.forEach(e => (by[e.k] = by[e.k] || []).push(e));
@@ -6163,7 +6255,7 @@ function renderReport() {
       <div class="dayl"><span>${fmtD(S.days[0].start)}</span><span>Today</span></div></div>
     <div class="rcardp"><h2>Levels</h2><div><b>Brain breaks:</b> ${Object.entries(S.skills).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div>
       <div><b>Games:</b> ${Object.entries(S.levels).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div></div>
-    <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
+    <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : e.s === "s" ? "sticker spelling" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
   const R = recommendations(p, S);
   $("#repBody").querySelectorAll(".recopts button").forEach(b => b.addEventListener("click", () => { decide(p, R[Number(b.dataset.i)], b.dataset.k); sfx.tap(); const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; }));
   $("#repNote").addEventListener("input", e => { const plan = readP(p, "plan", {}) || {}; plan.note = e.target.value; writeP(p, "plan", plan); });
