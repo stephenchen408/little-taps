@@ -548,6 +548,75 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .rectq .rw { left: 50%; top: 100%; transform: translate(-50%, 4px); }
 .rectq .rh { left: 100%; top: 50%; transform: translate(8px, -50%); }
 
+.passage { max-height: 100%; overflow: auto; padding: 10px 14px; background: rgba(255,255,255,.9); border: 3px solid var(--ink); border-radius: 16px; text-align: left; touch-action: pan-y; }
+.passage b { display: block; font-size: 1.1rem; margin-bottom: 4px; }
+.passage p { margin: 0; font-weight: 600; line-height: 1.4; font-size: clamp(.95rem, 3.8vw, 1.2rem); }
+.reading .prompt { flex: 1 1 60%; } .reading .choices { flex: 1 1 40%; gap: 8px; }
+.reading .choice { box-shadow: 0 4px 0 var(--ink); border-radius: 16px; }
+.choice.long span { font-size: clamp(.9rem, 3.5vw, 1.2rem); white-space: normal; line-height: 1.2; color: var(--ink); -webkit-text-stroke: 0; padding: 4px 10px; text-align: center; }
+.choice.word span { white-space: normal; }
+
+/* ---------- XP bar, level up, adventure map, shop ---------- */
+.xphud { display: flex; align-items: center; gap: 10px; align-self: center; width: min(100%, 560px); padding: 6px 14px 6px 8px; border: 4px solid var(--ink); border-radius: 999px;
+  background: linear-gradient(#FFFFFF, var(--paper)); box-shadow: 0 5px 0 var(--ink), 0 10px 20px rgba(23,58,94,.15); font-weight: 800; }
+.xphud:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.xphud .av { font-size: 2rem; line-height: 1; animation: bob 3s ease-in-out infinite; white-space: nowrap; }
+.xphud .av.duo { font-size: 1.35rem; letter-spacing: -.12em; }
+.me.duo { font-size: 2rem; letter-spacing: -.1em; white-space: nowrap; }
+.sitem.duo span { font-size: 1.6rem; letter-spacing: -.1em; white-space: nowrap; }
+.xphud .hl { flex: 1; min-width: 0; display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: 8px; align-items: center; text-align: left; }
+.xphud .hl b { font-size: 1.05rem; } .xphud .hl small { grid-column: 1 / 3; font-size: .72rem; font-weight: 700; opacity: .7; line-height: 1; }
+.xpbar { display: block; height: 14px; border-radius: 99px; background: #E6E0D2; border: 2px solid var(--ink); overflow: hidden; }
+.xpbar i { display: block; height: 100%; background: linear-gradient(90deg, #7CF5FF, #4DA8FF); border-radius: 99px; transition: width .6s cubic-bezier(.3,1.4,.5,1); }
+.xpbar.big { height: 18px; margin: 6px 0; }
+.xphud .coins { white-space: nowrap; font-size: 1.05rem; } .xphud .mapic { font-size: 1.5rem; }
+.xppop { position: fixed; right: 18px; top: 74px; z-index: 80; pointer-events: none; padding: 6px 14px; border: 3px solid var(--ink); border-radius: 999px; background: linear-gradient(#E6FBFF, #9DE6FF); font-weight: 800; box-shadow: 0 4px 0 var(--ink); }
+.xppop span { margin-left: 6px; }
+.xppop[hidden] { display: none; }
+.xpin { animation: xpin .4s cubic-bezier(.3,1.6,.5,1); }
+@keyframes xpin { from { transform: translateY(-14px) scale(.7); opacity: 0; } }
+.lvlup { position: fixed; left: 50%; top: 18%; z-index: 81; transform: translateX(-50%); pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 28px;
+  border: 5px solid var(--ink); border-radius: 26px; background: linear-gradient(#FFF3B0, var(--sun)); box-shadow: 0 8px 0 var(--ink), 0 0 60px rgba(255,201,60,.9); text-align: center;
+  animation: lvlin .6s cubic-bezier(.3,1.7,.5,1), toastout .5s ease-in 3.1s forwards; }
+.lvlup b { font-size: clamp(2rem, 9vw, 3.4rem); line-height: 1; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; color: #fff; text-shadow: 0 4px 0 var(--ink); }
+.lvlup span { font-weight: 800; font-size: 1.1rem; }
+@keyframes lvlin { from { transform: translateX(-50%) scale(.3) rotate(-10deg); opacity: 0; } }
+.mapscr { gap: 8px; }
+.mtop { display: flex; align-items: center; gap: 10px; }
+.mtop h1 { flex: 1; margin: 0; font-size: clamp(1.5rem, 6.5vw, 2.3rem); }
+.mtop .pill { height: auto; padding: 8px 14px; }
+.mapinfo { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 8px 14px; font-size: 1.05rem; }
+.mapinfo small { display: block; font-weight: 700; opacity: .75; font-size: .8rem; }
+.mapscroll { flex: 1; min-height: 0; overflow: auto; touch-action: pan-y; overscroll-behavior: contain; border: 4px solid var(--ink); border-radius: 26px; box-shadow: 0 6px 0 var(--ink); }
+.mapworld { position: relative; width: 100%; overflow: hidden; }
+.band { position: absolute; left: 0; right: 0; }
+.bname { position: absolute; left: 12px; bottom: 10px; font-weight: 800; font-size: 1.1rem; padding: 2px 12px; border-radius: 999px; background: rgba(255,255,255,.75); border: 2px solid var(--ink); }
+.deco { position: absolute; font-size: 2rem; opacity: .85; transform: translate(-50%, -50%); }
+.mpath { position: absolute; left: 0; top: 0; width: 100%; }
+.mpath polyline { fill: none; stroke: rgba(255,255,255,.8); stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 2 18; }
+.mpath polyline.done { stroke: #FFC93C; stroke-dasharray: none; stroke-width: 12; }
+.node { position: absolute; width: 52px; height: 52px; margin: -26px 0 0 -26px; border-radius: 50%; border: 4px solid var(--ink); display: grid; place-items: center; font-weight: 800; font-size: 1.2rem;
+  background: #ECE6D8; color: #6B7A8C; box-shadow: 0 4px 0 var(--ink); }
+.node.done { background: linear-gradient(#FFF3B0, var(--sun)); color: var(--ink); }
+.node.cur { background: linear-gradient(#B4F0A8, var(--leaf)); color: var(--ink); width: 62px; height: 62px; margin: -31px 0 0 -31px; animation: gogo 1.4s ease-in-out infinite; }
+.node.chest { font-size: 1.6rem; background: linear-gradient(#FFD8F0, #FF9AD0); }
+.me { position: absolute; transform: translateX(-50%); font-size: 3rem; line-height: 1; filter: drop-shadow(0 6px 0 rgba(23,58,94,.3)); animation: bob 1.6s ease-in-out infinite; pointer-events: none; }
+.shop { position: fixed; inset: 0; z-index: 62; display: grid; place-items: center; background: rgba(23,58,94,.55); padding: 16px; }
+.shop[hidden] { display: none; }
+.shopcard { width: min(100%, 620px); max-height: 100%; overflow: auto; background: var(--paper); border: 4px solid var(--ink); border-radius: 26px; padding: 14px; box-shadow: 0 7px 0 var(--ink); }
+.shopgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; }
+.sitem { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border: 3px solid var(--ink); border-radius: 18px; background: #fff; box-shadow: 0 4px 0 var(--ink); font-weight: 800; }
+.sitem span { font-size: 2.6rem; line-height: 1.1; }
+.sitem.on { background: linear-gradient(#B4F0A8, var(--leaf)); }
+.sitem.poor { opacity: .55; }
+.rec { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #EEE8DA; }
+.rec small { display: block; font-weight: 600; color: #4A5D73; }
+.recopts { display: flex; gap: 6px; flex-wrap: wrap; }
+.recopts button { padding: 6px 12px; border: 3px solid var(--ink); border-radius: 999px; background: #fff; font-weight: 800; font-size: .9rem; }
+.recopts button.on { background: var(--sun); }
+.notes { display: block; margin-top: 10px; font-weight: 600; }
+.notes textarea { display: block; width: 100%; margin-top: 6px; font: inherit; padding: 8px 10px; border: 3px solid var(--ink); border-radius: 12px; user-select: text; -webkit-user-select: text; touch-action: auto; }
+
 /* ---------- Progress page (grown-ups) ---------- */
 .report { gap: 10px; }
 .rtop { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -559,6 +628,10 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .rbody { flex: 1; min-height: 0; overflow: auto; touch-action: pan-y; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; user-select: text; -webkit-user-select: text; }
 .rcardp { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 12px 14px; box-shadow: 0 4px 0 rgba(23,58,94,.25); }
 .rcardp h2 { margin: 0 0 8px; font-size: 1.15rem; }
+.rcardp.claude { background: linear-gradient(#F3F8FF, #E3EEFF); }
+.rcardp.claude p { margin: 0 0 8px; font-weight: 600; line-height: 1.4; }
+.rcardp.claude small { display: inline-block; font-weight: 800; color: #3D5A80; margin-right: 6px; }
+.fine { margin: 6px 0 0; font-size: .82rem; color: #4A5D73; font-weight: 600; }
 .rstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
 .rstat { background: #fff; border: 2px solid #D8D2C4; border-radius: 14px; padding: 8px 12px; }
 .rstat b { display: block; font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -639,6 +712,9 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .whocard { position: relative; overflow: hidden; background: linear-gradient(170deg, color-mix(in srgb, var(--c) 65%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 82%, #000)); box-shadow: 0 7px 0 var(--ink), 0 16px 30px rgba(23,58,94,.22); }
 .whocard::before { content: ""; position: absolute; left: 8%; right: 8%; top: 4%; height: 28%; border-radius: 999px; background: linear-gradient(rgba(255,255,255,.6), rgba(255,255,255,0)); pointer-events: none; }
 .whocard > * { position: relative; }
+.whocard .em.duo { font-size: clamp(2.4rem, 10vw, 3.8rem); letter-spacing: -.08em; white-space: nowrap; }
+.whocard .em.duo i { font-style: normal; display: inline-block; font-size: .7em; vertical-align: middle; animation: bang .9s ease-in-out infinite; }
+@keyframes bang { 50% { transform: scale(1.35) rotate(12deg); } }
 .whocard .em { font-size: clamp(3.5rem, 16vw, 5.5rem); line-height: 1.1; filter: drop-shadow(0 6px 0 rgba(23,58,94,.25)); animation: bob 3s ease-in-out infinite; }
 .whocard:nth-child(2) .em { animation-delay: -1.5s; }
 .picker h1 { -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; color: var(--paper); text-shadow: 0 5px 0 var(--ink); animation: letterbob 3s ease-in-out infinite; --r: -2deg; }
@@ -687,20 +763,28 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   <section id="picker" class="screen picker" hidden>
     <h1>Who's playing?</h1>
     <div class="who">
-      <button data-p="little" class="whocard" style="--c:var(--sun)"><span class="em">🐣</span><b id="name_little">Luka</b></button>
-      <button data-p="big" class="whocard" style="--c:var(--sky)"><span class="em">🚀</span><b id="name_big">Enzo</b></button>
-      <button data-p="keira" class="whocard" style="--c:var(--bubble)"><span class="em">🦄</span><b id="name_keira">Keira</b></button>
+      <button data-p="little" class="whocard" style="--c:var(--sun)"><span class="em duo">🐘<i>💥</i>👻</span><b id="name_little">Luka</b></button>
+      <button data-p="big" class="whocard" style="--c:var(--sky)"><span class="em duo">🦑<i>💥</i>🐋</span><b id="name_big">Enzo</b></button>
+      <button data-p="keira" class="whocard" style="--c:var(--bubble)"><span class="em">🐼</span><b id="name_keira">Keira</b></button>
     </div>
   </section>
 
+  <section id="map" class="screen mapscr" hidden>
+    <div class="mtop"><button id="mapClose" class="tool big" aria-label="Back">✖</button><h1>🗺️ Adventure</h1><button id="shopBtn" class="pill">🛒 Shop</button><span class="pill">🪙 <b id="mapCoins">0</b></span></div>
+    <div class="mapinfo" id="mapInfo"></div>
+    <div class="mapscroll" id="mapScroll"><div class="mapworld" id="mapWorld"></div></div>
+    <div class="shop" id="shop" hidden><div class="shopcard"><div class="mtop"><h1>🛒 Shop</h1><span class="pill">🪙 <b id="shopCoins">0</b></span><button id="shopClose" class="tool big" aria-label="Close">✖</button></div><div class="shopgrid" id="shopGrid"></div></div></div>
+  </section>
+
   <section id="report" class="screen report" hidden>
-    <div class="rtop"><h1>📊 Progress</h1><button id="repCopy" class="pill">📋 Copy report for Claude</button><button id="repClose" class="tool big" aria-label="Close">✖</button></div>
+    <div class="rtop"><h1>👪 Parent dashboard</h1><button id="repCopy" class="pill">📋 Copy report for Claude</button><button id="repClose" class="tool big" aria-label="Close">✖</button></div>
     <div class="rtabs" id="repTabs"></div>
     <div class="rbody" id="repBody"></div>
   </section>
 
   <section id="hub" class="screen hub">
     <h1 id="logo" aria-label="Little Taps"></h1>
+    <button id="xpHud" class="xphud" aria-label="Adventure map"><span class="av" id="hudAv">🐣</span><span class="hl"><b id="hudLv">Level 1</b><span class="xpbar"><i id="hudBar"></i></span><small id="hudNext"></small></span><span class="coins">🪙 <b id="hudCoins">0</b></span><span class="mapic">🗺️</span></button>
     <div class="tabs" id="tabs"></div>
     <div class="tiles" id="tiles"></div>
     <div class="hubfoot">
@@ -727,9 +811,9 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   <div class="sheetcard" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <h2 id="sheetTitle">Grown-ups</h2>
     <p class="ver" id="appVersion"></p>
-    <button id="openReport" class="done" style="margin-bottom:12px">📊 See progress (answers, topics, what needs practice)</button>
+    <button id="openReport" class="done" style="margin-bottom:12px">👪 Parent dashboard (progress, Claude's notes, your choices)</button>
     <h3>Players</h3>
-    <div class="names"><label>🐣 <input id="nm_little" maxlength="16" placeholder="Luka" autocomplete="off"></label><label>🚀 <input id="nm_big" maxlength="16" placeholder="Enzo" autocomplete="off"></label><label>🦄 <input id="nm_keira" maxlength="16" placeholder="Keira" autocomplete="off"></label></div>
+    <div class="names"><label>🐘 <input id="nm_little" maxlength="16" placeholder="Luka" autocomplete="off"></label><label>🦑 <input id="nm_big" maxlength="16" placeholder="Enzo" autocomplete="off"></label><label>🐼 <input id="nm_keira" maxlength="16" placeholder="Keira" autocomplete="off"></label></div>
     <p class="ver">Names are saved only on this device.</p>
     <h3>Voice</h3>
     <div class="seg" id="voiceMode" style="margin-bottom:12px">
@@ -1038,7 +1122,66 @@ window.LT = (() => {
     ["What do we call an animal that eats only plants?", "herbivore", ["carnivore", "predator", "omnivore"], "An animal that eats only plants is a herbivore.", 5],
     ["What do we call an animal that eats plants and meat?", "omnivore", ["herbivore", "carnivore", "insect"], "An animal that eats plants and meat is an omnivore.", 5],
   ];
-  const PRO_PHRASES3 = ["Which word fits the blank?", "million", "point", "to the nearest thousand.", "to the nearest ten thousand.", "to the nearest hundred thousand.",
+  // Short original reading passages, NYS-style questions. Levels: 2 = grade 3, 4 = grade 4, 5-6 = grade 5.
+  // Each question: [question, answer, wrong answers, explanation, skill].
+  const READING = [
+    { lv: 2, title: "The Lost Kite", text: "Mia's red kite flew high over the park. Suddenly, a strong gust of wind snapped the string. The kite drifted over the trees and landed on the roof of the library. Mia's brother climbed a ladder with Dad's help and brought it back down.",
+      qs: [["Why did the kite fly away?", "The wind snapped the string.", ["Mia let go of it.", "The kite was too heavy.", "Her brother pulled it."], "The text says a strong gust of wind snapped the string.", "cause and effect"],
+           ["Where did the kite land?", "on the library roof", ["in a tall tree", "in the pond", "on Mia's house"], "The kite landed on the roof of the library.", "key details"]] },
+    { lv: 2, title: "Busy Beavers", text: "Beavers are great builders. They cut down trees with their strong front teeth. Then they use the branches and mud to build dams across streams. The dams make deep, calm ponds where beavers build their homes, called lodges.",
+      qs: [["What is this text mostly about?", "how beavers build", ["why trees are tall", "how fish swim", "where streams begin"], "Most of the sentences tell how beavers build dams and lodges.", "main idea"],
+           ["What is a lodge?", "a beaver's home", ["a kind of tree", "a beaver's tooth", "a small stream"], "The text says beaver homes are called lodges.", "vocabulary in context"]] },
+    { lv: 2, title: "Rainy Day", text: "Leo wanted to play soccer, but rain poured down all morning. He sighed and pressed his nose against the window. Then Grandma pulled out a box of old board games. By lunchtime, Leo was laughing so hard he forgot about the rain.",
+      qs: [["How did Leo feel at the beginning?", "disappointed", ["excited", "proud", "scared"], "He sighed because he could not play soccer, so he felt disappointed.", "character"],
+           ["What changed Leo's mood?", "playing games with Grandma", ["the rain stopping", "a soccer game", "eating lunch"], "Grandma's board games made Leo laugh.", "cause and effect"]] },
+    { lv: 3, title: "The Monarch's Journey", text: "Every fall, millions of monarch butterflies fly south to Mexico. Some travel more than 2,000 miles. Scientists believe the butterflies use the sun to find their way. In spring, the monarchs begin the long trip back north.",
+      qs: [["How do scientists think monarchs find their way?", "by using the sun", ["by following birds", "by smelling flowers", "by using the moon"], "The text says scientists believe they use the sun.", "key details"],
+           ["How is this text mostly organized?", "in time order", ["as a list of problems", "by comparing two animals", "as questions and answers"], "It follows the butterflies from fall to spring, in time order.", "text structure"]] },
+    { lv: 4, title: "The Science Fair", text: "Priya's volcano would not erupt. She had mixed the baking soda and vinegar twice, but only a small fizz came out. Instead of giving up, she read her notes again and noticed she had used too little baking soda. On her third try, foam bubbled over the top, and the judges clapped.",
+      qs: [["What lesson does this story teach?", "Keep trying and learn from mistakes.", ["Science fairs are boring.", "Always work with a partner.", "Volcanoes are dangerous."], "Priya did not give up, and she fixed her mistake.", "theme"],
+           ["Why didn't the volcano work at first?", "She used too little baking soda.", ["The vinegar was too old.", "The judges were late.", "The room was too cold."], "She noticed she had used too little baking soda.", "cause and effect"]] },
+    { lv: 4, title: "Two Kinds of Bears", text: "Polar bears and grizzly bears are both large and strong. Polar bears live in the icy Arctic and hunt seals. Their white fur helps them hide in the snow. Grizzly bears live in forests and mountains, and they eat berries, roots and fish.",
+      qs: [["How does the author organize this text?", "by comparing and contrasting", ["by telling a story", "by giving steps to follow", "in time order"], "The author shows how the two bears are alike and different.", "text structure"],
+           ["Why is white fur helpful to polar bears?", "It helps them hide in the snow.", ["It keeps them cool.", "It helps them swim faster.", "It scares other bears."], "The text says white fur helps them hide in the snow.", "key details"]] },
+    { lv: 4, title: "The Storm", text: "The thunder was a drum rolling across the sky. Rain tapped on the roof like tiny fingers. When the storm finally ended, the whole world sparkled as if it had been washed clean.",
+      qs: [["Which phrase is a simile?", "like tiny fingers", ["was a drum", "across the sky", "the storm finally ended"], "A simile compares two things using like or as.", "figurative language"],
+           ["What does 'The thunder was a drum' mean?", "The thunder was loud and booming.", ["Someone played a drum.", "The thunder was quiet.", "The rain stopped."], "It is a metaphor. The thunder sounded like a booming drum.", "figurative language"]] },
+    { lv: 5, title: "The Community Garden", text: "When the empty lot on Pine Street filled with trash, Ms. Alvarez decided something had to change. She asked neighbors to help clean it up, and within a month they had planted tomatoes, beans and sunflowers. Now families meet there every weekend, and the extra vegetables go to the local food pantry.",
+      qs: [["Which sentence best tells the main idea?", "Neighbors turned an empty lot into a garden that helps the community.", ["Ms. Alvarez likes sunflowers.", "Pine Street has a food pantry.", "Tomatoes grow very fast."], "The whole passage shows how the lot became a helpful garden.", "main idea"],
+           ["What problem did Ms. Alvarez want to solve?", "The lot was full of trash.", ["The food pantry was closed.", "Her garden needed water.", "Families had no park."], "The lot filled with trash, so she decided to change it.", "problem and solution"]] },
+    { lv: 5, title: "Summer Camp", text: "I was sure I would hate summer camp. I didn't know anyone, and the cabins smelled like old socks. But on the second night, my bunkmate Tasha taught me how to find the Big Dipper. By the end of the week, I was the one begging my parents to sign me up again.",
+      qs: [["From which point of view is this story told?", "first person", ["third person", "second person", "a narrator outside the story"], "The narrator uses I and me, so it is first person.", "point of view"],
+           ["Which theme fits this story best?", "New experiences can turn out better than we expect.", ["Camping is always fun.", "Old socks smell bad.", "Stars are hard to find."], "The narrator expected to hate camp but ended up loving it.", "theme"]] },
+    { lv: 5, title: "Recycling Cans", text: "Recycling one aluminum can saves enough energy to run a TV for about three hours. Aluminum can be recycled over and over without losing quality. A recycled can may be back on a store shelf in as little as 60 days.",
+      qs: [["What can you conclude from this text?", "Recycling aluminum saves energy and materials.", ["Aluminum cannot be recycled.", "TVs are made from cans.", "Cans take years to recycle."], "The facts show that recycling saves energy and lets the metal be used again.", "inference"],
+           ["In this text, what does 'quality' mean?", "how good something is", ["how heavy something is", "how old something is", "how much it costs"], "Losing quality means getting worse, so quality is how good something is.", "vocabulary in context"]] },
+    { lv: 6, title: "The Recital", text: "Jaden had practiced piano for weeks, but on the day of the recital he had butterflies in his stomach. His teacher smiled and said, 'Break a leg!' When he finished, the crowd gave him a standing ovation, and Jaden felt on top of the world.",
+      qs: [["What does 'butterflies in his stomach' mean?", "He felt nervous.", ["He felt hungry.", "He was sick.", "He saw butterflies."], "Butterflies in your stomach is an idiom for feeling nervous.", "figurative language"],
+           ["What does 'on top of the world' mean?", "very happy", ["on a mountain", "very tired", "a little scared"], "Feeling on top of the world means feeling very happy.", "figurative language"]] },
+    { lv: 6, title: "Ben Franklin's Kite", text: "Benjamin Franklin was curious about electricity. In 1752, he flew a kite during a storm to show that lightning is electricity. This discovery led him to invent the lightning rod, a metal rod that protects buildings by carrying lightning safely into the ground.",
+      qs: [["What did Franklin's kite experiment lead to?", "the invention of the lightning rod", ["the first light bulb", "a new kind of kite", "the end of storms"], "The discovery led him to invent the lightning rod.", "cause and effect"],
+           ["How does a lightning rod protect a building?", "It carries lightning into the ground.", ["It stops storms from forming.", "It makes the building taller.", "It turns lightning into light."], "The rod carries lightning safely into the ground.", "key details"]] },
+  ];
+  const VOCAB_QA2 = [
+    ["s:My dog is ___ than your dog.", "bigger", ["more big", "biggest", "bigest"], "Use the ending er to compare two things.", 3],
+    ["s:This is the ___ day of the year.", "hottest", ["hotter", "most hot", "hotest"], "Use the ending est to compare three or more things.", 3],
+    ["s:The girl ___ won the race is my sister.", "who", ["which", "what", "whose"], "Use who for people.", 4],
+    ["s:Right now, we ___ dinner.", "are eating", ["ate", "eats", "have eaten"], "Are eating tells what is happening right now.", 4],
+    ["s:By the time we arrived, the movie ___ already started.", "had", ["has", "have", "is"], "Had started shows it happened before we arrived.", 5],
+    ["s:You can have either juice ___ milk.", "or", ["nor", "and", "but"], "Either goes with or.", 5],
+    ["s:Neither the cat ___ the dog was hungry.", "nor", ["or", "and", "but"], "Neither goes with nor.", 5],
+    ["Which sentence uses commas correctly?", "We bought apples, bananas, and grapes.", ["We bought, apples bananas and grapes.", "We bought apples bananas, and grapes.", "We, bought apples, bananas and grapes."], "Use commas to separate the items in a list.", 5],
+    ["What does the root tele mean in telephone and telescope?", "far", ["sound", "small", "write"], "Tele means far.", 5],
+    ["What does the root graph mean in autograph and paragraph?", "write", ["see", "sound", "far"], "Graph means write or draw.", 6],
+    ["What does the root bio mean in biology?", "life", ["earth", "water", "light"], "Bio means life.", 6],
+    ["Which word is a preposition?", "under", ["quickly", "jump", "happy"], "A preposition shows where or when, like under.", 5],
+    ["Which word is an interjection?", "Wow!", ["Walk", "Wide", "Wall"], "An interjection shows strong feeling, like wow.", 6],
+    ["s:The ___ puppy would not stop jumping and running around.", "energetic", ["sleepy", "tiny", "quiet"], "Jumping and running are clues that the puppy is energetic.", 5],
+    ["s:I wanted to play outside. ___, it was raining.", "However", ["Because", "Also", "For example"], "However shows a contrast between two ideas.", 5],
+    ["Which one is a complete sentence?", "The dog barked at the mailman.", ["Barked at the mailman.", "The dog at the mailman.", "When the dog barked."], "A complete sentence has a subject, a verb and a complete thought.", 4],
+    ["s:The trail was so ___ that we had to hold the rope to climb it.", "steep", ["flat", "short", "smooth"], "Holding a rope to climb is a clue that the trail is steep.", 5],
+  ];
+  const PRO_PHRASES3 = ["minutes is", "oh", "o'clock", "so the answer is", "So one more is needed.", "cubic centimeters.", "square feet.", "Which word fits the blank?", "million", "point", "to the nearest thousand.", "to the nearest ten thousand.", "to the nearest hundred thousand.",
     "Which number is a factor of", "Which number is prime?", "is prime. It can only be divided by one and itself.", "is in the tenths place, so it is worth",
     "is in the hundredths place, so it is worth", "remainder", "is the same as", "is the same as how many out of", "Which fraction is the biggest?", "is the biggest.",
     "A rectangle is", "by", "What is its area?", "What is its perimeter?", "The area is", "The perimeter is", "which is", "Multiply first.", "of",
@@ -1054,7 +1197,7 @@ window.LT = (() => {
   const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
     "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
     "Make the number in one swipe!","Shoot the letters in order!","Count by",
-    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
+    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Adventure map","Treasure chest!","You bought it!","Not enough coins yet.","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
     "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.","Fill rows to clear them. Each line is worth the times table number!"];
   function voiceLines() {
     const L = {};
@@ -1092,8 +1235,9 @@ window.LT = (() => {
     Object.values(MISSIONS).flat().forEach(m => [false, true].forEach(big => { const t = missionText(m, big); if (t) add("mis:" + t, t + "."); }));
     PRO_WORDS.forEach(([w]) => add(w));
     PRO_PHRASES3.forEach(p => add(p)); PRO_SPELL2.forEach(w => add(w));
-    [...VOCAB_QA, ...SCI_FACTS].forEach(([q, , , expl]) => { add(q, q.startsWith("s:") ? q.slice(2).replace("___", "blank") : q); add(expl); });
-    [["little", "Looka"], ["big", "Enzo"], ["keira", "Keera"]].forEach(([k, n]) => add("hi:" + k, `Hi ${n}!`)); // spelled the way the names are said
+    READING.forEach(ps => ps.qs.forEach(([q, , , expl]) => { add(q); add(expl); }));
+    [...VOCAB_QA, ...VOCAB_QA2, ...SCI_FACTS].forEach(([q, , , expl]) => { add(q, q.startsWith("s:") ? q.slice(2).replace("___", "blank") : q); add(expl); });
+    [["little", "Luka"], ["big", "Enzo"], ["keira", "Keera"]].forEach(([k, n]) => add("hi:" + k, `Hi ${n}!`)); // Luka's exact sound is pinned in tools/make_voice.py
     [...PRO_WORDS.map(x => x[0]), ...PRO_SPELL].forEach(w => add("spell:" + w, `Can you spell ${w}?`));
     [...PRO_SPELL, ...OPPOSITES.flat(), ...SYNONYMS.flat(), ...PLURALS.flat(), ...SYLLABLES.map(x => x[0])].forEach(w => add(w));
     Object.entries(ANIMAL_INFO).forEach(([n, [cls, d]]) => {
@@ -1106,7 +1250,7 @@ window.LT = (() => {
     Object.entries(COUNTBY).forEach(([n, w]) => add("countby:" + n, `Count by ${w}!`));
     return L;
   }
-  return { PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
+  return { READING, VOCAB_QA2, PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
     VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
 })();
 </script>
@@ -1114,7 +1258,7 @@ window.LT = (() => {
 <script>
 (() => {
 "use strict";
-const { PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const { READING, VOCAB_QA2, PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
 const stickerSet = () => PRO ? PRO_STICKERS : STICKERS;
 const $ = (s, el = document) => el.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -1125,7 +1269,8 @@ const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.
 const PAPER = "#FFFDF6";
 // Three players, each with their own levels, stickers, scores and brain-break clock. Luka keeps the original keys.
 // Enzo and Keira both get the big-kid games; Keira starts the learning levels higher. Voice settings and names are shared.
-const PLAYERS = { little: { name: "Luka", em: "🐣", c: "--sun", pre: "" }, big: { name: "Enzo", em: "🚀", c: "--sky", pre: "p2." }, keira: { name: "Keira", em: "🦄", c: "--bubble", pre: "p3." } };
+const PLAYERS = { little: { name: "Luka", em: "🐘💥👻", c: "--sun", pre: "" }, big: { name: "Enzo", em: "🦑💥🐋", c: "--sky", pre: "p2." }, keira: { name: "Keira", em: "🐼", c: "--bubble", pre: "p3." } };
+const isDuo = em => [...String(em)].length > 2; // the "fighting" icons are three emoji: two creatures and a bang
 const GLOBAL_KEYS = /^(voiceMode|voice|rate|profile|names|vcMarked)$/;
 let PROFILE = (() => { try { return JSON.parse(localStorage.getItem("littletaps.profile")); } catch (e) { return null; } })();
 if (!PLAYERS[PROFILE]) PROFILE = null;
@@ -1136,7 +1281,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "20 (Nov 26, progress + pause)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "22 (Nov 26, parent dashboard, new icons)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1418,9 +1563,10 @@ function floatUp(parent, x, y, content) {
 // The big kid starts the shared games further along.
 const PRO_START = { robot: 6, balance: 5, words: 4, puzzle: 5, runner: 5 };
 // Keira starts the learning games around a 4th-5th grade level; every level then adapts to how she does.
-const KEIRA_START = { numbers: 4, math: 4, vocab: 4, science: 4, times: 4, spell: 4, pairs: 3, shop: 3, robot: 7, balance: 6, words: 5, puzzle: 6, runner: 6, maze: 2 };
-const SKILL_START = { keira: { numbers: 4, math: 4, vocab: 4, science: 4 } };
-const levelOf = id => store.get("lvl." + id, PROFILE === "keira" ? (KEIRA_START[id] || PRO_START[id] || 1) : PRO ? (PRO_START[id] || 1) : 1);
+const KEIRA_START = { numbers: 5, math: 5, story: 4, reading: 5, vocab: 5, science: 4, times: 4, spell: 4, pairs: 3, shop: 3, robot: 7, balance: 6, words: 5, puzzle: 6, runner: 6, maze: 2 };
+// Starting levels (grade bands: 1-2 = grade 3, 3-4 = grade 4, 5+ = grade 5). Keira: 5th grade; Enzo: 3rd grade, climbing as he gets them right.
+const SKILL_START = { keira: { numbers: 5, math: 5, story: 4, reading: 5, vocab: 5, science: 4 }, big: { story: 2, reading: 2 } };
+const levelOf = id => store.get("lvl." + id, PROFILE === "keira" ? (KEIRA_START[id] || PRO_START[id] || 1) : PRO ? ((SKILL_START.big || {})[id] || PRO_START[id] || 1) : 1);
 const skillOf = t => store.get("skill." + t, (SKILL_START[PROFILE] || {})[t] || 1);
 const setLevel = (id, v) => store.set("lvl." + id, v);
 // Shows a new sticker (or a star once the book is full), then calls next().
@@ -1448,6 +1594,7 @@ function reward(lead, next) {
 const SCI_TOPICS = [[/heart|lung|brain|body|breathe/i, "Human body"], [/plant|roots/i, "Plants"], [/solid|liquid|\bgas\b|freez|evapor|condens|vapor/i, "Matter and the water cycle"],
   [/planet|\bsun\b|star|Earth|moon|day and night/i, "Space and Earth"], [/gravity|magnet|force/i, "Forces and magnets"], [/energy/i, "Energy"], [/insect|spider|caterpillar|bees|mammal|herbivore|omnivore|animal/i, "Animals"]];
 function conceptOf(r, track) {
+  if (r._concept) return r._concept;
   const keys = (r.ask || []).filter(x => typeof x === "string"), k0 = keys[0] || "", has = w => keys.includes(w), nums = (r.ask || []).filter(x => typeof x === "number");
   if (track === "times") return has("divided by") ? "Division facts" : "Times tables";
   if (track === "spell" || k0.startsWith("spell:")) return "Spelling words";
@@ -1512,14 +1659,59 @@ function logAnswer(src, track, r, ok, picked) {
     q: askText(r.ask || []).slice(0, 140), a: labelOf(r, r.answer), p: picked == null ? null : labelOf(r, picked) });
   if (log.length > 2500) log.splice(0, log.length - 2500);
   store.set("log", log);
+  award(ok ? 10 : 2, ok ? 1 : 0);
+}
+// ---------- XP, coins and levels (per player) ----------
+// Right answer +10 XP and a coin; a miss still earns +2 XP for trying. Brain break +30 XP, mission +50 XP.
+// Each level needs a little more XP than the last; every 5th level opens a treasure chest (+50 coins).
+function levelInfo(xp) { let lv = 1, need = 100, rest = xp; while (rest >= need) { rest -= need; lv++; need = 100 + 40 * (lv - 1); } return { lv, rest, need }; }
+let xpPopEl = null, xpPopT = 0, xpPopSum = { xp: 0, c: 0 };
+function xpPop(xp, c) {
+  xpPopSum.xp += xp; xpPopSum.c += c;
+  if (!xpPopEl || !xpPopEl.isConnected) { xpPopEl = document.createElement("div"); xpPopEl.className = "xppop"; document.body.appendChild(xpPopEl); }
+  xpPopEl.innerHTML = `+${xpPopSum.xp} XP${xpPopSum.c ? ` <span>🪙 +${xpPopSum.c}</span>` : ""}`; replay(xpPopEl, "xpin"); xpPopEl.hidden = false;
+  clearTimeout(xpPopT); xpPopT = setTimeout(() => { xpPopEl.hidden = true; xpPopSum = { xp: 0, c: 0 }; }, 1800);
+}
+function award(xp, coins = 0) {
+  if (!PROFILE) return;
+  const before = levelInfo(store.get("xp", 0)).lv, total = store.get("xp", 0) + xp;
+  store.set("xp", total); if (coins) store.set("coins", store.get("coins", 0) + coins);
+  xpPop(xp, coins);
+  const after = levelInfo(total).lv;
+  if (after > before) levelUp(after);
+  updateHud();
+}
+function levelUp(lv) {
+  const chest = lv % 5 === 0;
+  if (chest) store.set("coins", store.get("coins", 0) + 50);
+  const b = document.createElement("div"); b.className = "lvlup";
+  b.innerHTML = `<b>⬆️ Level ${lv}!</b>${chest ? "<span>🎁 Treasure chest: +50 coins</span>" : `<span>${worldOf(lv).name}</span>`}`;
+  document.body.appendChild(b); setTimeout(() => b.remove(), 3600);
+  celebrate(); sfx.yay(); setTimeout(() => say("Level up!", chest ? "Treasure chest!" : null), 900);
+}
+const WORLDS = [["Sunny Meadow", "🌼", "#BFF0A8", "#8FD67A", ["🌼", "🌷", "🦋", "🐞"]], ["Whispering Forest", "🌲", "#A8DDB0", "#5FAE6E", ["🌲", "🍄", "🦊", "🦉"]],
+  ["Sandy Desert", "🏜️", "#FFE3A3", "#F2BE6B", ["🌵", "🐪", "🦂", "☀️"]], ["Frosty Peaks", "❄️", "#E3F2FF", "#A9CDF2", ["❄️", "⛄", "🐧", "🏔️"]],
+  ["Lava Land", "🌋", "#FFC7A8", "#F08A6B", ["🌋", "🔥", "🦖", "💎"]], ["Starry Space", "🚀", "#B9B4F2", "#6E66C9", ["⭐", "🪐", "🛸", "🌙"]], ["Rainbow Kingdom", "🌈", "#FFD1EC", "#C9A3FF", ["🌈", "🏰", "🦄", "👑"]]];
+const worldOf = lv => { const w = WORLDS[Math.min(WORLDS.length - 1, Math.floor((lv - 1) / 10))]; return { name: w[0], em: w[1], c1: w[2], c2: w[3], deco: w[4] }; };
+const avatarOf = () => store.get("avatar", PLAYERS[PROFILE || "little"].em);
+function updateHud() {
+  const hud = $("#xpHud"); if (!hud || !PROFILE) return;
+  const L = levelInfo(store.get("xp", 0));
+  $("#hudAv").textContent = avatarOf(); $("#hudAv").classList.toggle("duo", isDuo(avatarOf())); $("#hudLv").textContent = `Level ${L.lv}`; $("#hudBar").style.width = Math.round(L.rest / L.need * 100) + "%";
+  $("#hudCoins").textContent = store.get("coins", 0); $("#hudNext").textContent = `${L.need - L.rest} XP to go`;
 }
 // Accuracy on a topic over the last n tries.
 function mastery(log, c, n = 20) { const xs = log.filter(e => e.c === c).slice(-n); return { n: xs.length, acc: xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : null }; }
+// Parent choices from the progress page: practice a topic more, less, or skip it for now. Prefix match ("Word problems" covers "Word problems: money").
+const planOf = () => store.get("plan", {}) || {};
+const focusOf = (plan, c) => { const f = plan.focus || {}; for (const k in f) if (c === k || c.startsWith(k + ":")) return f[k]; return null; };
+const FOCUS_W = { more: 3, less: .4, skip: .02 };
 // Makes several candidate questions and favours topics that need practice or haven't been tried much (never the same topic twice in a row if avoidable).
 function pickRound(make, lvl, track, lastC) {
   const log = store.get("log", []).slice(-500), cands = [];
   for (let i = 0; i < 6; i++) { const r = make(lvl); r._lv = lvl; r._c = conceptOf(r, track); cands.push(r); }
-  const w = cands.map(r => { const m = mastery(log, r._c); let x = m.n < 4 ? 1.1 : .2 + (1 - m.acc) * 1.8; if (r._c === lastC) x *= .3; return x; });
+  const plan = planOf();
+  const w = cands.map(r => { const m = mastery(log, r._c); let x = m.n < 4 ? 1.1 : .2 + (1 - m.acc) * 1.8; if (r._c === lastC) x *= .3; const f = focusOf(plan, r._c); if (f) x *= FOCUS_W[f] || 1; return x; });
   let roll = Math.random() * w.reduce((a, b) => a + b, 0), pickd = cands[0];
   for (let i = 0; i < cands.length; i++) { roll -= w[i]; if (roll <= 0) { pickd = cands[i]; break; } }
   if (pickd._qa) { recentQA.push(pickd._qa); if (recentQA.length > 18) recentQA.shift(); }
@@ -1551,7 +1743,7 @@ function missionsFor(id) {
   function complete(k) {
     const ms = m(k);
     do { st.i[k] = st.next++; } while (st.i.filter(x => x % all.length === st.i[k] % all.length).length > 1);
-    st.p[k] = 0; st.done++;
+    st.p[k] = 0; st.done++; setTimeout(() => award(50, 10), 1200);
     if (st.done % 3 === 0) M.due = true;
     const host = $("#game");
     if (host) {
@@ -1594,6 +1786,8 @@ const COACH = {
   animals: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
   vocab: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
   science: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
+  story: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
+  reading: { g: "tap", line: "Listen, then tap the answer.", from: ".choices", quiz: true },
   spell: { g: "tap", line: "Tap the letters to spell the word.", from: ".letters" },
   trace: { g: "drag", line: "Put your finger on the green dot and follow the arrows.", from: [.35, .3], to: [.5, .7], first: 9 },
   balloons: { g: "tap", line: "Tap the balloons to pop them!", from: ".balloon" },
@@ -1666,10 +1860,12 @@ document.addEventListener("visibilitychange", () => { if (document.hidden) saveG
 window.addEventListener("pagehide", saveGateClock);
 function openGate(onDone) {
   saveGateClock();
-  const tracks = PRO ? [["numbers", numberRoundPro], ["math", mathRoundPro], ["vocab", vocabRound], ["science", scienceRound]] : GATE_TRACKS;
+  const tracks = PRO ? [["numbers", numberRoundPro], ["math", mathRoundPro], ["story", wordProblemRound], ["reading", readingRound], ["vocab", vocabRound], ["science", scienceRound]] : GATE_TRACKS;
   // Topic area for this break: weaker and less recently used areas come up more often.
   const recent = store.get("log", []).filter(e => e.s === "b").slice(-200), lastTrack = store.get("gateLast", "");
-  const tw = tracks.map(([k]) => { const xs = recent.filter(e => e.k === k).slice(-12), acc = xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : .5; return (k === lastTrack ? .25 : 1) * (.6 + (1 - acc) * 1.4); });
+  const plan = planOf(), focusTracks = new Set(store.get("log", []).filter(e => focusOf(plan, e.c) === "more").map(e => e.k));
+  Object.entries(plan.focusTrack || {}).forEach(([k, v]) => { if (v === "more") focusTracks.add(k); });
+  const tw = tracks.map(([k]) => { const xs = recent.filter(e => e.k === k).slice(-12), acc = xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : .5; return (k === lastTrack ? .25 : 1) * (.6 + (1 - acc) * 1.4) * (focusTracks.has(k) ? 2.5 : 1); });
   let roll = Math.random() * tw.reduce((a, b) => a + b, 0), ti = 0; while (ti < tracks.length - 1 && (roll -= tw[ti]) > 0) ti++;
   const forced = store.get("gateNext", null); if (forced != null) { ti = forced % tracks.length; store.set("gateNext", null); } // used by automated tests
   const [track, make] = tracks[ti], Q = PRO ? 4 : 3, MAXQ = Q + (PRO ? 4 : 2);
@@ -1714,7 +1910,7 @@ function openGate(onDone) {
   }
   function next(first) {
     busy = false; round = pickRound(make, lvl, track, round && round._c);
-    showPrompt(promptEl, round);
+    showPrompt(promptEl, round); body.classList.toggle("reading", round.kind === "long");
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", ask);
     wrap.innerHTML = "";
     const cols = shuffle(COLORS);
@@ -1753,14 +1949,14 @@ function openGate(onDone) {
     store.set("skill." + track, lvl);
     gateClock = 0; saveGateClock(); // the break counts as done only now
     const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
-    store.set("breaks", store.get("breaks", 0) + 1);
+    store.set("breaks", store.get("breaks", 0) + 1); award(stars === 3 ? 40 : 30, 5);
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
     // The question window goes away right away; the game stays paused (and visible) until they tap ▶.
     later(() => { ov.remove(); onDone(); pauseGame(`${"⭐".repeat(stars)}${"✨".repeat(3 - stars)} Brain break done!`); }, 900);
   }
   next(true);
 }
-if (window.__debug) Object.assign(window.__debug, { openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
+if (window.__debug) Object.assign(window.__debug, { openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ wordProblemRound, readingRound, numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
 // Picks a column count that gives the biggest cells for n items.
 const fitGrid = (el, n, aspect = 1, pad = 28, gap = 10) => {
   const W = el.clientWidth - pad, H = el.clientHeight - pad;
@@ -1800,14 +1996,14 @@ function quizGame(root, tools, id, bg, makeRound) {
   }
   function levelDone() {
     const up = mistakes <= 4;
-    if (up) { level++; setLevel(id, level); }
+    if (up) { level++; setLevel(id, level); award(40, 5); }
     done = 0; mistakes = 0; drawChip();
     reward(up ? "Level complete!" : "Let's practice this level again.", next);
   }
   function next() {
     busy = false; wrongHere = 0;
     round = pickRound(makeRound, level, id, round && round._c);
-    showPrompt(promptEl, round);
+    showPrompt(promptEl, round); field.classList.toggle("reading", round.kind === "long");
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", () => { ask(); armIdle(); });
     wrap.innerHTML = "";
     const cols = shuffle(COLORS);
@@ -2211,6 +2407,72 @@ function misspell(w) {
   ];
   return pick(ops)(w);
 }
+// ---------- Word problems, by grade (NYS Next Generation standards): level 1-2 = grade 3, 3-4 = grade 4, 5+ = grade 5 ----------
+const WP_NAMES = ["Maya", "Leo", "Ava", "Sam", "Zoe", "Noah", "Lily", "Max", "Ella", "Ben", "Nora", "Omar", "Priya", "Diego", "Hana", "Jack", "Mila", "Theo"];
+const WP_ITEMS = ["stickers", "marbles", "cookies", "pencils", "shells", "cards", "beads", "stamps"];
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+const choices4 = (ans, alts, pad) => {
+  const out = [ans], key = x => String(x);
+  for (const a of alts) if (a != null && key(a) !== key(ans) && !out.some(o => key(o) === key(a)) && !(typeof a === "number" && (!(a > 0) || !Number.isFinite(a)))) out.push(a);
+  let k = 1; while (out.length < 4 && k < 30) { const v = pad(k++); if (!out.some(o => key(o) === key(v))) out.push(v); }
+  return shuffle(out.slice(0, 4));
+};
+const WP_TYPES = { 3: ["groups", "share", "twostep", "packs", "area", "fracpart", "compare", "elapsed", "tens"], 4: ["times", "timesback", "multi", "vans", "fullboxes", "leftover", "money", "fracadd", "fracwhole", "convert", "books"],
+  5: ["fracunlike", "fracof", "change", "snack", "volume", "bigdiv", "bigdiv2", "metric", "convert5", "tickets", "fracshare", "fracdiv"] };
+const pad2 = m => String(m).padStart(2, "0"), minParts = m => m === 0 ? ["o'clock"] : m < 10 ? ["oh", m] : [m];
+function wordProblemRound(level) {
+  const g = level <= 2 ? 3 : level <= 4 ? 4 : 5, review = g > 3 && Math.random() < .2;
+  const type = pick(WP_TYPES[review ? g - 1 : g]), nm = pick(WP_NAMES), nm2 = pick(WP_NAMES.filter(x => x !== nm)), its = pick(WP_ITEMS);
+  let text, ans, alts, why, c, pad = k => (typeof ans === "number" ? ans + (k % 2 ? k : -k) : null), em = "📝";
+  if (type === "groups") { const a = ri(3, 9), b = ri(3, 9); ans = a * b; text = `${nm} has ${a} boxes. Each box holds ${b} ${its}. How many ${its} does ${nm} have in all?`; alts = [a + b, a * b + b, a * (b - 1)]; why = [a, "times", b, "is", ans]; c = "multiply"; }
+  else if (type === "share") { const b = ri(3, 8), q = ri(3, 9), t = b * q; ans = q; text = `${nm} shares ${t} ${its} equally among ${b} friends. How many ${its} does each friend get?`; alts = [q + 1, q - 1, t - b]; why = [t, "divided by", b, "is", q]; c = "divide"; }
+  else if (type === "twostep") { const a = ri(20, 60), b = ri(10, 30), d = ri(5, a); ans = a + b - d; text = `${nm} had ${a} ${its}. ${nm} got ${b} more, then gave ${d} to ${nm2}. How many ${its} does ${nm} have now?`; alts = [a + b + d, a + b, a - d]; why = [a, "plus", b, "is", a + b, P(.2), a + b, "minus", d, "is", ans]; c = "two-step"; }
+  else if (type === "packs") { const a = ri(3, 8), b = ri(4, 10), d = ri(2, 9); ans = a * b + d; text = `Pencils come in packs of ${b}. ${nm} buys ${a} packs and finds ${d} more pencils. How many pencils does ${nm} have now?`; alts = [a * b, a + b + d, (a + d) * b]; why = [a, "times", b, "is", a * b, P(.2), a * b, "plus", d, "is", ans]; c = "two-step"; }
+  else if (type === "area") { const w = ri(3, 9), h = ri(2, 8); ans = w * h; text = `A garden is ${w} feet long and ${h} feet wide. What is its area in square feet?`; alts = [2 * (w + h), w + h, w * h + w]; why = ["The area is", w, "times", h, "which is", ans, "square feet."]; c = "area and perimeter"; em = "🌱"; }
+  else if (type === "fracpart") { const d = pick([4, 6, 8]), n = ri(1, d - 1); ans = `${n}/${d}`; text = `A pizza is cut into ${d} equal slices. ${nm} eats ${n} slices. What fraction of the pizza did ${nm} eat?`; alts = [`${d - n}/${d}`, `${d}/${n}`, `${n}/${d + n}`]; why = [n, "out of", d]; c = "fractions"; em = "🍕"; pad = k => `${n}/${d + k}`; }
+  else if (type === "compare") { const a = ri(30, 90), b = ri(10, a - 5); ans = a - b; text = `${nm} read ${a} pages. ${nm2} read ${b} pages. How many more pages did ${nm} read than ${nm2}?`; alts = [a + b, ans + 10, ans - 1]; why = [a, "minus", b, "is", ans]; c = "compare"; em = "📚"; }
+  else if (type === "times") { const a = ri(3, 12), k = ri(3, 9); ans = a * k; text = `${nm2} has ${a} ${its}. ${nm} has ${k} times as many ${its} as ${nm2}. How many ${its} does ${nm} have?`; alts = [a + k, a * k + a, a * (k - 1)]; why = [a, "times", k, "is", ans]; c = "times as many"; }
+  else if (type === "multi") { const a = ri(12, 48), b = ri(11, 29); ans = a * b; text = `A school orders ${a} boxes of ${its}. Each box has ${b} ${its}. How many ${its} is that in all?`; alts = [ans + 10, ans - 10, a * (b - 1)]; why = [a, "times", b, "is", ans]; c = "multiply"; }
+  else if (type === "vans") { const cap = ri(6, 9), q = ri(4, 8), r = ri(1, cap - 1), n = cap * q + r; ans = `${q + 1}`; text = `${n} students are going on a field trip. Each van holds ${cap} students. How many vans are needed?`; alts = [`${q}`, `${q} R${r}`, `${q + 2}`]; why = [n, "divided by", cap, "is", q, "remainder", r, P(.2), "So one more is needed.", P(.1), q + 1]; c = "remainders"; em = "🚐"; pad = k => `${q + 2 + k}`; }
+  else if (type === "leftover") { const b = ri(4, 9); let n; do { n = ri(50, 150); } while (n % b === 0); ans = n % b; text = `${nm} has ${n} ${its} and puts them into bags of ${b}. How many ${its} are left over?`; alts = [Math.floor(n / b), b - ans, ans + 1]; why = [n, "divided by", b, "is", Math.floor(n / b), "remainder", ans]; c = "remainders"; }
+  else if (type === "money") { const p1 = ri(24, 96) * 5, p2 = ri(22, 90) * 5; ans = money(p1 + p2); text = `A notebook costs ${money(p1)} and a pen costs ${money(p2)}. How much do they cost together?`; alts = [money(p1 + p2 + 100), money(p1 + p2 - 10), money(Math.abs(p1 - p2))]; why = [...moneySay(p1), "plus", ...moneySay(p2), "is", ...moneySay(p1 + p2)]; c = "money"; em = "💵"; pad = k => money(p1 + p2 + 5 * k); }
+  else if (type === "fracadd") { const d = pick([5, 6, 8, 10, 12]), a = ri(1, d - 2), b = ri(1, d - 1 - a); ans = `${a + b}/${d}`; text = `${nm} ran ${a}/${d} of a mile in the morning and ${b}/${d} of a mile after school. How far did ${nm} run in all?`; alts = [`${a + b}/${2 * d}`, `${a + b - 1}/${d}`, `${a + b + 1}/${d}`]; why = [a, "out of", d, "plus", b, "out of", d, "is", a + b, "out of", d]; c = "fractions"; em = "🏃"; pad = k => `${a + b}/${d + k}`; }
+  else if (type === "convert") { if (Math.random() < .5) { const ft = ri(2, 9); ans = ft * 12; text = `A rope is ${ft} feet long. How many inches long is it? (1 foot = 12 inches)`; alts = [ft + 12, ft * 10, ans + 12]; why = [ft, "times", 12, "is", ans]; } else { const h = ri(2, 5); ans = h * 60; text = `A car trip takes ${h} hours. How many minutes is that? (1 hour = 60 minutes)`; alts = [h + 60, h * 100, ans - 60]; why = [h, "times", 60, "is", ans]; } c = "measurement"; em = "📏"; }
+  else if (type === "books") { const a = ri(3, 6), pr = ri(8, 15), m = ri(2, 5); ans = `$${a * pr + m}`; text = `${nm} buys ${a} books that cost $${pr} each and a bookmark for $${m}. How much does ${nm} spend in all?`; alts = [`$${a * pr}`, `$${a + pr + m}`, `$${a * (pr + m)}`]; why = [a, "times", pr, "is", a * pr, P(.2), a * pr, "plus", m, "is", a * pr + m]; c = "two-step"; em = "📚"; pad = k => `$${a * pr + m + k}`; }
+  else if (type === "fracunlike") { const [a, b, d2, e] = pick([[1, 2, 1, 3], [1, 2, 1, 4], [2, 3, 1, 4], [3, 4, 1, 8], [1, 4, 1, 6], [1, 2, 2, 5], [1, 3, 1, 4], [3, 5, 1, 4]]), L = b * e / gcd(b, e), N = a * L / b + d2 * L / e;
+    ans = `${N}/${L}`; text = `${nm} walked ${a}/${b} of a mile to the park and then ${d2}/${e} of a mile to the store. How far did ${nm} walk in all?`; alts = [`${a + d2}/${b + e}`, `${N + 1}/${L}`, `${a + d2}/${L}`];
+    why = [a, "out of", b, "is the same as", a * L / b, "out of", L, P(.2), d2, "out of", e, "is the same as", d2 * L / e, "out of", L, P(.2), "so the answer is", N, "out of", L]; c = "fractions (unlike denominators)"; em = "🚶"; pad = k => `${N}/${L + k}`; }
+  else if (type === "fracof") { const d = pick([3, 4, 5, 6, 8]), k = ri(1, d - 1), total = d * ri(3, 9); ans = total / d * k; text = `A class has ${total} students. ${k}/${d} of them ride the bus. How many students ride the bus?`; alts = [total / d, total - k, total - ans]; why = [total, "divided by", d, "is", total / d, P(.2), total / d, "times", k, "is", ans]; c = "fraction of a number"; em = "🚌"; }
+  else if (type === "change") { let n, pr, cost, pay; do { n = ri(2, 4); pr = ri(55, 130) * 5; cost = n * pr; pay = cost < 1000 ? 1000 : 2000; } while (cost >= 2000); ans = money(pay - cost);
+    text = `${nm} buys ${n} sandwiches for ${money(pr)} each and pays with ${money(pay).replace(".00", "")}. How much change does ${nm} get?`; alts = [money(pay - pr), money(cost), money(pay - cost + 100)];
+    why = [...moneySay(pr), "times", n, "is", ...moneySay(cost), P(.2), ...moneySay(pay), "minus", ...moneySay(cost), "is", ...moneySay(pay - cost)]; c = "money"; em = "🥪"; pad = k => money(pay - cost + 5 * k); }
+  else if (type === "volume") { const l = ri(3, 9), w = ri(2, 6), h = ri(2, 5); ans = l * w * h; text = `A box is ${l} cm long, ${w} cm wide and ${h} cm tall. What is its volume in cubic centimeters?`; alts = [l + w + h, l * w, ans + l * w]; why = [l, "times", w, "times", h, "is", ans, "cubic centimeters."]; c = "volume"; em = "📦"; }
+  else if (type === "bigdiv") { const d = ri(11, 25), q = ri(12, 40); ans = q; text = `A baker makes ${d * q} muffins and packs them in boxes of ${d}. How many boxes does the baker fill?`; alts = [q + 1, q - 1, q + 10]; why = [d * q, "divided by", d, "is", q]; c = "divide"; em = "🧁"; }
+  else if (type === "metric") { const m = ri(12, 95) / 10; ans = Math.round(m * 100); text = `A ribbon is ${m} meters long. How many centimeters is that? (1 meter = 100 centimeters)`; alts = [Math.round(m * 10), Math.round(m * 1000), ans + 100]; why = [m, "times", 100, "is", ans]; c = "measurement"; em = "🎀"; }
+  else if (type === "tickets") { const kp = ri(6, 12), ap = ri(10, 18), k = ri(2, 5), a = ri(1, 3), tot = k * kp + a * ap; ans = `$${tot}`; text = `Tickets cost $${kp} for kids and $${ap} for adults. A family buys ${k} kid tickets and ${a} adult tickets. What is the total cost?`; alts = [`$${(k + a) * kp}`, `$${(k + a) * ap}`, `$${k * kp + ap}`]; why = [k, "times", kp, "is", k * kp, P(.2), a, "times", ap, "is", a * ap, P(.2), k * kp, "plus", a * ap, "is", tot]; c = "two-step"; em = "🎟️"; pad = j => `$${tot + j}`; }
+  else if (type === "fracshare") { let pz, ppl; do { pz = ri(2, 5); ppl = ri(pz + 1, 8); } while (gcd(pz, ppl) > 1); ans = `${pz}/${ppl}`; text = `${pz} pizzas are shared equally by ${ppl} friends. How much pizza does each friend get?`; alts = [`${ppl}/${pz}`, `1/${ppl}`, `${pz}/${ppl + pz}`]; why = [pz, "divided by", ppl, "is", pz, "out of", ppl]; c = "fractions as division"; em = "🍕"; pad = k => `${pz}/${ppl + k}`; }
+  else if (type === "elapsed") { const h = ri(1, 11), m = ri(5, 55), d = ri(15, 45), tot = m + d, eh = ((h + Math.floor(tot / 60) - 1) % 12) + 1, emn = tot % 60, act = pick(["Recess", "Soccer practice", "The movie", "Art class", "The bus ride"]);
+    ans = `${eh}:${pad2(emn)}`; text = `${act} starts at ${h}:${pad2(m)} and lasts ${d} minutes. What time does it end?`; alts = [`${h}:${pad2(emn)}`, `${eh}:${pad2((emn + 10) % 60)}`, `${(h % 12) + 1}:${pad2(m)}`];
+    why = [h, ...minParts(m), "plus", d, "minutes is", eh, ...minParts(emn)]; c = "elapsed time"; em = "⏰"; pad = k => `${eh}:${pad2((emn + 5 * k) % 60)}`; }
+  else if (type === "tens") { const r = ri(3, 9), t = pick([20, 30, 40, 50, 60, 70, 80, 90]); ans = r * t; text = `A theater has ${r} rows with ${t} seats in each row. How many seats are there?`; alts = [r + t, ans + t, ans / 10]; why = [r, "times", t, "is", ans]; c = "multiply"; em = "🎭"; }
+  else if (type === "timesback") { const b = ri(3, 12), k = ri(3, 9), a = b * k; ans = b; text = `${nm} scored ${a} points. That is ${k} times as many points as ${nm2} scored. How many points did ${nm2} score?`; alts = [a * k, a - k, b + 1]; why = [a, "divided by", k, "is", b]; c = "times as many"; em = "🏀"; }
+  else if (type === "fullboxes") { const per = ri(6, 12), q = ri(5, 12), r = ri(1, per - 1), n = per * q + r; ans = q; text = `A factory packs ${n} toy cars into boxes of ${per}. How many boxes can be filled completely?`; alts = [q + 1, r, q - 1]; why = [n, "divided by", per, "is", q, "remainder", r, P(.2), "so the answer is", q]; c = "remainders"; em = "🚗"; }
+  else if (type === "fracwhole") { const d = pick([3, 4, 5, 6, 8, 10]), n = ri(1, d - 1), k = ri(2, 6); ans = `${n * k}/${d}`; text = `Each glass holds ${n}/${d} of a liter of juice. How many liters do ${k} glasses hold?`; alts = [`${n}/${d * k}`, `${n + k}/${d}`, `${n * k}/${d * k}`]; why = [k, "times", n, "out of", d, "is", n * k, "out of", d]; c = "fractions"; em = "🥤"; pad = j => `${n * k + j}/${d}`; }
+  else if (type === "convert5") { const [u1, u2, f, hint] = pick([["gallons", "quarts", 4, "1 gallon = 4 quarts"], ["pounds", "ounces", 16, "1 pound = 16 ounces"], ["yards", "feet", 3, "1 yard = 3 feet"], ["kilograms", "grams", 1000, "1 kilogram = 1,000 grams"], ["liters", "milliliters", 1000, "1 liter = 1,000 milliliters"]]), q = ri(2, 9);
+    ans = q * f; text = `How many ${u2} are in ${q} ${u1}? (${hint})`; alts = [q + f, ans - f, ans + f]; why = [q, "times", f, "is", ans]; c = "measurement"; em = "⚖️"; }
+  else if (type === "snack") { const a = ri(2, 3), p1 = ri(110, 390), p2 = ri(150, 450), tot = a * p1 + p2; ans = money(tot); text = `${nm} buys ${a} juice boxes for ${money(p1)} each and a bag of pretzels for ${money(p2)}. How much does ${nm} spend in all?`;
+    alts = [money(p1 + p2), money(a * (p1 + p2)), money(tot + 100)]; why = [...moneySay(p1), "times", a, "is", ...moneySay(a * p1), P(.2), ...moneySay(a * p1), "plus", ...moneySay(p2), "is", ...moneySay(tot)]; c = "money"; em = "🧃"; pad = k => money(tot + k); }
+  else if (type === "bigdiv2") { const d = ri(12, 25), q = ri(40, 99), r = ri(1, d - 1), n = d * q + r; ans = q; text = `${fmtN(n)} markers are packed ${d} to a box. How many boxes are full?`; alts = [q + 1, r, q - 1]; why = [n, "divided by", d, "is", q, "remainder", r, P(.2), "so the answer is", q]; c = "divide"; em = "🖍️"; }
+  else { const d = pick([2, 3, 4]), n = ri(2, 4); ans = `1/${d * n}`; text = `${n} friends share 1/${d} of a cake equally. What fraction of the whole cake does each friend get?`; alts = [`${n}/${d}`, `1/${d + n}`, `${d}/${n}`]; why = [1, "out of", d, "divided by", n, "is", 1, "out of", d * n]; c = "fractions (dividing)"; em = "🎂"; pad = k => `1/${d * n + k}`; }
+  const choices = choices4(ans, alts, pad);
+  return { prompt: `<div class="wp">${em} ${text}</div>`, kind: typeof ans === "string" ? "word" : undefined, ask: [text], answer: ans, choices, right: why, full: true, wrong: () => ["Not quite."], _concept: "Word problems: " + c, _qa: text };
+}
+// ---------- Reading: short passages with grade-level questions ----------
+function readingRound(level) {
+  const near = READING.filter(ps => ps.lv <= level && ps.lv >= level - 2), pool = near.length ? near : READING.filter(ps => ps.lv <= Math.max(2, level)), all = pool.flatMap(ps => ps.qs.map(q => [ps, q]));
+  const avail = all.filter(([, q]) => !recentQA.includes(q[0])), [ps, [q, ans, wrong, expl, skill]] = pick(avail.length ? avail : all);
+  return { prompt: `<div class="passage"><b>${ps.title}</b><p>${ps.text}</p></div>`, kind: "long", ask: [q], answer: ans, choices: shuffle([ans, ...wrong]), right: [expl], full: true, wrong: () => ["Not quite."], _concept: "Reading: " + skill, _qa: q };
+}
 // Question-and-answer rounds (grammar, reading and science facts), with no repeats for a while.
 const recentQA = [];
 function qaRound(list, icon) {
@@ -2224,7 +2486,7 @@ function qaRound(list, icon) {
 function vocabRound(level) {
   const type = pick(level <= 1 ? ["spell", "spell", "opposite", "plural", "syllables"] : level <= 2 ? ["spell", "spell", "opposite", "synonym", "plural", "syllables"]
     : level <= 3 ? ["spell", "opposite", "synonym", "plural", "qa", "qa"] : ["spell", "spell", "synonym", "qa", "qa", "qa", "qa"]);
-  if (type === "qa") return qaRound(VOCAB_QA.filter(x => x[4] <= level), "📚");
+  if (type === "qa") return qaRound([...VOCAB_QA, ...VOCAB_QA2].filter(x => x[4] <= level && x[4] >= level - 3), "📚");
   if (type === "spell") {
     const w = pick(level >= 4 ? PRO_SPELL2 : PRO_SPELL), wrong = new Set();
     let g = 0; while (wrong.size < 3 && g++ < 60) { const m = misspell(w); if (m !== w) wrong.add(m); }
@@ -3948,14 +4210,14 @@ function gameSnake(root, tools) {
   });
   steering(field, box, turn);
   loop((dt, t) => {
-    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } 
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } 
     J.update(dt); tongue = (tongue + dt) % 2.6;
     if (state === "play") { acc += dt * 1000; while (acc >= stepMs && state === "play") { acc -= stepMs; step(); } }
     draw(t);
   });
   reset();
   sayIntro();
-  onWin("resize", () => { if (state !== "play") reset(true); else fit(); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(true); else fit(); });
 }
 
 /* ---------- Space: defend the planet from wobbly alien blobs ---------- */
@@ -4172,13 +4434,13 @@ function gameSpace(root, tools) {
   loop((dt, t) => {
     J.update(dt);
     if (state === "intro") { introT -= dt; ship.x += (ship.tx - ship.x) * Math.min(1, dt * 12); if (introT <= 0) { state = "play"; overlay(ovl, ""); } }
-    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } 
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } 
     if (state === "play") update(dt);
     draw(t);
   });
   reset();
   say("Drag to move your ship. It shoots by itself!");
-  onWin("resize", () => { if (state !== "play" && state !== "intro") reset(); else fit(); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(); else fit(); });
 }
 
 /* ---------- Maze: a bunny collects berries in a garden maze while bees buzz around ---------- */
@@ -4366,10 +4628,13 @@ function gameMaze(root, tools) {
     GFX.vignette(g, W, H, .22);
   }
   steering(field, box, steer);
-  loop((dt, t) => { if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (state === "play") update(dt); if (grid) draw(t); });
+  loop((dt, t) => { if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } if (state === "play") update(dt); if (grid) draw(t); });
   lives = 3; score = 0; newLevel(false);
   say("Collect all the berries! Stay away from the bees.");
-  onWin("resize", () => { if (state !== "play") newLevel(false); });
+  onWin("resize", () => {
+    if (state === "ready" || state === "over") return newLevel(false);
+    ({ W, H } = fitCanvas(cv, g, box)); tile = Math.floor(Math.min(W / TW, H / TH)); ox = (W - TW * tile) / 2; oy = (H - TH * tile) / 2; bgImg = null;
+  });
 }
 
 /* ======================================================================
@@ -4735,13 +5000,13 @@ function gameStack(root, tools) {
     J.update(dt);
     falling.forEach(f => { f.vy += 900 * dt; f.y += f.vy * dt; f.rot += dt * (f.x > W / 2 ? 2.4 : -2.4); }); falling = falling.filter(f => f.y < H + 200);
     tower.forEach(b => { if (b.pulse != null && b.pulse < .4) b.pulse += dt; });
-    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
   if (window.__debug) window.__debug.stack = { grow(n) { for (let i = 0; i < n; i++) { const t = tower[tower.length - 1]; floors++; tower.push({ x: t.x + rand(-4, 4), w: t.w, n: stackLabel(floors) }); } cam = Math.max(0, (tower.length + 3) * bh - (H - 160)); spawn(); } };
   reset();
   say("Tap to drop the block.");
-  onWin("resize", () => { if (state !== "play") reset(); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(); else ({ W, H } = fit()); });
 }
 
 /* ---------- Slice: swipe through flying fruit; slice fruit that add up to ten in one swipe for a bonus ---------- */
@@ -4880,12 +5145,12 @@ function gameSlice(root, tools) {
     halves.forEach(h => { h.x += h.vx * dt; h.y += h.vy * dt; h.vy += H * 1.25 * dt; h.rot += h.side * 3 * dt; h.life -= dt; }); halves = halves.filter(h => h.life > 0);
     trail.forEach(p => p.life -= dt); trail = trail.filter(p => p.life > 0);
     splats.forEach(sp => { sp.life -= dt; }); splats = splats.filter(sp => sp.life > 0);
-    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
+    if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
   reset();
   say("Swipe to slice the fruit! Don't touch the bombs.");
-  onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(); else ({ W, H } = fit()); });
 }
 
 /* ---------- Flap: tap to fly through gaps; some walls have two gaps and the bigger number gives more stars ---------- */
@@ -5055,10 +5320,10 @@ function gameFlap(root, tools) {
     if (state === "play") flap();
   });
   onWin("keydown", e => { if (e.key === " " || e.key === "ArrowUp") { e.preventDefault(); if (state === "ready") { state = "play"; overlay(ovl, ""); } if (state === "play") flap(); } });
-  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
   reset();
   say("Tap to flap! Fly through the gaps.");
-  onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(); else ({ W, H } = fit()); });
 }
 
 /* ---------- Runner: steer a crowd through math gates, then smash the wall at the end ---------- */
@@ -5234,10 +5499,10 @@ function gameRunner(root, tools) {
   });
   cv.addEventListener("pointermove", e => { if (e.buttons || e.pointerType === "touch") aim(e); });
   onWin("keydown", e => { if (e.key === "ArrowLeft") tx = Math.max(trackL + 20, tx - 60); if (e.key === "ArrowRight") tx = Math.min(trackR - 20, tx + 60); });
-  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt); draw(t); });
   reset();
   say("Drag to steer. Go through the best gates!");
-  onWin("resize", () => { if (state !== "play") reset(); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(); else ({ W, H } = fit()); });
 }
 
 /* ---------- Drop: falling blocks; fill a row to clear it ----------
@@ -5466,7 +5731,7 @@ function gameDrop(root, tools) {
   });
   loop((dt, t) => {
     J.update(dt); beams.forEach(b => { b.life -= dt; }); beams = beams.filter(b => b.life > 0);
-    if (state === "play" && !clearing && pauseDue(dt)) { state = "gate"; release(); runPause(() => { state = "play"; }); }
+    if (state === "play" && !clearing && pauseDue(dt)) { state = "gate"; release(); runPause(() => { if (state === "gate") state = "play"; }); }
     if (J.stop > 0) J.stop -= dt; else if (state === "play") update(dt);
     draw(t);
   });
@@ -5693,11 +5958,11 @@ function gameHop(root, tools) {
     if (row === frog.row && (!pad || pad === frog.pad)) return;
     hopTo(row, pad ? pad.x + padW() / 2 : x, pad);
   });
-  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play" || state === "paused") update(dt); draw(t); });
+  loop((dt, t) => { J.update(dt); if (state === "play" && pauseDue(dt)) { state = "gate"; runPause(() => { if (state === "gate") state = "play"; }); } if (J.stop > 0) J.stop -= dt; else if (state === "play" || state === "paused") update(dt); draw(t); });
   if (window.__debug) window.__debug.hop = { rows: () => rowsD, frog: () => frog, sy, padW, state: () => state, info: () => ({ score, banks, si, lives, seq }) };
   reset();
   say("Tap a lily pad to hop on it.");
-  onWin("resize", () => { if (state !== "play") reset(); else ({ W, H } = fit()); });
+  onWin("resize", () => { if (state === "ready" || state === "over") reset(); else ({ W, H } = fit()); });
 }
 
 /* ---------- Sticker book ---------- */
@@ -5758,6 +6023,8 @@ const LEARN_PRO = [
   { id: "math", name: "Math", word: "12×7", run: (r, t) => quizGame(r, t, "math", "math-bg", mathRoundPro), lv: true },
   { id: "vocab", name: "Vocab", em: "📚", run: (r, t) => quizGame(r, t, "vocab", "letters-bg", vocabRound), lv: true },
   { id: "science", name: "Science", em: "🔬", run: (r, t) => quizGame(r, t, "science", "animals-bg", scienceRound), lv: true },
+  { id: "story", name: "Problems", em: "🧮", run: (r, t) => quizGame(r, t, "story", "math-bg", wordProblemRound), lv: true },
+  { id: "reading", name: "Reading", em: "📖", run: (r, t) => quizGame(r, t, "reading", "letters-bg", readingRound), lv: true },
   { id: "times", name: "Times", word: "9×8", run: gameTimes, lv: true },
   { id: "spell", name: "Spell", em: "🐝", run: gameSpell, lv: true },
   { id: "pairs", name: "Pairs", em: "🃏", run: gameMemory, lv: true },
@@ -5815,6 +6082,55 @@ function summary(p) {
   const days = range(0, 13).map(i => { const d0 = new Date(); d0.setHours(0, 0, 0, 0); const start = d0.getTime() - (13 - i) * day, xs = log.filter(e => e.t >= start && e.t < start + day); return { start, n: xs.length, a: acc(xs) }; });
   return { log, week, total: log.length, weekN: week.length, weekAcc: acc(week), allAcc: acc(log), breaks: readP(p, "breaks", 0), learnN: log.filter(e => e.s === "l").length, topics, skills, levels, days };
 }
+// Notes from Claude to the parents. Updated in the code each time we work on the app together.
+const CLAUDE_NOTES = {
+  all: [["Nov 26", "Welcome to the parent dashboard. How we'll work together: the app records every answer and adapts on its own (harder after two right in a row, easier after misses, and it favors weak topics). I write notes and recommendations here. You pick choices below and leave me messages. When we work on the app, tap “Copy report for Claude” on each device the kids use and paste it into our chat. I'll review their answers, score their proficiency and update the curriculum."]],
+  little: [["Nov 26", "Luka: brain breaks are numbers to 10, letters and animal sounds, all read aloud, with at most 2 extra questions after misses. I'm watching number recognition 1–10, letter names and beginning sounds. When those are steady (80%+), next is counting objects and numbers to 20."]],
+  big: [["Nov 26", "Enzo: starts at NYS 3rd-grade content and moves up to 4th and 5th grade as he gets questions right. I'm watching multi-digit multiplication, fractions, word problems and reading inference. Goal: a steady 80%+ at 4th-grade level, then 5th-grade fractions and decimals."]],
+  keira: [["Nov 26", "Keira: starts at NYS 5th-grade level with extra word problems (your request). Word problems cover the 5th-grade test types: multi-step money, fractions with unlike denominators, fraction of a number, volume, unit conversions, remainders. I'll look at which types she misses and adjust. Reading: main idea, theme, inference and figurative language."]],
+};
+const TARGET_GRADE = { little: null, big: 3, keira: 5 }, lvGrade = lv => lv <= 2 ? 3 : lv <= 4 ? 4 : lv <= 6 ? 5 : 6;
+const AREA_NAMES = { numbers: "Number sense", math: "Computation", story: "Word problems", reading: "Reading", vocab: "Grammar & vocabulary", science: "Science", letters: "Letters & sounds", animals: "Animals" };
+// Claude's proficiency scoring per subject area: grade level being worked at + accuracy, compared with the child's grade.
+function proficiency(p, S) {
+  const by = {}; S.log.forEach(e => (by[e.k] = by[e.k] || []).push(e));
+  return Object.entries(by).filter(([k]) => AREA_NAMES[k] || k === "times" || k === "spell").map(([k, xs]) => {
+    const last = xs.slice(-30), acc = Math.round(last.reduce((a, e) => a + e.ok, 0) / last.length * 100), lvs = last.map(e => e.lv || 1).sort((a, b) => a - b), lv = lvs[Math.floor(lvs.length / 2)];
+    const t = TARGET_GRADE[p], gr = lvGrade(lv);
+    let rate = null;
+    if (last.length >= 8) {
+      if (t == null) rate = acc >= 85 ? 4 : acc >= 70 ? 3 : acc >= 50 ? 2 : 1;
+      else rate = gr > t && acc >= 75 ? 4 : gr >= t && acc >= 70 ? 3 : (gr >= t && acc >= 50) || (gr === t - 1 && acc >= 70) ? 2 : 1;
+    }
+    return { k, name: AREA_NAMES[k] || (k === "times" ? "Times tables" : "Spelling"), n: xs.length, acc, lv, grade: t == null ? null : gr, rate };
+  }).sort((a, b) => (a.rate ?? 9) - (b.rate ?? 9));
+}
+const RATE = { 4: ["good", "★ 4 Exceeds"], 3: ["good", "✅ 3 Meets"], 2: ["warn", "◐ 2 Approaching"], 1: ["bad", "⚠️ 1 Below"] };
+const writeP = (p, k, v) => { try { localStorage.setItem("littletaps." + PLAYERS[p].pre + k, JSON.stringify(v)); } catch (e) {} };
+const TRACK_NAMES = { numbers: "Numbers", math: "Math", story: "Word problems", reading: "Reading", vocab: "Grammar & words", science: "Science", letters: "Letters", animals: "Animals" };
+// Recommendations from the answer record; each has choices a parent can pick. Choices take effect right away and go into the copied report.
+function recommendations(p, S) {
+  const out = [], plan = readP(p, "plan", {}) || {};
+  if (p === "keira") out.push({ id: "parent:word", text: "Practice word problems more", why: "You asked for this. Word problems come up more often in brain breaks.", opts: [["more", "Practice more"], ["keep", "Normal amount"]], rec: "more" });
+  S.topics.filter(t => t.st[0] === "bad" || t.st[0] === "warn").slice(0, 6).forEach(t => out.push({ id: "topic:" + t.c, text: `Practice “${t.c}” more`, why: `${t.a}% right in the last ${Math.min(20, t.n)} tries.`, opts: [["more", "Practice more"], ["keep", "Keep as is"], ["skip", "Skip for now"]], rec: "more", topic: t.c }));
+  S.topics.filter(t => t.st[0] === "good" && t.n >= 12 && t.a >= 90).slice(0, 4).forEach(t => out.push({ id: "less:" + t.c, text: `Show “${t.c}” less often`, why: `${t.a}% right over ${t.n} tries. Time can go to newer topics.`, opts: [["less", "Show less"], ["keep", "Keep as is"]], rec: "less", topic: t.c }));
+  const byTrack = {}; S.log.filter(e => e.s === "b").slice(-300).forEach(e => (byTrack[e.k] = byTrack[e.k] || []).push(e));
+  Object.entries(byTrack).forEach(([k, xs]) => {
+    const lv = S.skills[k] ?? 1, cur = xs.filter(e => e.lv === lv).slice(-20); if (cur.length < 12) return;
+    const a = Math.round(cur.reduce((s, e) => s + e.ok, 0) / cur.length * 100);
+    if (a >= 90) out.push({ id: `up:${k}:${lv}`, text: `Move ${TRACK_NAMES[k] || k} up to level ${lv + 1}`, why: `${a}% right at level ${lv}.`, opts: [["up", "Move up"], ["keep", "Stay"]], rec: "up", track: k, lv });
+    if (a < 55 && lv > 1) out.push({ id: `down:${k}:${lv}`, text: `Move ${TRACK_NAMES[k] || k} down to level ${lv - 1}`, why: `Only ${a}% right at level ${lv}.`, opts: [["down", "Move down"], ["keep", "Stay"]], rec: "down", track: k, lv });
+  });
+  return out.map(r => ({ ...r, chosen: (plan.decisions || {})[r.id] }));
+}
+function decide(p, r, choice) {
+  const plan = readP(p, "plan", {}) || {}; plan.focus = plan.focus || {}; plan.focusTrack = plan.focusTrack || {}; plan.decisions = plan.decisions || {};
+  plan.decisions[r.id] = { choice, t: Date.now(), text: r.text };
+  if (r.topic) { if (choice === "keep") delete plan.focus[r.topic]; else plan.focus[r.topic] = choice; }
+  if (r.id === "parent:word") { if (choice === "more") { plan.focus["Word problems"] = "more"; plan.focusTrack.story = "more"; } else { delete plan.focus["Word problems"]; delete plan.focusTrack.story; } }
+  if (r.track && (choice === "up" || choice === "down")) writeP(p, "skill." + r.track, Math.max(1, r.lv + (choice === "up" ? 1 : -1)));
+  writeP(p, "plan", plan);
+}
 let repPlayer = null;
 function renderReport() {
   const p = repPlayer || PROFILE || "little", S = summary(p);
@@ -5824,12 +6140,19 @@ function renderReport() {
   const fmtD = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   const maxDay = Math.max(1, ...S.days.map(d => d.n));
   $("#repBody").innerHTML = `
+    <div class="rcardp claude"><h2>💬 From Claude</h2>${[...(CLAUDE_NOTES.all || []), ...(CLAUDE_NOTES[p] || [])].map(([d, t]) => `<p><small>${esc(d)}</small> ${esc(t)}</p>`).join("")}</div>
+    <div class="rcardp"><h2>🎯 Proficiency (Claude's scoring)</h2>${(() => { const P = proficiency(p, S); return P.length ? `<table class="rtable"><tr><th>Area</th><th>Working at</th><th>Right (last 30)</th><th>Rating</th></tr>
+      ${P.map(a => `<tr><td>${esc(a.name)}</td><td>${a.grade ? `Grade ${a.grade} · L${a.lv}` : `Level ${a.lv}`}</td><td class="num">${a.acc}% <small>(${a.n})</small></td><td>${a.rate ? `<span class="stat ${RATE[a.rate][0]}">${RATE[a.rate][1]}</span>` : '<span class="stat none">⏳ Not enough yet</span>'}</td></tr>`).join("")}</table>
+      <p class="fine">Ratings compare the grade level of the questions with ${esc(playerName(p))}'s grade (1 Below · 2 Approaching · 3 Meets · 4 Exceeds), like New York State test levels. They need at least 8 answers.</p>` : "<p>Scores appear after a few brain breaks.</p>"; })()}</div>
     <div class="rcardp"><div class="rstats">
       <div class="rstat"><b>${S.weekN}</b><span>answers this week</span></div>
       <div class="rstat"><b>${S.weekAcc == null ? "–" : S.weekAcc + "%"}</b><span>right on first try (week)</span></div>
       <div class="rstat"><b>${S.breaks}</b><span>brain breaks finished</span></div>
       <div class="rstat"><b>${S.total}</b><span>answers all time${S.allAcc == null ? "" : ` · ${S.allAcc}% right`}</span></div>
     </div></div>
+    <div class="rcardp"><h2>Recommendations</h2>${(() => { const R = recommendations(p, S); return R.length ? R.map((r, i) => `<div class="rec"><div><b>${esc(r.text)}</b><small>${esc(r.why)}${r.chosen ? ` · You chose “${esc((r.opts.find(o => o[0] === r.chosen.choice) || [, r.chosen.choice])[1])}” on ${fmtD(r.chosen.t)}` : ""}</small></div>
+      <div class="recopts">${r.opts.map(([k, lab]) => `<button data-i="${i}" data-k="${k}" class="${r.chosen && r.chosen.choice === k ? "on" : ""}">${k === r.rec ? "★ " : ""}${esc(lab)}</button>`).join("")}</div></div>`).join("") : "<p>Recommendations appear after a few more answers.</p>"; })()}
+      <label class="notes"><b>✉️ Message to Claude</b> (saved on this device and included in the copied report)<textarea id="repNote" rows="3" placeholder="What should we work on next?">${esc((readP(p, "plan", {}) || {}).note || "")}</textarea></label></div>
     ${S.total ? "" : `<div class="rcardp"><b>No answers recorded yet for ${esc(playerName(p))}.</b> Answers from brain breaks and Learn games show up here.</div>`}
     ${weak.length ? `<div class="rcardp"><h2>Needs practice</h2>${weak.slice(0, 6).map(t => `<div style="margin-bottom:8px"><span class="stat ${t.st[0]}">${t.st[1]}</span> <b>${esc(t.c)}</b> · ${t.a}% of last ${Math.min(20, t.n)}
       <ul class="miss">${t.misses.map(m => `<li>${esc(m.q)} — picked <b>${esc(m.p ?? "?")}</b>, right: <b>${esc(m.a)}</b></li>`).join("")}</ul></div>`).join("")}</div>` : ""}
@@ -5841,6 +6164,9 @@ function renderReport() {
     <div class="rcardp"><h2>Levels</h2><div><b>Brain breaks:</b> ${Object.entries(S.skills).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div>
       <div><b>Games:</b> ${Object.entries(S.levels).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div></div>
     <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
+  const R = recommendations(p, S);
+  $("#repBody").querySelectorAll(".recopts button").forEach(b => b.addEventListener("click", () => { decide(p, R[Number(b.dataset.i)], b.dataset.k); sfx.tap(); const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; }));
+  $("#repNote").addEventListener("input", e => { const plan = readP(p, "plan", {}) || {}; plan.note = e.target.value; writeP(p, "plan", plan); });
 }
 function reportText() {
   const lines = [`Little Taps progress report — ${new Date().toLocaleString()}`, `App version ${APP_VERSION}`, ""];
@@ -5848,14 +6174,71 @@ function reportText() {
     const S = summary(p);
     lines.push(`== ${playerName(p)} ==`, `Answers: ${S.total} all time (${S.allAcc ?? "–"}% right first try); ${S.weekN} this week (${S.weekAcc ?? "–"}%). Brain breaks finished: ${S.breaks}. Learn-game answers: ${S.learnN}.`);
     lines.push(`Brain-break levels: ${Object.entries(S.skills).map(([k, v]) => `${k} ${v}`).join(", ") || "-"}`, `Game levels: ${Object.entries(S.levels).map(([k, v]) => `${k} ${v}`).join(", ") || "-"}`);
+    const P = proficiency(p, S);
+    if (P.length) { lines.push("Proficiency (area: working at, accuracy last 30, rating):"); P.forEach(a => lines.push(`- ${a.name}: ${a.grade ? "grade " + a.grade + ", " : ""}level ${a.lv}, ${a.acc}% (${a.n} answers), ${a.rate ? RATE[a.rate][1].replace(/^\S+\s/, "") : "not enough yet"}`)); }
     lines.push("Topics (accuracy over last 20 tries, total tries, level, status):");
     S.topics.forEach(t => lines.push(`- ${t.c}: ${t.a ?? "-"}% (${t.n} tries, level ${t.lv}) ${t.st[1].replace(/^\S+\s/, "")}${t.trend == null ? "" : `, trend ${t.trend >= 0 ? "+" : ""}${t.trend}`}`));
+    const plan = readP(p, "plan", {}) || {}, L = levelInfo(readP(p, "xp", 0));
+    lines.push(`Player level ${L.lv} (${readP(p, "xp", 0)} XP), coins ${readP(p, "coins", 0)}.`);
+    const dec = Object.entries(plan.decisions || {});
+    if (dec.length) { lines.push("Parent decisions:"); dec.forEach(([id, d]) => lines.push(`- ${d.text || id}: ${d.choice} (${new Date(d.t).toLocaleDateString()})`)); }
+    if (Object.keys(plan.focus || {}).length) lines.push(`Current focus: ${Object.entries(plan.focus).map(([k, v]) => `${k} = ${v}`).join("; ")}`);
+    if (plan.note) lines.push(`Parent notes: ${plan.note}`);
     const misses = S.log.filter(e => !e.ok).slice(-15);
     if (misses.length) { lines.push("Recent misses:"); misses.forEach(m => lines.push(`- [${m.c}, L${m.lv}] ${m.q} -> picked ${m.p ?? "?"}, right ${m.a}`)); }
     lines.push("");
   });
   return lines.join("\n");
 }
+// ---------- Adventure map ----------
+const AVATARS = [["🐘💥👻", 0], ["🦑💥🐋", 0], ["🐼", 0], ["🦄", 60], ["🐶", 40], ["🐱", 40], ["🐰", 60], ["🦊", 80], ["🐼", 100], ["🐸", 120], ["🐵", 150], ["🦁", 200], ["🐯", 200],
+  ["🐧", 250], ["🐙", 300], ["🦖", 350], ["🐲", 400], ["🤖", 450], ["👽", 500], ["🦸", 600], ["🧙", 700], ["🐉", 900], ["👑", 1200]];
+function renderMap() {
+  const L = levelInfo(store.get("xp", 0)), N = Math.max(30, Math.ceil((L.lv + 12) / 10) * 10), gap = 92, H = N * gap + 120, world = $("#mapWorld");
+  $("#mapCoins").textContent = store.get("coins", 0);
+  const nextChest = Math.ceil((L.lv + 1) / 5) * 5;
+  $("#mapInfo").innerHTML = `<b>${avatarOf()} Level ${L.lv}</b> · ${worldOf(L.lv).em} ${worldOf(L.lv).name}<span class="xpbar big"><i style="width:${Math.round(L.rest / L.need * 100)}%"></i></span>
+    <small>${L.need - L.rest} XP to level ${L.lv + 1} · 🎁 treasure at level ${nextChest} · Earn XP: right answers +10 · brain breaks +30 · missions +50</small>`;
+  const pos = n => ({ x: 50 + 30 * Math.sin(n * .85), y: H - 70 - (n - 1) * gap });
+  let html = "";
+  for (let w = 0; w * 10 < N; w++) { // world bands, bottom to top
+    const wd = worldOf(w * 10 + 1), top = H - 70 - (Math.min(N, w * 10 + 10) - 1) * gap - gap / 2, bot = w === 0 ? H : H - 70 - (w * 10) * gap + gap / 2;
+    html += `<div class="band" style="top:${top}px;height:${bot - top}px;background:linear-gradient(${wd.c1},${wd.c2})"><span class="bname">${wd.em} ${wd.name}</span></div>`;
+    for (let k = 0; k < 6; k++) { const yy = top + 40 + ((k * 137 + w * 59) % Math.max(60, bot - top - 80)), xx = (k % 2 ? 78 + (k * 7) % 14 : 6 + (k * 11) % 12); html += `<span class="deco" style="top:${yy}px;left:${xx}%">${wd.deco[k % 4]}</span>`; }
+  }
+  const pts = range(1, N).map(n => pos(n));
+  html += `<svg class="mpath" viewBox="0 0 100 ${H}" preserveAspectRatio="none" style="height:${H}px"><polyline points="${pts.map(p => `${p.x},${p.y}`).join(" ")}" /><polyline class="done" points="${pts.slice(0, L.lv).map(p => `${p.x},${p.y}`).join(" ")}" /></svg>`;
+  for (let n = 1; n <= N; n++) {
+    const p = pos(n), chest = n % 5 === 0, cls = n < L.lv ? "done" : n === L.lv ? "cur" : "lock";
+    html += `<div class="node ${cls}${chest ? " chest" : ""}" style="left:${p.x}%;top:${p.y}px">${chest ? (n <= L.lv ? "📦" : "🎁") : n < L.lv ? "⭐" : n}</div>`;
+    if (n === L.lv) html += `<div class="me${isDuo(avatarOf()) ? " duo" : ""}" style="left:${p.x}%;top:${p.y - 54}px">${avatarOf()}</div>`;
+  }
+  world.style.height = H + "px"; world.innerHTML = html;
+  const sc = $("#mapScroll"); sc.scrollTop = pos(L.lv).y - sc.clientHeight * .6;
+}
+function openMap() { audio(); hub.hidden = true; $("#map").hidden = false; renderMap(); sfx.tap(); say("Adventure map"); }
+$("#xpHud").addEventListener("click", openMap);
+$("#mapClose").addEventListener("click", () => { $("#map").hidden = true; hub.hidden = false; renderHub(); });
+function renderShop() {
+  const owned = new Set([PLAYERS[PROFILE || "little"].em, ...store.get("owned", [])]), coins = store.get("coins", 0), cur = avatarOf();
+  $("#shopCoins").textContent = coins; $("#mapCoins").textContent = coins;
+  $("#shopGrid").innerHTML = AVATARS.filter(([em, price]) => price > 0 || em === PLAYERS[PROFILE || "little"].em).map(([em, price]) => {
+    const have = owned.has(em);
+    return `<button class="sitem${isDuo(em) ? " duo" : ""}${em === cur ? " on" : ""}${!have && price > coins ? " poor" : ""}" data-em="${em}" data-price="${price}"><span>${em}</span><b>${em === cur ? "Wearing" : have ? "Use" : "🪙 " + price}</b></button>`;
+  }).join("");
+  $("#shopGrid").querySelectorAll(".sitem").forEach(b => b.addEventListener("click", () => {
+    const em = b.dataset.em, price = Number(b.dataset.price), mine = new Set([PLAYERS[PROFILE || "little"].em, ...store.get("owned", [])]);
+    if (!mine.has(em)) {
+      const c = store.get("coins", 0);
+      if (c < price) { sfx.boop(); replay(b, "wiggle"); say("Not enough coins yet."); return; }
+      store.set("coins", c - price); store.set("owned", [...store.get("owned", []), em]); celebrate(); sfx.yay(); say("You bought it!");
+    } else sfx.tap();
+    store.set("avatar", em); renderShop(); renderMap();
+  }));
+}
+$("#shopBtn").addEventListener("click", () => { $("#shop").hidden = false; renderShop(); sfx.tap(); });
+$("#shopClose").addEventListener("click", () => { $("#shop").hidden = true; });
+
 $("#openReport").addEventListener("click", () => { sheet.hidden = true; stopSpeech(); repPlayer = PROFILE || "little"; hub.hidden = true; picker.hidden = true; $("#report").hidden = false; renderReport(); });
 $("#repClose").addEventListener("click", () => { $("#report").hidden = true; hub.hidden = false; renderHub(); });
 $("#repCopy").addEventListener("click", () => {
@@ -5897,7 +6280,7 @@ function renderHub() {
   tabs.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
     hubTab = b.dataset.tab; store.set("tab", hubTab); sfx.tap(); say(b.textContent.replace(/^\S+\s/, "")); renderHub();
   }));
-  $("#whoEm").textContent = PLAYERS[PROFILE || "little"].em; $("#whoName").textContent = playerName(PROFILE || "little");
+  $("#whoEm").textContent = isDuo(avatarOf()) ? [...avatarOf()][0] + [...avatarOf()][2] : avatarOf(); $("#whoName").textContent = playerName(PROFILE || "little"); updateHud();
   tilesEl.innerHTML = "";
   sets.find(x => x[0] === hubTab)[2].forEach((gm, i) => {
     // Color order keeps neighbours different in 3, 4 and 6 column layouts.
@@ -5921,10 +6304,15 @@ function showPicker() {
 picker.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => {
   saveGateClock(); // the current player's brain-break clock is kept separately from the other player's
   audio(); PROFILE = b.dataset.p; PRO = PROFILE !== "little"; store.set("profile", PROFILE);
-  gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2);
+  gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2); seedPlan();
   hubTab = null; picker.hidden = true; hub.hidden = false; sfx.tap(); renderHub();
   say(playerName(PROFILE) === NAMES_DEFAULT[PROFILE] ? "hi:" + PROFILE : "Hi! Let's play!");
 }));
+function seedPlan() {
+  if (PROFILE === "keira" && store.get("plan", null) == null)
+    store.set("plan", { focus: { "Word problems": "more" }, focusTrack: { story: "more" }, decisions: { "parent:word": { choice: "more", t: Date.now(), text: "Practice word problems more" } }, note: "" });
+}
+seedPlan();
 $("#who").addEventListener("click", showPicker);
 if (PROFILE) renderHub(); else { renderHub(); showPicker(); }
 $("#book").addEventListener("click", () => openGame(BOOK));
@@ -5962,7 +6350,7 @@ function renderSheet() {
   speedEl.querySelectorAll("button").forEach(b => b.classList.toggle("on", Math.abs(Number(b.dataset.rate) - rate) < .01));
   $("#gateMins").querySelectorAll("button").forEach(b => b.classList.toggle("on", Number(b.dataset.m) === store.get("gateMins", 2)));
   $("#skills").textContent = `${playerName(PROFILE || "little")}'s brain-break levels: ` + (PRO
-    ? `Numbers ${skillOf("numbers")} · Math ${skillOf("math")} · Vocab ${skillOf("vocab")} · Science ${skillOf("science")}`
+    ? `Numbers ${skillOf("numbers")} · Math ${skillOf("math")} · Word problems ${skillOf("story")} · Reading ${skillOf("reading")} · Grammar ${skillOf("vocab")} · Science ${skillOf("science")}`
     : `Numbers ${skillOf("numbers")} · Letters ${skillOf("letters")} · Animals ${skillOf("animals")}`);
 }
 // Voice check: every letter (alone, big, little) and number 0-100, tap to hear, optionally mark.

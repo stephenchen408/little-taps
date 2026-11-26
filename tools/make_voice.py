@@ -98,7 +98,17 @@ def variants(key, text):
 report = []
 
 
+# Exact sounds for names the spelling can't pin down (phonemes, as the voice engine writes them).
+PHONEMES = {"hi:little": "hˈaɪ lˈuːkə!"}  # Luka = "LOO-kuh", not "LUH-kuh"
+
+
 def clip_for(key, text):
+    if key in PHONEMES:
+        f = cache / f"ph_{hashlib.sha1(f'{VOICE}|{SPEED}|{PHONEMES[key]}'.encode()).hexdigest()[:16]}.npy"
+        if f.exists(): return np.load(f)
+        a = finish(kokoro.create(PHONEMES[key], voice=VOICE, speed=SPEED, lang="en-us", is_phonemes=True)[0])
+        np.save(f, a)
+        return a
     if len(text.split()) > 2:
         # Sentences: said as written.
         h = hashlib.sha1(f"v2|{VOICE}|{SPEED}|{text}".encode()).hexdigest()[:16]
