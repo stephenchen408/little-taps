@@ -224,6 +224,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .qtext { flex: none; max-width: 100%; text-align: center; font-weight: 800; line-height: 1.2; font-size: clamp(1.15rem, 4.8vw, 1.9rem); color: var(--ink);
   background: rgba(255,255,255,.75); border: 3px solid var(--ink); border-radius: 18px; padding: 6px 14px; box-shadow: 0 4px 0 rgba(23,58,94,.25); text-wrap: balance; }
 .pbody { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; container-type: size; }
+.pbody .eq.nums.long b { font-size: 2.2rem; font-size: min(18cqw, 36cqh); }
 .choices { flex: 1 1 60%; min-width: 0; min-height: 0; display: grid; grid-auto-rows: 1fr; gap: 12px; }
 .choice { min-width: 0; min-height: 0; padding: 0; border: 4px solid var(--ink); border-radius: 24px; background: var(--paper);
   box-shadow: 0 6px 0 var(--ink); display: grid; place-items: center; container-type: size; transition: opacity .3s; }
@@ -540,6 +541,60 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .countpop { animation: countpop .7s cubic-bezier(.3,1.6,.5,1); }
 @keyframes countpop { from { transform: scale(2.2); opacity: 0; } 40% { opacity: 1; } to { transform: scale(1); } }
 
+.rectq { position: relative; width: min(66cqw, calc(60cqh * var(--r))); aspect-ratio: var(--r); border: 4px solid var(--ink); border-radius: 6px; margin: 0 40px 30px 0;
+  background-color: #DDEFFF; background-image: linear-gradient(rgba(23,58,94,.2) 2px, transparent 2px), linear-gradient(90deg, rgba(23,58,94,.2) 2px, transparent 2px);
+  background-size: calc(100% / var(--w)) calc(100% / var(--h)); }
+.rectq i { position: absolute; font-style: normal; font-weight: 800; font-size: min(9cqw, 13cqh); line-height: 1; }
+.rectq .rw { left: 50%; top: 100%; transform: translate(-50%, 4px); }
+.rectq .rh { left: 100%; top: 50%; transform: translate(8px, -50%); }
+
+/* ---------- Progress page (grown-ups) ---------- */
+.report { gap: 10px; }
+.rtop { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rtop h1 { margin: 0; flex: 1; font-size: clamp(1.6rem, 7vw, 2.4rem); }
+.rtop .pill { font-size: clamp(.85rem, 3.6vw, 1.05rem); height: auto; padding: 8px 14px; }
+.rtabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.rtabs button { padding: 6px 16px; border: 3px solid var(--ink); border-radius: 999px; background: #fff; font-weight: 800; font-size: 1.05rem; }
+.rtabs button.on { background: var(--sun); }
+.rbody { flex: 1; min-height: 0; overflow: auto; touch-action: pan-y; overscroll-behavior: contain; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; user-select: text; -webkit-user-select: text; }
+.rcardp { background: var(--paper); border: 3px solid var(--ink); border-radius: 18px; padding: 12px 14px; box-shadow: 0 4px 0 rgba(23,58,94,.25); }
+.rcardp h2 { margin: 0 0 8px; font-size: 1.15rem; }
+.rstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.rstat { background: #fff; border: 2px solid #D8D2C4; border-radius: 14px; padding: 8px 12px; }
+.rstat b { display: block; font-size: 1.6rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.rstat span { font-size: .85rem; font-weight: 600; color: #4A5D73; }
+.rtable { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.rtable th { text-align: left; font-size: .8rem; color: #4A5D73; font-weight: 700; padding: 4px 6px; border-bottom: 2px solid #E2DCCD; }
+.rtable td { padding: 6px; border-bottom: 1px solid #EEE8DA; vertical-align: middle; font-weight: 600; }
+.rtable td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.meter { width: 100%; min-width: 70px; height: 10px; border-radius: 99px; background: #ECE6D8; overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 99px; background: #3D7DD8; }
+.stat { white-space: nowrap; font-weight: 800; font-size: .85rem; }
+.stat.good { color: #217A3C; } .stat.warn { color: #9A6B00; } .stat.bad { color: #B3361F; } .stat.none { color: #6B7A8C; }
+.miss { margin: 4px 0 0; padding-left: 18px; font-size: .9rem; font-weight: 600; color: #34475C; }
+.miss li { margin: 2px 0; }
+.days { display: flex; align-items: flex-end; gap: 2px; height: 90px; padding-top: 6px; }
+.days i { flex: 1; background: #3D7DD8; border-radius: 4px 4px 0 0; min-height: 2px; }
+.days i.zero { background: #E2DCCD; }
+.dayl { display: flex; justify-content: space-between; font-size: .75rem; color: #6B7A8C; font-weight: 600; margin-top: 4px; }
+.recent { list-style: none; margin: 0; padding: 0; font-size: .9rem; font-weight: 600; }
+.recent li { padding: 5px 0; border-bottom: 1px solid #EEE8DA; }
+.recent small { color: #6B7A8C; font-weight: 600; }
+.copied { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 70; background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 999px; font-weight: 800; }
+.reptext { width: 100%; height: 40vh; font: 14px/1.4 ui-monospace, monospace; }
+
+/* ---------- Pause ---------- */
+.pauseov { position: absolute; inset: 0; z-index: 43; display: grid; place-items: center; background: rgba(23,58,94,.45); border-radius: 30px; }
+.pauseov.after { background: rgba(23,58,94,.12); place-items: end center; padding-bottom: 18px; }
+.pauseov.counting { background: transparent; place-items: center; pointer-events: auto; }
+.pcard { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 22px; background: rgba(255,253,246,.94); border: 4px solid var(--ink); border-radius: 26px; box-shadow: 0 6px 0 var(--ink); text-align: center; }
+.pcard b { font-size: clamp(1.4rem, 6vw, 2rem); line-height: 1.1; }
+.pcard span { font-weight: 700; opacity: .8; }
+.pauseov .gogo { width: min(30vw, 130px); height: min(30vw, 130px); font-size: min(14vw, 62px); }
+.pauseov.after .pcard { flex-direction: row; flex-wrap: wrap; justify-content: center; max-width: 92%; }
+.pauseov.after .gogo { width: min(22vw, 96px); height: min(22vw, 96px); font-size: min(11vw, 46px); }
+#pauseBtn[hidden] { display: none; }
+
 /* ---------- Captions (big kid) ---------- */
 .caption { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 46; max-width: min(92%, 640px); padding: 8px 18px; pointer-events: none; text-align: center;
   border: 3px solid var(--ink); border-radius: 18px; background: rgba(255,253,246,.95); box-shadow: 0 5px 0 rgba(23,58,94,.35); font-weight: 800; line-height: 1.25;
@@ -578,7 +633,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .picker { justify-content: center; align-items: center; gap: 24px; }
 .picker h1 { margin: 0; font-size: clamp(2rem, 9vw, 3.4rem); text-align: center; }
 .who { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; width: 100%; }
-.whocard { flex: 1 1 240px; max-width: 360px; min-height: 190px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+.whocard { flex: 1 1 200px; max-width: 320px; min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   background: var(--c); border: 4px solid var(--ink); border-radius: 30px; box-shadow: 0 7px 0 var(--ink); font-size: clamp(1.5rem, 6.5vw, 2.2rem); font-weight: 800; }
 .whocard:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--ink); }
 .whocard { position: relative; overflow: hidden; background: linear-gradient(170deg, color-mix(in srgb, var(--c) 65%, #fff), var(--c) 55%, color-mix(in srgb, var(--c) 82%, #000)); box-shadow: 0 7px 0 var(--ink), 0 16px 30px rgba(23,58,94,.22); }
@@ -632,9 +687,16 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   <section id="picker" class="screen picker" hidden>
     <h1>Who's playing?</h1>
     <div class="who">
-      <button data-p="little" class="whocard" style="--c:var(--sun)"><span class="em">🐣</span><b id="nameLittle">Little kid</b><small>Ages 3–6</small></button>
-      <button data-p="big" class="whocard" style="--c:var(--sky)"><span class="em">🚀</span><b id="nameBig">Big kid</b><small>Ages 8–10</small></button>
+      <button data-p="little" class="whocard" style="--c:var(--sun)"><span class="em">🐣</span><b id="name_little">Luka</b></button>
+      <button data-p="big" class="whocard" style="--c:var(--sky)"><span class="em">🚀</span><b id="name_big">Enzo</b></button>
+      <button data-p="keira" class="whocard" style="--c:var(--bubble)"><span class="em">🦄</span><b id="name_keira">Keira</b></button>
     </div>
+  </section>
+
+  <section id="report" class="screen report" hidden>
+    <div class="rtop"><h1>📊 Progress</h1><button id="repCopy" class="pill">📋 Copy report for Claude</button><button id="repClose" class="tool big" aria-label="Close">✖</button></div>
+    <div class="rtabs" id="repTabs"></div>
+    <div class="rbody" id="repBody"></div>
   </section>
 
   <section id="hub" class="screen hub">
@@ -651,6 +713,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   <section id="stage" class="screen" hidden>
     <div class="topbar">
       <button id="home" class="tool big" aria-label="Home">🏠</button>
+      <button id="pauseBtn" class="tool big" aria-label="Pause">⏸</button>
       <div id="homeAsk" class="homeask" hidden>Go home? <button class="yes" id="homeYes" aria-label="Yes, go home">✔</button><button class="no" id="homeNo" aria-label="No, keep playing">✖</button></div>
       <div class="gtitle" id="gtitle"></div>
       <div class="tools" id="tools"></div>
@@ -664,8 +727,9 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   <div class="sheetcard" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <h2 id="sheetTitle">Grown-ups</h2>
     <p class="ver" id="appVersion"></p>
+    <button id="openReport" class="done" style="margin-bottom:12px">📊 See progress (answers, topics, what needs practice)</button>
     <h3>Players</h3>
-    <div class="names"><label>🐣 <input id="nmLittle" maxlength="16" placeholder="Little kid" autocomplete="off"></label><label>🚀 <input id="nmBig" maxlength="16" placeholder="Big kid" autocomplete="off"></label></div>
+    <div class="names"><label>🐣 <input id="nm_little" maxlength="16" placeholder="Luka" autocomplete="off"></label><label>🚀 <input id="nm_big" maxlength="16" placeholder="Enzo" autocomplete="off"></label><label>🦄 <input id="nm_keira" maxlength="16" placeholder="Keira" autocomplete="off"></label></div>
     <p class="ver">Names are saved only on this device.</p>
     <h3>Voice</h3>
     <div class="seg" id="voiceMode" style="margin-bottom:12px">
@@ -899,6 +963,86 @@ window.LT = (() => {
     if (n !== 1) return t.replace("{n}", n);
     return t.replace("{n} times", "once").replace("{n}", 1).replace("1 power-ups", "1 power-up").replace("1 walls", "1 wall").replace("1 mazes", "1 maze").replace("1 sleepy bees", "1 sleepy bee");
   };
+  // Harder spelling words (vocab level 4 and up).
+  const PRO_SPELL2 = ["although","adventure","calendar","certain","century","describe","disappear","exercise","February","forty","guard","height","imagine","interest",
+    "knowledge","machine","mention","natural","necessary","occasion","perhaps","popular","probably","promise","quarter","recent","remember","sentence","strength",
+    "suppose","therefore","though","various","weight","Wednesday","whether"];
+  // Reading and grammar: [question, answer, wrong answers, explanation, from level]. "s:" = a sentence with a blank.
+  const VOCAB_QA = [
+    ["s:I can't wait to see ___ new house.", "their", ["there", "they're"], "Their means it belongs to them.", 3],
+    ["s:___ going to the park after lunch.", "They're", ["Their", "There"], "They're is short for they are.", 3],
+    ["s:Put the box over ___ by the door.", "there", ["their", "they're"], "There means in that place.", 3],
+    ["s:I have ___ brothers.", "two", ["to", "too"], "Two is the number 2.", 3],
+    ["s:Can I come ___?", "too", ["to", "two"], "Too means also.", 3],
+    ["s:We walked ___ school.", "to", ["too", "two"], "To shows where you are going.", 3],
+    ["s:___ my best friend.", "You're", ["Your"], "You're is short for you are.", 3],
+    ["s:Is that ___ bike?", "your", ["you're"], "Your means it belongs to you.", 3],
+    ["s:The dog wagged ___ tail.", "its", ["it's"], "Its means belonging to it.", 4],
+    ["s:___ raining outside.", "It's", ["Its"], "It's is short for it is.", 4],
+    ["s:Yesterday I ___ a letter to Grandma.", "wrote", ["write", "writed"], "Wrote is the past tense of write.", 3],
+    ["s:Last week she ___ to the zoo.", "went", ["goed", "go"], "Went is the past tense of go.", 3],
+    ["s:We ___ a great movie last night.", "saw", ["seen", "seed"], "Saw is the past tense of see.", 3],
+    ["s:He ___ the ball over the fence.", "threw", ["throwed", "through"], "Threw is the past tense of throw.", 4],
+    ["s:The bird ___ away.", "flew", ["flied", "flown"], "Flew is the past tense of fly.", 4],
+    ["s:The pirates ___ the treasure under a tree.", "hid", ["hided", "hidden"], "Hid is the past tense of hide.", 5],
+    ["Which word is a verb?", "jump", ["happy", "table", "blue"], "A verb is an action word, like jump.", 4],
+    ["Which word is a noun?", "teacher", ["quickly", "run", "soft"], "A noun is a person, place or thing, like teacher.", 4],
+    ["Which word is an adjective?", "shiny", ["swim", "garden", "slowly"], "An adjective describes a noun, like shiny.", 4],
+    ["Which word is an adverb?", "quietly", ["quiet", "table", "sing"], "An adverb tells how something is done, like quietly.", 5],
+    ["What does unhappy mean?", "not happy", ["very happy", "happy again", "happy before"], "The prefix un means not.", 4],
+    ["What does reread mean?", "read again", ["not read", "read before", "read badly"], "The prefix re means again.", 4],
+    ["What does preheat mean?", "heat before", ["heat again", "not heat", "heat too much"], "The prefix pre means before.", 5],
+    ["What does careless mean?", "without care", ["full of care", "care again", "very careful"], "The suffix less means without.", 5],
+    ["What does helpful mean?", "full of help", ["without help", "help again", "not helping"], "The suffix ful means full of.", 5],
+    ["What does disagree mean?", "not agree", ["agree again", "agree a lot", "agree before"], "The prefix dis means not.", 5],
+    ["What is the short way to write do not?", "don't", ["dont", "do'nt", "doesn't"], "Do not becomes don't.", 4],
+    ["What is the short way to write we will?", "we'll", ["well", "w'ell", "we'il"], "We will becomes we'll.", 5],
+    ["What is the short way to write they are?", "they're", ["their", "theyr'e", "there"], "They are becomes they're.", 5],
+    ["Which one is a compound word?", "sunflower", ["sunny", "running", "yellow"], "Sunflower is made of two words, sun and flower.", 4],
+    ["Which one is a compound word?", "football", ["follow", "funny", "finger"], "Football is made of two words, foot and ball.", 4],
+    ["Which sentence is written correctly?", "My dog is fast.", ["my dog is fast.", "My dog is fast", "my Dog is fast"], "A sentence starts with a capital letter and ends with a period.", 4],
+    ["Which word means very big?", "enormous", ["tiny", "narrow", "gentle"], "Enormous means very big.", 5],
+    ["Which word means very old?", "ancient", ["modern", "brand new", "recent"], "Ancient means very old.", 5],
+    ["Which word means scared?", "frightened", ["delighted", "curious", "proud"], "Frightened means scared.", 5],
+  ];
+  // Science facts: [question, answer, wrong answers, explanation, from level].
+  const SCI_FACTS = [
+    ["Which one is a solid?", "ice", ["steam", "juice", "air"], "Ice is a solid.", 3],
+    ["Which one is a gas?", "steam", ["ice", "milk", "a rock"], "Steam is a gas.", 3],
+    ["Which one is a liquid?", "juice", ["a rock", "steam", "a spoon"], "Juice is a liquid.", 3],
+    ["What happens when water freezes?", "It turns to ice.", ["It turns to steam.", "It gets hotter.", "It disappears."], "When water freezes, it turns to ice.", 3],
+    ["How many legs does an insect have?", "6", ["4", "8", "10"], "Insects have six legs.", 3],
+    ["How many legs does a spider have?", "8", ["6", "4", "10"], "Spiders have eight legs.", 3],
+    ["What do caterpillars turn into?", "butterflies", ["bees", "beetles", "worms"], "Caterpillars turn into butterflies.", 3],
+    ["What do bees make?", "honey", ["milk", "silk", "juice"], "Bees make honey.", 3],
+    ["What do plants need to make food?", "sunlight", ["sand", "darkness", "plastic"], "Plants use sunlight to make food.", 3],
+    ["What part of a plant takes in water?", "the roots", ["the flowers", "the petals", "the seeds"], "The roots take in water.", 3],
+    ["What does the heart do?", "pumps blood", ["helps you think", "digests food", "helps you see"], "The heart pumps blood around your body.", 4],
+    ["Which body part helps you breathe?", "the lungs", ["the heart", "the stomach", "the bones"], "Your lungs help you breathe.", 4],
+    ["Which body part helps you think?", "the brain", ["the lungs", "the stomach", "the skin"], "Your brain helps you think.", 4],
+    ["Which planet is closest to the sun?", "Mercury", ["Earth", "Mars", "Jupiter"], "Mercury is closest to the sun.", 4],
+    ["Which planet is the biggest?", "Jupiter", ["Mars", "Earth", "Venus"], "Jupiter is the biggest planet.", 4],
+    ["Which planet is called the red planet?", "Mars", ["Venus", "Saturn", "Neptune"], "Mars is called the red planet.", 4],
+    ["Which planet has big rings?", "Saturn", ["Mars", "Mercury", "Earth"], "Saturn has big rings.", 4],
+    ["What is the closest star to Earth?", "the sun", ["the moon", "Mars", "the North Star"], "The sun is the closest star to Earth.", 4],
+    ["Which force pulls things down to the ground?", "gravity", ["magnetism", "wind", "friction"], "Gravity pulls things down.", 4],
+    ["What will a magnet pick up?", "a paper clip", ["a pencil", "a rubber band", "a leaf"], "Magnets pick up things made of iron or steel, like a paper clip.", 4],
+    ["Which animal is a mammal that can fly?", "a bat", ["an eagle", "a bee", "a penguin"], "A bat is a mammal that can fly.", 4],
+    ["What gas do people need to breathe?", "oxygen", ["smoke", "helium", "steam"], "People need oxygen to live.", 5],
+    ["When water turns into a gas, what is it called?", "evaporation", ["freezing", "melting", "raining"], "Water turning into a gas is called evaporation.", 5],
+    ["When water vapor cools into drops, what is it called?", "condensation", ["evaporation", "melting", "erosion"], "Water vapor turning back into drops is called condensation.", 5],
+    ["Which energy source will not run out?", "the wind", ["coal", "oil", "gasoline"], "Wind is renewable. It will not run out.", 5],
+    ["Which layer of the Earth do we live on?", "the crust", ["the core", "the mantle", "the ocean"], "We live on the crust.", 5],
+    ["What causes day and night?", "Earth spinning", ["the moon moving", "clouds", "the sun turning off"], "Day and night happen because the Earth spins.", 5],
+    ["How long does Earth take to go around the sun?", "one year", ["one day", "one week", "one month"], "Earth takes one year to go around the sun.", 5],
+    ["What do we call an animal that eats only plants?", "herbivore", ["carnivore", "predator", "omnivore"], "An animal that eats only plants is a herbivore.", 5],
+    ["What do we call an animal that eats plants and meat?", "omnivore", ["herbivore", "carnivore", "insect"], "An animal that eats plants and meat is an omnivore.", 5],
+  ];
+  const PRO_PHRASES3 = ["Which word fits the blank?", "million", "point", "to the nearest thousand.", "to the nearest ten thousand.", "to the nearest hundred thousand.",
+    "Which number is a factor of", "Which number is prime?", "is prime. It can only be divided by one and itself.", "is in the tenths place, so it is worth",
+    "is in the hundredths place, so it is worth", "remainder", "is the same as", "is the same as how many out of", "Which fraction is the biggest?", "is the biggest.",
+    "A rectangle is", "by", "What is its area?", "What is its perimeter?", "The area is", "The perimeter is", "which is", "Multiply first.", "of",
+    "one half", "one third", "one fourth", "one fifth", "one sixth", "one eighth", "one tenth"];
   // Longer picture words for the big kid's arcade and spelling games.
   const PRO_WORDS = [["robot","🤖"],["pizza","🍕"],["tiger","🐯"],["zebra","🦓"],["camel","🐪"],["whale","🐳"],["shark","🦈"],["snake","🐍"],["horse","🐴"],
     ["mouse","🐭"],["apple","🍎"],["lemon","🍋"],["grapes","🍇"],["banana","🍌"],["carrot","🥕"],["cookie","🍪"],["cheese","🧀"],["donut","🍩"],["rabbit","🐰"],
@@ -947,6 +1091,9 @@ window.LT = (() => {
     ["Mission complete!", "Missions!", "Mission master!"].forEach(p => add(p));
     Object.values(MISSIONS).flat().forEach(m => [false, true].forEach(big => { const t = missionText(m, big); if (t) add("mis:" + t, t + "."); }));
     PRO_WORDS.forEach(([w]) => add(w));
+    PRO_PHRASES3.forEach(p => add(p)); PRO_SPELL2.forEach(w => add(w));
+    [...VOCAB_QA, ...SCI_FACTS].forEach(([q, , , expl]) => { add(q, q.startsWith("s:") ? q.slice(2).replace("___", "blank") : q); add(expl); });
+    [["little", "Looka"], ["big", "Enzo"], ["keira", "Keera"]].forEach(([k, n]) => add("hi:" + k, `Hi ${n}!`)); // spelled the way the names are said
     [...PRO_WORDS.map(x => x[0]), ...PRO_SPELL].forEach(w => add("spell:" + w, `Can you spell ${w}?`));
     [...PRO_SPELL, ...OPPOSITES.flat(), ...SYNONYMS.flat(), ...PLURALS.flat(), ...SYLLABLES.map(x => x[0])].forEach(w => add(w));
     Object.entries(ANIMAL_INFO).forEach(([n, [cls, d]]) => {
@@ -959,7 +1106,7 @@ window.LT = (() => {
     Object.entries(COUNTBY).forEach(([n, w]) => add("countby:" + n, `Count by ${w}!`));
     return L;
   }
-  return { MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
+  return { PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
     VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
 })();
 </script>
@@ -967,7 +1114,7 @@ window.LT = (() => {
 <script>
 (() => {
 "use strict";
-const { MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const { PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
 const stickerSet = () => PRO ? PRO_STICKERS : STICKERS;
 const $ = (s, el = document) => el.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -976,18 +1123,20 @@ const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = arr => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const replay = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
 const PAPER = "#FFFDF6";
-// Two players. "little" keeps the original keys; "big" (ages 8-10) stores its own levels, stickers and scores under "p2.".
-// Voice settings and names are shared.
+// Three players, each with their own levels, stickers, scores and brain-break clock. Luka keeps the original keys.
+// Enzo and Keira both get the big-kid games; Keira starts the learning levels higher. Voice settings and names are shared.
+const PLAYERS = { little: { name: "Luka", em: "🐣", c: "--sun", pre: "" }, big: { name: "Enzo", em: "🚀", c: "--sky", pre: "p2." }, keira: { name: "Keira", em: "🦄", c: "--bubble", pre: "p3." } };
 const GLOBAL_KEYS = /^(voiceMode|voice|rate|profile|names|vcMarked)$/;
 let PROFILE = (() => { try { return JSON.parse(localStorage.getItem("littletaps.profile")); } catch (e) { return null; } })();
-let PRO = PROFILE === "big";
+if (!PLAYERS[PROFILE]) PROFILE = null;
+let PRO = !!PROFILE && PROFILE !== "little";
 const store = {
-  key: k => "littletaps." + (PRO && !GLOBAL_KEYS.test(k) ? "p2." : "") + k,
+  key: k => "littletaps." + (PROFILE && !GLOBAL_KEYS.test(k) ? PLAYERS[PROFILE].pre : "") + k,
   get(k, d) { try { const v = localStorage.getItem(store.key(k)); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "18 (Nov 26, brain-break timer)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "20 (Nov 26, progress + pause)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1065,9 +1214,11 @@ function loadClips() {
 }
 loadClips();
 function numKeys(n) {
+  if (!Number.isInteger(n)) { const [i, f] = String(n).split("."); return [...numKeys(Number(i)), "point", ...f.split("")]; }
   if (n <= 100) return [String(n)];
   if (n < 1000) { const h = Math.floor(n / 100), r = n % 100; return r ? [String(h), "hundred", String(r)] : [String(h), "hundred"]; }
-  if (n < 10000) { const t = Math.floor(n / 1000), r = n % 1000; return r ? [String(t), "thousand", ...numKeys(r)] : [String(t), "thousand"]; }
+  if (n < 1e6) { const t = Math.floor(n / 1000), r = n % 1000; return [...numKeys(t), "thousand", ...(r ? numKeys(r) : [])]; }
+  if (n < 1e9) { const m = Math.floor(n / 1e6), r = n % 1e6; return [...numKeys(m), "million", ...(r ? numKeys(r) : [])]; }
   return [String(n)];
 }
 const keysOf = parts => parts.flat().filter(p => p !== null && p !== undefined && p !== "").flatMap(p => typeof p === "number" ? numKeys(p) : [p]);
@@ -1161,13 +1312,38 @@ function ttsSay(text) {
 
 /* ---------- Per-game timers, loops and listeners, all cleared on exit ---------- */
 const session = { timers: new Set(), raf: 0, offs: [] };
-function later(fn, ms) { const id = setTimeout(() => { session.timers.delete(id); fn(); }, ms); session.timers.add(id); return id; }
+// While paused, game timers wait and game loops get no time (the picture freezes).
+let PAUSED = false, pauseOv = null;
+function later(fn, ms) { const id = setTimeout(() => { session.timers.delete(id); if (PAUSED) { later(fn, 300); return; } fn(); }, ms); session.timers.add(id); return id; }
 function loop(fn) {
-  let last = performance.now();
-  const tick = t => { const dt = Math.min(.1, (t - last) / 1000); last = t; fn(dt, t / 1000); session.raf = requestAnimationFrame(tick); };
+  let last = performance.now(), ft = last / 1000;
+  const tick = t => { const dt = Math.min(.1, (t - last) / 1000); last = t; if (!PAUSED) ft = t / 1000; fn(PAUSED ? 0 : dt, ft); session.raf = requestAnimationFrame(tick); };
   session.raf = requestAnimationFrame(tick);
 }
 function onWin(type, fn) { window.addEventListener(type, fn); session.offs.push(() => window.removeEventListener(type, fn)); }
+function pauseGame(doneMsg) {
+  if (PAUSED || stage.hidden || (!doneMsg && stage.querySelector(".gate, .reward"))) return;
+  PAUSED = true; stopSpeech();
+  pauseOv = document.createElement("div"); pauseOv.className = "pauseov" + (doneMsg ? " after" : "");
+  pauseOv.innerHTML = `<div class="pcard">${doneMsg ? `<b>${doneMsg}</b><span>Look where you are, then tap ▶</span>` : "<b>Paused</b>"}<button class="gogo" aria-label="Keep playing">▶</button></div>`;
+  $("#game").appendChild(pauseOv);
+  const ov = pauseOv, go = $(".gogo", ov);
+  let started = false;
+  const nudge = () => setTimeout(() => { if (started || !ov.isConnected) return; say("Tap when you're ready!"); replay(go, "hop"); nudge(); }, 12000);
+  nudge();
+  go.addEventListener("pointerdown", e => {
+    e.preventDefault(); if (started) return; started = true; sfx.tap();
+    // A quick 3-2-1 so they're ready when it moves again.
+    ov.classList.add("counting"); ov.innerHTML = '<div class="gcount"></div>';
+    const el = $(".gcount", ov);
+    ["3", "2", "1", "Go!"].forEach((st, i) => setTimeout(() => {
+      if (!ov.isConnected) return;
+      el.textContent = st; replay(el, "countpop"); say(st); tone(i < 3 ? 660 : 990, { d: i < 3 ? .12 : .3, v: .14, type: "triangle" });
+      if (i === 3) setTimeout(() => { if (ov.isConnected) { ov.remove(); if (pauseOv === ov) pauseOv = null; PAUSED = false; } }, 450);
+    }, i * 650));
+  });
+}
+function clearPause() { PAUSED = false; if (pauseOv) { pauseOv.remove(); pauseOv = null; } }
 function endSession() {
   session.timers.forEach(clearTimeout); session.timers.clear();
   cancelAnimationFrame(session.raf);
@@ -1241,7 +1417,11 @@ function floatUp(parent, x, y, content) {
 /* ---------- Rewards: stickers and stars, saved on the device ---------- */
 // The big kid starts the shared games further along.
 const PRO_START = { robot: 6, balance: 5, words: 4, puzzle: 5, runner: 5 };
-const levelOf = id => store.get("lvl." + id, PRO ? (PRO_START[id] || 1) : 1);
+// Keira starts the learning games around a 4th-5th grade level; every level then adapts to how she does.
+const KEIRA_START = { numbers: 4, math: 4, vocab: 4, science: 4, times: 4, spell: 4, pairs: 3, shop: 3, robot: 7, balance: 6, words: 5, puzzle: 6, runner: 6, maze: 2 };
+const SKILL_START = { keira: { numbers: 4, math: 4, vocab: 4, science: 4 } };
+const levelOf = id => store.get("lvl." + id, PROFILE === "keira" ? (KEIRA_START[id] || PRO_START[id] || 1) : PRO ? (PRO_START[id] || 1) : 1);
+const skillOf = t => store.get("skill." + t, (SKILL_START[PROFILE] || {})[t] || 1);
 const setLevel = (id, v) => store.set("lvl." + id, v);
 // Shows a new sticker (or a star once the book is full), then calls next().
 function reward(lead, next) {
@@ -1263,6 +1443,89 @@ function reward(lead, next) {
   ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > total * 1000) close(); });
   later(close, Math.max(3600, total * 1000 + 1400));
 }
+/* ---------- Learning record: every answer is saved per player with its topic, level and right/wrong.
+   Brain breaks and Learn quizzes use it to lean toward topics that need practice; the Progress page reports on it. ---------- */
+const SCI_TOPICS = [[/heart|lung|brain|body|breathe/i, "Human body"], [/plant|roots/i, "Plants"], [/solid|liquid|\bgas\b|freez|evapor|condens|vapor/i, "Matter and the water cycle"],
+  [/planet|\bsun\b|star|Earth|moon|day and night/i, "Space and Earth"], [/gravity|magnet|force/i, "Forces and magnets"], [/energy/i, "Energy"], [/insect|spider|caterpillar|bees|mammal|herbivore|omnivore|animal/i, "Animals"]];
+function conceptOf(r, track) {
+  const keys = (r.ask || []).filter(x => typeof x === "string"), k0 = keys[0] || "", has = w => keys.includes(w), nums = (r.ask || []).filter(x => typeof x === "number");
+  if (track === "times") return has("divided by") ? "Division facts" : "Times tables";
+  if (track === "spell" || k0.startsWith("spell:")) return "Spelling words";
+  if (k0.startsWith("cls:") || k0.startsWith("notcls:")) return "Animal groups";
+  if (k0.startsWith("diet:")) return "What animals eat";
+  if (k0.startsWith("who:")) return "Animal sounds";
+  if (k0.startsWith("where:")) return "Where animals live";
+  if (k0.startsWith("case:")) return "Big and little letters";
+  if (k0.startsWith("starts:")) return "Beginning sounds";
+  if (k0.startsWith("rhymeq:")) return "Rhymes";
+  if (k0.startsWith("countby:") || keys.some(x => x.startsWith("countby:"))) return "Skip counting";
+  if (k0 === "Find the number") return "Number recognition";
+  if (k0 === "Find the word") return "Sight words";
+  if (k0.startsWith("What number is this?")) return "Tens and ones";
+  if (k0 === "Which number is smaller?" || k0 === "Which number is bigger?") return "Bigger and smaller";
+  if (has("Which letter is missing?")) return "Alphabet order";
+  if (k0.startsWith("Look at the pattern")) return "Patterns";
+  if (has("How many altogether?")) return "Adding";
+  if (has("How many are left?")) return "Taking away";
+  if (k0 === "What is the value of the") return String(r.answer).includes(".") ? "Decimal place value" : "Place value";
+  if (k0 === "Round") return "Rounding";
+  if (k0 === "Which number is the biggest?" || k0 === "Which number is the smallest?") return "Comparing numbers";
+  if (k0 === "Which number is odd?" || k0 === "Which number is even?") return "Odd and even";
+  if (k0 === "Which number is a multiple of") return "Multiples";
+  if (k0 === "Which number is a factor of") return "Factors";
+  if (k0 === "Which number is prime?") return "Prime numbers";
+  if (has("What number is missing?") || has("Which number is missing?")) return track === "numbers" && !PRO ? "Counting order" : "Number patterns";
+  if (k0 === "Which fraction is the biggest?") return "Comparing fractions";
+  if (k0 === "What fraction is shaded?") return "Fractions";
+  if (has("is the same as how many out of")) return "Equivalent fractions";
+  if (k0 === "A rectangle is") return has("What is its area?") ? "Area" : "Perimeter";
+  if (keys.some(x => /^one (half|third|fourth|fifth|sixth|eighth|tenth)$/.test(x))) return "Fraction of a number";
+  if (Object.values(WORD_PROBLEMS).some(t => t[0] === k0 || t[0] === (r.ask || [])[0])) return "Word problems";
+  if (k0 === "What number times") return "Missing factor";
+  if (k0 === "What is") {
+    if (has("plus") && has("times")) return "Order of operations";
+    if (has("out of")) return "Adding fractions";
+    if (has("divided by")) return /R\d/.test(String(r.answer)) ? "Division with remainders" : nums.some(n => n >= 100) ? "Long division" : "Division";
+    if (has("times")) return nums.some(n => n > 12) ? "Multi-digit multiplication" : "Times tables";
+    if (has("plus")) return nums.some(n => !Number.isInteger(n)) ? "Decimals" : nums.some(n => n >= 100) ? "3-digit adding" : "Adding";
+    if (has("minus")) return nums.some(n => n >= 100) ? "3-digit subtracting" : "Subtracting";
+  }
+  if (k0 === "Which word is spelled correctly?") return "Spelling";
+  if (k0 === "What is the opposite of") return "Opposites";
+  if (k0 === "Which word means the same as") return "Synonyms";
+  if (k0 === "What is the plural of") return "Plurals";
+  if (k0 === "How many syllables are in") return "Syllables";
+  if (k0 === "Which word fits the blank?") return /past tense/.test(askText(r.right || [])) ? "Past tense verbs" : "Homophones (their/there, to/too)";
+  if (/^Which word is an? (verb|noun|adjective|adverb)\?$/.test(k0)) return "Parts of speech";
+  if (/^What does \w+ mean\?$/.test(k0)) return "Prefixes and suffixes";
+  if (k0.startsWith("What is the short way")) return "Contractions";
+  if (k0 === "Which one is a compound word?") return "Compound words";
+  if (k0 === "Which sentence is written correctly?") return "Capitals and periods";
+  if (/^Which word means /.test(k0)) return "Word meanings";
+  if (track === "science") { const q = askText(r.ask || []), hit = SCI_TOPICS.find(([re]) => re.test(q)); return hit ? hit[1] : "Science facts"; }
+  return { numbers: "Numbers", math: "Math", letters: "Letters", vocab: "Words", science: "Science", animals: "Animal facts" }[track] || track;
+}
+const labelOf = (r, v) => String(r.label ? r.label(v) : v);
+function logAnswer(src, track, r, ok, picked) {
+  const log = store.get("log", []);
+  log.push({ t: Date.now(), s: src, k: track, c: r._c || conceptOf(r, track), lv: r._lv || 0, ok: ok ? 1 : 0,
+    q: askText(r.ask || []).slice(0, 140), a: labelOf(r, r.answer), p: picked == null ? null : labelOf(r, picked) });
+  if (log.length > 2500) log.splice(0, log.length - 2500);
+  store.set("log", log);
+}
+// Accuracy on a topic over the last n tries.
+function mastery(log, c, n = 20) { const xs = log.filter(e => e.c === c).slice(-n); return { n: xs.length, acc: xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : null }; }
+// Makes several candidate questions and favours topics that need practice or haven't been tried much (never the same topic twice in a row if avoidable).
+function pickRound(make, lvl, track, lastC) {
+  const log = store.get("log", []).slice(-500), cands = [];
+  for (let i = 0; i < 6; i++) { const r = make(lvl); r._lv = lvl; r._c = conceptOf(r, track); cands.push(r); }
+  const w = cands.map(r => { const m = mastery(log, r._c); let x = m.n < 4 ? 1.1 : .2 + (1 - m.acc) * 1.8; if (r._c === lastC) x *= .3; return x; });
+  let roll = Math.random() * w.reduce((a, b) => a + b, 0), pickd = cands[0];
+  for (let i = 0; i < cands.length; i++) { roll -= w[i]; if (roll <= 0) { pickd = cands[i]; break; } }
+  if (pickd._qa) { recentQA.push(pickd._qa); if (recentQA.length > 18) recentQA.shift(); }
+  return pickd;
+}
+
 /* ---------- Missions: three small goals at a time per arcade game. Finishing one shows a banner;
    every three finished earn a sticker at the next pause (never mid-action, no timers, nothing resets). ---------- */
 let MIS = null;
@@ -1388,7 +1651,8 @@ function startCoach(id, gameEl) {
   later(tick, 500);
 }
 /* ---------- Brain breaks: arcade games pause for 3 quick questions; the level adapts ---------- */
-const GATE_TRACKS = [["numbers", numberRound], ["letters", letterRound], ["math", mathRound]];
+// Luka's brain breaks: numbers, letters and animals (no sums yet).
+const GATE_TRACKS = [["numbers", numberRound], ["letters", letterRound], ["animals", (lv) => animalRound(lv)]];
 // Arcade play time since the last finished brain break. It is saved per player and survives switching games,
 // going home, closing the app and leaving in the middle of a break: only finishing a break resets it.
 let gateClock = store.get("gateClock", 0), gateSaveT = 0, gateMins = store.get("gateMins", 2);
@@ -1403,11 +1667,16 @@ window.addEventListener("pagehide", saveGateClock);
 function openGate(onDone) {
   saveGateClock();
   const tracks = PRO ? [["numbers", numberRoundPro], ["math", mathRoundPro], ["vocab", vocabRound], ["science", scienceRound]] : GATE_TRACKS;
-  const n = store.get("gateNext", 0), [track, make] = tracks[n % tracks.length], Q = PRO ? 4 : 3, MAXQ = Q + 4;
-  store.set("gateNext", n + 1);
+  // Topic area for this break: weaker and less recently used areas come up more often.
+  const recent = store.get("log", []).filter(e => e.s === "b").slice(-200), lastTrack = store.get("gateLast", "");
+  const tw = tracks.map(([k]) => { const xs = recent.filter(e => e.k === k).slice(-12), acc = xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : .5; return (k === lastTrack ? .25 : 1) * (.6 + (1 - acc) * 1.4); });
+  let roll = Math.random() * tw.reduce((a, b) => a + b, 0), ti = 0; while (ti < tracks.length - 1 && (roll -= tw[ti]) > 0) ti++;
+  const forced = store.get("gateNext", null); if (forced != null) { ti = forced % tracks.length; store.set("gateNext", null); } // used by automated tests
+  const [track, make] = tracks[ti], Q = PRO ? 4 : 3, MAXQ = Q + (PRO ? 4 : 2);
+  store.set("gateLast", track);
   // got = right on the first try; every miss adds one more problem (up to 4 more), so guessing makes the break longer.
   // Difficulty adapts as it goes: two right in a row = a harder problem next; two misses in a row = a bit easier.
-  let lvl = store.get("skill." + track, 1), got = 0, misses = 0, need = Q, streak = 0, missStreak = 0, round = null, busy = false, unlockAt = 0;
+  let lvl = skillOf(track), got = 0, misses = 0, need = Q, streak = 0, missStreak = 0, round = null, busy = false, unlockAt = 0;
   const ov = document.createElement("div");
   ov.className = "gate";
   ov.innerHTML = '<div class="gcard"><div class="ghead"><b>🧠 Brain break!</b><span class="glv"></span><span class="gpips"></span><button class="tool big" aria-label="Say it again">🔊</button></div><div class="gbody"><div class="prompt"></div><div class="choices"></div></div></div>';
@@ -1426,14 +1695,14 @@ function openGate(onDone) {
   }
   function explain(ch, b, guessed) {
     // Wrong: show the right answer and why, out loud and in writing, then a new problem when they're ready.
-    busy = true; misses++; streak = 0; missStreak++;
+    busy = true; misses++; streak = 0; missStreak++; logAnswer("b", track, round, false, ch);
     need = Math.min(MAXQ, need + 1);
     if (missStreak >= 2) { setLvl(lvl - 1); missStreak = 0; } else drawPips();
     b.classList.remove("pop-in"); b.classList.add("no"); replay(b, "wiggle"); sfx.boop();
     const right = [...wrap.children].find(x => x._val === round.answer); if (right) right.classList.add("yes");
     wrap.querySelectorAll(".choice").forEach(x => x !== b && x !== right && x.classList.add("fade"));
     if (round.onRight) round.onRight(promptEl);
-    const why = round.right.length === 1 ? ["The answer is", ...round.right] : round.right;
+    const why = round.right.length === 1 && !round.full ? ["The answer is", ...round.right] : round.right;
     const parts = [...(guessed ? ["Slow down and read carefully.", P(.3)] : []), "Not quite.", P(.25), ...why];
     const bar = document.createElement("div"); bar.className = "gexplain";
     bar.innerHTML = `<p>${guessed ? "<b>Slow down and read carefully.</b> " : ""}${askText(why)}</p><button class="gotit" disabled>Got it ▶</button>`;
@@ -1444,7 +1713,7 @@ function openGate(onDone) {
     go.addEventListener("click", () => { bar.remove(); next(false); });
   }
   function next(first) {
-    busy = false; round = make(lvl);
+    busy = false; round = pickRound(make, lvl, track, round && round._c);
     showPrompt(promptEl, round);
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", ask);
     wrap.innerHTML = "";
@@ -1459,7 +1728,7 @@ function openGate(onDone) {
         if (busy || b.classList.contains("wait")) return;
         if (ch !== round.answer) return explain(ch, b, performance.now() - unlockAt < 1500);
         // Right: no read-back, just a quick cheer and on to the next one.
-        busy = true; got++; streak++; missStreak = 0;
+        busy = true; got++; streak++; missStreak = 0; logAnswer("b", track, round, true, null);
         if (streak >= 2 && streak % 2 === 0) setLvl(lvl + 1); else drawPips();
         b.classList.remove("pop-in"); b.classList.add("yes"); wrap.querySelectorAll(".choice").forEach(x => x !== b && x.classList.add("fade"));
         sfx.yay(); say(praise());
@@ -1484,31 +1753,14 @@ function openGate(onDone) {
     store.set("skill." + track, lvl);
     gateClock = 0; saveGateClock(); // the break counts as done only now
     const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
+    store.set("breaks", store.get("breaks", 0) + 1);
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
-    // Wait for a tap, then count down so the player is ready when the game starts moving again.
-    later(() => {
-      $(".ghead .tool", ov).remove(); pips.innerHTML = range(1, need).map(() => '<i class="on"></i>').join("");
-      body.className = "gbody gready";
-      body.innerHTML = `<div class="gstars">${"⭐".repeat(stars)}${"✨".repeat(3 - stars)}</div><b>Get ready!</b><button class="gogo" aria-label="I'm ready">▶</button><span>Tap when you're ready</span>`;
-      const go = $(".gogo", body);
-      let started = false;
-      later(function nudge() { if (started || !ov.isConnected) return; say("Tap when you're ready!"); replay(go, "hop"); later(nudge, 10000); }, 10000);
-      go.addEventListener("pointerdown", e => {
-        e.preventDefault(); if (started) return; started = true; sfx.tap();
-        const steps = ["3", "2", "1", "Go!"];
-        body.innerHTML = '<div class="gcount"></div>';
-        const el = $(".gcount", body);
-        steps.forEach((st, i) => later(() => {
-          el.textContent = st; replay(el, "countpop"); say(st);
-          tone(i < 3 ? 660 : 990, { d: i < 3 ? .12 : .3, v: .14, type: "triangle" });
-          if (i === 3) { celebrate(); later(() => { ov.remove(); onDone(); }, 650); }
-        }, i * 750));
-      });
-    }, 1300);
+    // The question window goes away right away; the game stays paused (and visible) until they tap ▶.
+    later(() => { ov.remove(); onDone(); pauseGame(`${"⭐".repeat(stars)}${"✨".repeat(3 - stars)} Brain break done!`); }, 900);
   }
   next(true);
 }
-if (window.__debug) Object.assign(window.__debug, { openGate, reward: (...a) => reward(...a), rounds: () => ({ numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
+if (window.__debug) Object.assign(window.__debug, { openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
 // Picks a column count that gives the biggest cells for n items.
 const fitGrid = (el, n, aspect = 1, pad = 28, gap = 10) => {
   const W = el.clientWidth - pad, H = el.clientHeight - pad;
@@ -1554,7 +1806,7 @@ function quizGame(root, tools, id, bg, makeRound) {
   }
   function next() {
     busy = false; wrongHere = 0;
-    round = makeRound(level);
+    round = pickRound(makeRound, level, id, round && round._c);
     showPrompt(promptEl, round);
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", () => { ask(); armIdle(); });
     wrap.innerHTML = "";
@@ -1573,6 +1825,7 @@ function quizGame(root, tools, id, bg, makeRound) {
         if (busy) return;
         b.classList.remove("pop-in"); b.style.animationDelay = "0ms";
         armIdle();
+        if (!round._logged) { round._logged = true; logAnswer("l", id, round, ch === round.answer, ch === round.answer ? null : ch); }
         if (ch === round.answer) {
           busy = true; done++; clearTimeout(idleT); drawChip();
           wrap.querySelectorAll(".choice").forEach(x => x !== b && x.classList.add("fade"));
@@ -1596,7 +1849,7 @@ function quizGame(root, tools, id, bg, makeRound) {
 }
 // The big kid reads questions himself: the spoken parts become a line of text above the picture.
 function askText(parts) {
-  return parts.filter(p => p != null && !isPause(p)).map(p => typeof p === "number" || /^\d+$/.test(p) ? fmtN(+p) : /^[A-Z]$/.test(p) ? p : (LINES[p] ?? String(p)))
+  return parts.filter(p => p != null && !isPause(p)).map(p => typeof p === "number" || /^\d+$/.test(p) ? fmtN(+p) : /^[A-Z]$/.test(p) ? p : String(p).startsWith("s:") ? String(p).slice(2) : p === "hmm" ? "?" : (LINES[p] ?? String(p)))
     .join(" ").replace(/\s+([?.!,:])/g, "$1").replace(/\s+/g, " ").trim().replace(/^((what|which|how|who|where|is|can|does)\b.*[^?.!])$/i, "$1?");
 }
 function showPrompt(promptEl, round) {
@@ -1616,7 +1869,7 @@ const nearNumbers = (n, k, lo, hi) => {
 const seqHTML = items => { const len = Math.max(...items.map(x => String(x).length)); return `<div class="seq" style="--len:${len}">${items.map(x => x === "?" ? '<b class="q">?</b>' : `<b>${x}</b>`).join("")}</div>`; };
 function fillBlank(el, val) { const q = $(".q", el); if (q) { q.textContent = val; q.classList.remove("q"); replay(q, "hop"); } }
 function numberRound(level) {
-  const max = level <= 1 ? 30 : level === 2 ? 60 : 100, k = level <= 1 ? 3 : 4;
+  const max = level <= 1 ? 10 : level === 2 ? 20 : level === 3 ? 50 : 100, k = level <= 1 ? 3 : 4;
   const type = pick(level <= 1 ? ["find", "seq", "find"] : level <= 3 ? ["find", "seq", "tens", "bigger", "skip"] : ["find", "seq", "tens", "tens", "bigger", "skip", "skip"]);
   if (type === "tens") {
     const n = ri(11, Math.min(99, max)), t = Math.floor(n / 10), o = n % 10;
@@ -1754,36 +2007,41 @@ function mathRound(level) {
    ====================================================================== */
 const fmtN = n => n.toLocaleString("en-US");
 const unfmt = s => Number(String(s).replace(/,/g, ""));
+// Levels: 1 = to 999, 2 = to 9,999, 3 = to 99,999, 4 = to 999,999 with factors, 5+ = primes and decimals.
 function numberRoundPro(level) {
-  const max = level <= 1 ? 999 : 9999;
-  const type = pick(level <= 1 ? ["place", "round", "compare", "evenodd", "seq", "multiple"] : ["place", "place", "round", "round", "compare", "evenodd", "seq", "multiple"]);
+  const max = level <= 1 ? 999 : level === 2 ? 9999 : level === 3 ? 99999 : 999999;
+  const pool = level <= 1 ? ["place", "round", "compare", "evenodd", "seq", "multiple"]
+    : level <= 3 ? ["place", "place", "round", "round", "compare", "evenodd", "seq", "multiple"]
+    : level === 4 ? ["place", "place", "round", "round", "compare", "factor", "factor", "multiple", "seq"]
+    : ["place", "round", "compare", "factor", "prime", "prime", "decimal", "decimal", "multiple"];
+  const type = pick(pool);
   if (type === "place") {
     let n, s, i;
-    do { n = ri(level <= 1 ? 100 : 1000, max); s = String(n); i = ri(0, s.length - 1); } while (s[i] === "0" || s.split(s[i]).length > 2);
+    do { n = ri(Math.max(100, Math.ceil((max + 1) / 10)), max); s = String(n); i = ri(0, s.length - 1); } while (s[i] === "0" || s.split(s[i]).length > 2);
     const d = Number(s[i]), val = d * 10 ** (s.length - 1 - i);
     let di = 0;
     const html = [...fmtN(n)].map(ch => /\d/.test(ch) ? `<b class="${di++ === i ? "hl" : ""}">${ch}</b>` : "<i>,</i>").join("");
-    const opts = [...new Set([d, d * 10, d * 100, d * 1000])].map(fmtN);
+    const all = [...new Set(range(0, Math.max(3, s.length - 1)).map(k => d * 10 ** k))], opts = [val, ...shuffle(all.filter(v => v !== val)).slice(0, 3)];
     return {
-      prompt: `<div class="bignum">${html}</div>`, kind: "word", ask: ["What is the value of the", d, "in", n], answer: fmtN(val), choices: shuffle(opts),
+      prompt: `<div class="bignum">${html}</div>`, kind: "word", ask: ["What is the value of the", d, "in", n], answer: fmtN(val), choices: shuffle(opts.map(fmtN)),
       right: [d, "is worth", val], wrong: c => ["That's", unfmt(c), "Look at which place the digit is in."],
     };
   }
   if (type === "round") {
-    const toH = level > 1 && Math.random() < .5, unit = toH ? 100 : 10;
-    let n; do { n = ri(toH ? 101 : 11, max); } while (n % unit === 0);
-    const r = Math.round(n / unit) * unit, alt = Math.round(n / (toH ? 10 : 100)) * (toH ? 10 : 100);
-    const opts = [...new Set([r, r - unit, r + unit, alt].filter(v => v >= 0))].slice(0, 4);
-    while (opts.length < 4) opts.push(r + unit * (opts.length + 1));
+    const units = level <= 1 ? [10] : level === 2 ? [10, 100] : level === 3 ? [100, 1000] : [1000, 10000, 100000];
+    const unit = pick(units), name = { 10: "to the nearest ten.", 100: "to the nearest hundred.", 1000: "to the nearest thousand.", 10000: "to the nearest ten thousand.", 100000: "to the nearest hundred thousand." }[unit];
+    let n; do { n = ri(unit + 1, max); } while (n % unit === 0);
+    const r = Math.round(n / unit) * unit, sm = Math.max(1, unit / 10);
+    const others = [...new Set([r - unit, r + unit, Math.round(n / (unit * 10)) * unit * 10, Math.round(n / sm) * sm])].filter(v => v >= 0 && v !== r);
+    const opts = [r, ...shuffle(others).slice(0, 3)]; while (opts.length < 4) opts.push(r + unit * (opts.length + 1));
     return {
-      prompt: `<div class="bignum">${fmtN(n)}</div>`, kind: "word", ask: ["Round", n, toH ? "to the nearest hundred." : "to the nearest ten."],
-      answer: fmtN(r), choices: shuffle(opts.map(fmtN)), right: [n, "rounds to", r], wrong: c => ["That's", unfmt(c), "Not quite.", "Round", n, toH ? "to the nearest hundred." : "to the nearest ten."],
+      prompt: `<div class="bignum">${fmtN(n)}</div>`, kind: "word", ask: ["Round", n, name],
+      answer: fmtN(r), choices: shuffle(opts.map(fmtN)), right: [n, "rounds to", r], wrong: c => ["That's", unfmt(c), "Not quite.", "Round", n, name],
     };
   }
   if (type === "compare") {
     // Four numbers made from the same digits, so only place value tells them apart.
-    let digits; do { digits = shuffle(range(1, 9)).slice(0, level <= 1 ? 3 : 4); } while (false);
-    const nums = new Set(); let g = 0;
+    const digits = shuffle(range(1, 9)).slice(0, Math.min(6, level + 2)), nums = new Set(); let g = 0;
     while (nums.size < 4 && g++ < 50) nums.add(Number(shuffle(digits).join("")));
     const list = [...nums], big = Math.random() < .5, ans = big ? Math.max(...list) : Math.min(...list);
     return {
@@ -1792,7 +2050,7 @@ function numberRoundPro(level) {
     };
   }
   if (type === "evenodd") {
-    const odd = Math.random() < .5, mk = want => { let n; do { n = ri(11, level <= 1 ? 999 : 9999); } while ((n % 2 === 1) !== want); return n; };
+    const odd = Math.random() < .5, mk = want => { let n; do { n = ri(11, Math.min(max, 99999)); } while ((n % 2 === 1) !== want); return n; };
     const ans = mk(odd), others = [mk(!odd), mk(!odd), mk(!odd)];
     return {
       prompt: EAR, kind: "word", ask: [odd ? "Which number is odd?" : "Which number is even?"], answer: fmtN(ans), choices: shuffle([ans, ...others].map(fmtN)),
@@ -1800,14 +2058,34 @@ function numberRoundPro(level) {
     };
   }
   if (type === "multiple") {
-    const m = ri(3, 9), ans = m * ri(3, 12), set = new Set([ans]);
+    const m = level >= 4 ? ri(6, 12) : ri(3, 9), ans = m * ri(3, 12), set = new Set([ans]);
     while (set.size < 4) { const v = ans + ri(-9, 9); if (v > 0 && v % m) set.add(v); }
     return {
       prompt: EAR, ask: ["Which number is a multiple of", m], answer: ans, choices: shuffle([...set]),
       right: [ans, "is a multiple of", m, "because", m, "times", ans / m, "is", ans], wrong: c => ["That's", c, "Which number is a multiple of", m],
     };
   }
-  const step = pick([3, 4, 6, 7, 8, 9, 11, 12, 15, 25, 50]), a = step * ri(1, 8), seq = [0, 1, 2, 3].map(i => a + i * step), p = ri(0, 3), ans = seq[p];
+  if (type === "factor") {
+    const f = ri(3, 12), n = f * ri(4, 12), set = new Set([f]); let g = 0;
+    while (set.size < 4 && g++ < 200) { const v = ri(3, 15); if (n % v) set.add(v); }
+    return { prompt: EAR, ask: ["Which number is a factor of", n], answer: f, choices: shuffle([...set]), right: [f, "times", n / f, "is", n], wrong: c => ["That's", c, "Which number is a factor of", n] };
+  }
+  if (type === "prime") {
+    const primes = [11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+    const odd = [9, 15, 21, 25, 27, 33, 35, 39, 45, 49, 51, 55, 57, 63, 65, 69, 75, 77, 81, 85, 87, 91, 93, 95], pr = pick(primes);
+    return { prompt: EAR, ask: ["Which number is prime?"], answer: pr, choices: shuffle([pr, ...shuffle(odd).slice(0, 3)]), right: [pr, "is prime. It can only be divided by one and itself."], wrong: c => ["That's", c, "Which number is prime?"] };
+  }
+  if (type === "decimal") {
+    let a, b, c; do { a = ri(1, 9); b = ri(1, 9); c = ri(1, 9); } while (a === b || b === c || a === c);
+    const txt = `${a}.${b}${c}`, hund = Math.random() < .5, d = hund ? c : b, val = hund ? `0.0${d}` : `0.${d}`;
+    const html = [...txt].map((ch, k) => ch === "." ? "<i>.</i>" : `<b class="${k === (hund ? 3 : 2) ? "hl" : ""}">${ch}</b>`).join("");
+    return {
+      prompt: `<div class="bignum">${html}</div>`, kind: "word", ask: ["What is the value of the", d, "in", Number(txt)], answer: val,
+      choices: shuffle([val, hund ? `0.${d}` : `0.0${d}`, String(d), String(d * 10)]),
+      right: [d, hund ? "is in the hundredths place, so it is worth" : "is in the tenths place, so it is worth", Number(val)], wrong: c => ["Not quite.", "Look at which place the digit is in."],
+    };
+  }
+  const step = pick(level >= 4 ? [7, 8, 9, 11, 12, 15, 25, 50, 75, 125] : [3, 4, 6, 7, 8, 9, 11, 12, 15, 25, 50]), a = step * ri(1, 8), seq = [0, 1, 2, 3].map(i => a + i * step), p = ri(0, 3), ans = seq[p];
   const shown = seq.map((x, i) => i === p ? "?" : x);
   return {
     prompt: seqHTML(shown), ask: [...shown.map(x => x === "?" ? "hmm" : x), "What number is missing?"], answer: ans,
@@ -1816,9 +2094,65 @@ function numberRoundPro(level) {
   };
 }
 function mathRoundPro(level) {
-  const types = level <= 1 ? ["add", "sub", "mul", "mul", "div"] : level <= 2 ? ["add", "sub", "mul", "div", "missing", "word", "frac"] : ["add3", "sub3", "mul", "div", "missing", "word", "word", "frac"];
+  // Levels: 1-2 facts and 2-digit; 3 = 3-digit and word problems; 4 = 2-digit x 1-digit, remainders, equivalent fractions;
+  // 5 = 2-digit x 2-digit, long division, adding fractions, decimals, area; 6+ = order of operations, perimeter, fractions of a number, comparing fractions.
+  const types = level <= 1 ? ["add", "sub", "mul", "mul", "div"] : level <= 2 ? ["add", "sub", "mul", "div", "missing", "word", "frac"] : level <= 3 ? ["add3", "sub3", "mul", "div", "missing", "word", "word", "frac"]
+    : level <= 4 ? ["mul21", "mul21", "divbig", "rem", "equiv", "word", "add3", "frac"]
+    : level <= 5 ? ["mul22", "divbig", "rem", "equiv", "fracadd", "decadd", "area", "fracof", "word"]
+    : ["mul22", "divbig", "fracof", "order", "order", "area", "perim", "decadd", "fraccmp", "fracadd", "word"];
   const type = pick(types), near = (n, spread = 10) => shuffle([...new Set([n, n + 1, Math.max(0, n - 1), n + spread, Math.max(0, n - spread)])].slice(0, 4));
   const eq = (a, op, b) => `<div class="eq nums long"><b>${fmtN(a)}</b><b class="op">${op}</b><b>${fmtN(b)}</b><b class="op">=</b><b class="q">?</b></div>`;
+  const eqs = (...xs) => `<div class="eq nums long">${xs.map(x => /^[+−×÷=]$/.test(x) ? `<b class="op">${x}</b>` : x === "?" ? `<b class="q">?</b>` : `<b>${x}</b>`).join("")}</div>`;
+  const uniq4 = (ans, cands) => shuffle([ans, ...shuffle([...new Set(cands)].filter(v => v !== ans && (typeof v !== "number" || v > 0)))].slice(0, 4));
+  const r1 = x => Math.round(x * 10) / 10;
+  if (type === "mul21" || type === "mul22") {
+    const a = type === "mul22" ? ri(11, 39) : ri(12, 99), b = type === "mul22" ? ri(11, 29) : ri(3, 9), ans = a * b;
+    return { prompt: eq(a, "×", b), ask: ["What is", a, "times", b], answer: ans, choices: uniq4(ans, [ans + 10, ans - 10, a * (b - 1), ans + b, ans - a]), right: [a, "times", b, "is", ans], wrong: () => ["Not quite."], onRight: el => fillBlank(el, ans) };
+  }
+  if (type === "divbig") {
+    const b = ri(3, 9), q = ri(12, 99), a = b * q;
+    return { prompt: eq(a, "÷", b), ask: ["What is", a, "divided by", b], answer: q, choices: uniq4(q, [q + 1, q - 1, q + 10, q - 10]), right: [a, "divided by", b, "is", q], wrong: () => ["Not quite."], onRight: el => fillBlank(el, q) };
+  }
+  if (type === "rem") {
+    const b = ri(3, 9), q = ri(4, 12), r = ri(1, b - 1), a = b * q + r, ans = `${q} R${r}`;
+    return { prompt: eq(a, "÷", b), kind: "word", ask: ["What is", a, "divided by", b], answer: ans, choices: uniq4(ans, [`${q} R${r === b - 1 ? r - 1 : r + 1}`, `${q + 1} R${r}`, `${q - 1} R${r}`, `${q} R${b}`].filter(x => !/R0$/.test(x))),
+      right: [a, "divided by", b, "is", q, "remainder", r], wrong: () => ["Not quite."] };
+  }
+  if (type === "equiv") {
+    const d1 = pick([2, 3, 4, 5]), n1 = ri(1, d1 - 1), k = ri(2, 4), d2 = d1 * k, n2 = n1 * k;
+    return { prompt: eqs(`${n1}/${d1}`, "=", "?", `/${d2}`), ask: [n1, "out of", d1, "is the same as how many out of", d2], answer: n2, choices: uniq4(n2, [n2 + 1, n2 - 1, n1 + k, d2 - n2, n1]),
+      right: [n1, "out of", d1, "is the same as", n2, "out of", d2], wrong: () => ["Not quite."], onRight: el => fillBlank(el, n2) };
+  }
+  if (type === "fracadd") {
+    const d = pick([5, 6, 8, 10, 12]), a = ri(1, d - 2), b = ri(1, d - 1 - a), ans = `${a + b}/${d}`;
+    return { prompt: eqs(`${a}/${d}`, "+", `${b}/${d}`, "=", "?"), kind: "word", ask: ["What is", a, "out of", d, "plus", b, "out of", d], answer: ans,
+      choices: uniq4(ans, [`${a + b}/${d * 2}`, `${a + b - 1}/${d}`, `${a + b + 1}/${d}`, `${a * b}/${d}`]), right: [a, "out of", d, "plus", b, "out of", d, "is", a + b, "out of", d], wrong: () => ["Not quite."], onRight: el => fillBlank(el, ans) };
+  }
+  if (type === "fraccmp") {
+    const fr = []; while (fr.length < 3) { const d = ri(2, 10), n = ri(1, d - 1); if (!fr.some(f => Math.abs(f.n / f.d - n / d) < .001)) fr.push({ n, d }); }
+    const big = fr.reduce((x, y) => y.n / y.d > x.n / x.d ? y : x);
+    return { prompt: `<div class="bigemoji">🍕</div>`, kind: "word", ask: ["Which fraction is the biggest?"], answer: `${big.n}/${big.d}`, choices: shuffle(fr.map(f => `${f.n}/${f.d}`)), right: [big.n, "out of", big.d, "is the biggest."], wrong: () => ["Not quite."] };
+  }
+  if (type === "decadd") {
+    const a = ri(11, 59) / 10, b = ri(11, 49) / 10, ans = r1(a + b);
+    return { prompt: eq(a, "+", b), ask: ["What is", a, "plus", b], answer: ans, choices: uniq4(ans, [r1(ans + 1), r1(ans - 1), r1(ans + .1), r1(ans - .1)]), right: [a, "plus", b, "is", ans], wrong: () => ["Not quite."], onRight: el => fillBlank(el, ans) };
+  }
+  if (type === "area" || type === "perim") {
+    let w, h; do { w = ri(3, 12); h = ri(2, 9); } while (w === h);
+    const area = type === "area", ans = area ? w * h : 2 * (w + h);
+    return { prompt: `<div class="rectq" style="--w:${w};--h:${h};--r:${w / h}"><i class="rw">${w}</i><i class="rh">${h}</i></div>`, ask: ["A rectangle is", w, "by", h, P(.2), area ? "What is its area?" : "What is its perimeter?"],
+      answer: ans, choices: uniq4(ans, area ? [2 * (w + h), w + h, w * h + w, w * (h - 1)] : [w * h, w + h, 2 * (w + h) + 2, 2 * w + h]),
+      right: area ? ["The area is", w, "times", h, "which is", ans] : ["The perimeter is", w, "plus", h, "plus", w, "plus", h, "which is", ans], wrong: () => ["Not quite."] };
+  }
+  if (type === "fracof") {
+    const d = pick([2, 3, 4, 5, 6, 8, 10]), q = ri(2, 12), n = d * q, word = { 2: "one half", 3: "one third", 4: "one fourth", 5: "one fifth", 6: "one sixth", 8: "one eighth", 10: "one tenth" }[d];
+    return { prompt: eqs(`1/${d} of ${n}`, "=", "?"), ask: ["What is", word, "of", n], answer: q, choices: uniq4(q, [q + 1, q - 1, n - q, q * 2]), right: [n, "divided by", d, "is", q], wrong: () => ["Not quite."], onRight: el => fillBlank(el, q) };
+  }
+  if (type === "order") {
+    const a = ri(2, 9), b = ri(2, 9), c = ri(2, 9), ans = a + b * c;
+    return { prompt: eqs(a, "+", b, "×", c, "=", "?"), ask: ["What is", a, "plus", b, "times", c], answer: ans, choices: uniq4(ans, [(a + b) * c, ans + 1, ans - 1, a * b + c]),
+      right: ["Multiply first.", b, "times", c, "is", b * c, P(.2), a, "plus", b * c, "is", ans], wrong: () => ["Not quite."], onRight: el => fillBlank(el, ans) };
+  }
   if (type === "add" || type === "add3") {
     const big = type === "add3", a = big ? ri(125, 699) : ri(15, 79), b = big ? ri(105, 999 - a) : ri(15, 99 - a + 20), ans = a + b;
     return { prompt: eq(a, "+", b), ask: ["What is", a, "plus", b], answer: ans, choices: near(ans), right: [a, "plus", b, "is", ans], wrong: () => ["Not quite.", "What is", a, "plus", b], onRight: el => fillBlank(el, ans) };
@@ -1853,10 +2187,11 @@ function mathRoundPro(level) {
   // Word problem, read aloud and shown.
   const kind = pick(["add", "sub", "mul", "div"]), T = WORD_PROBLEMS[kind];
   let a, b, ans;
-  if (kind === "add") { a = ri(12, 48); b = ri(9, 39); ans = a + b; }
-  else if (kind === "sub") { a = ri(20, 60); b = ri(5, a - 5); ans = a - b; }
-  else if (kind === "mul") { a = ri(3, 9); b = ri(3, 9); ans = a * b; }
-  else { b = ri(2, 6); ans = ri(3, 9); a = b * ans; }
+  const hard = level >= 4;
+  if (kind === "add") { a = hard ? ri(120, 650) : ri(12, 48); b = hard ? ri(110, 349) : ri(9, 39); ans = a + b; }
+  else if (kind === "sub") { a = hard ? ri(300, 900) : ri(20, 60); b = hard ? ri(105, a - 50) : ri(5, a - 5); ans = a - b; }
+  else if (kind === "mul") { a = hard ? ri(12, 25) : ri(3, 9); b = ri(3, 9); ans = a * b; }
+  else { b = hard ? ri(3, 9) : ri(2, 6); ans = hard ? ri(11, 25) : ri(3, 9); a = b * ans; }
   const parts = T.map(p => p === "a" ? a : p === "b" ? b : p);
   const emoji = { add: "🔵", sub: "🐦", mul: "🍪", div: "⭐" }[kind];
   return {
@@ -1876,10 +2211,22 @@ function misspell(w) {
   ];
   return pick(ops)(w);
 }
+// Question-and-answer rounds (grammar, reading and science facts), with no repeats for a while.
+const recentQA = [];
+function qaRound(list, icon) {
+  const avail = list.filter(x => !recentQA.includes(x[0])), [q, ans, wrong, expl] = pick(avail.length ? avail : list);
+  const sentence = q.startsWith("s:");
+  return {
+    prompt: sentence ? `<div class="wp">Which word fits the blank?<br><b>${q.slice(2).replace("___", "_____")}</b></div>` : `<div class="bigemoji">${icon}</div>`,
+    kind: "word", ask: sentence ? ["Which word fits the blank?", q] : [q], answer: ans, choices: shuffle([ans, ...wrong]), right: [expl], full: true, wrong: () => ["Not quite."], _qa: q,
+  };
+}
 function vocabRound(level) {
-  const type = pick(level <= 1 ? ["spell", "spell", "opposite", "plural", "syllables"] : ["spell", "spell", "opposite", "synonym", "plural", "syllables"]);
+  const type = pick(level <= 1 ? ["spell", "spell", "opposite", "plural", "syllables"] : level <= 2 ? ["spell", "spell", "opposite", "synonym", "plural", "syllables"]
+    : level <= 3 ? ["spell", "opposite", "synonym", "plural", "qa", "qa"] : ["spell", "spell", "synonym", "qa", "qa", "qa", "qa"]);
+  if (type === "qa") return qaRound(VOCAB_QA.filter(x => x[4] <= level), "📚");
   if (type === "spell") {
-    const w = pick(PRO_SPELL), wrong = new Set();
+    const w = pick(level >= 4 ? PRO_SPELL2 : PRO_SPELL), wrong = new Set();
     let g = 0; while (wrong.size < 3 && g++ < 60) { const m = misspell(w); if (m !== w) wrong.add(m); }
     return { prompt: EAR, kind: "word", ask: ["Which word is spelled correctly?", w], answer: w, choices: shuffle([w, ...wrong]), right: [w], wrong: () => ["That one isn't spelled right.", w] };
   }
@@ -1905,6 +2252,7 @@ function vocabRound(level) {
   };
 }
 function scienceRound(level) {
+  if (level >= 3 && Math.random() < (level >= 4 ? .75 : .5)) return qaRound(SCI_FACTS.filter(f => f[4] <= level), "🔬");
   const known = CRITTERS.filter(c => ANIMAL_INFO[c[1]]), info = c => ANIMAL_INFO[c[1]], label = e => CRITTERS.find(x => x[0] === e)[1];
   const type = pick(level <= 1 ? ["cls", "cls", "diet"] : ["cls", "notcls", "notcls", "diet"]);
   if (type === "diet") {
@@ -2127,7 +2475,7 @@ function gameSpell(root, tools) {
   const chip = tools.firstChild;
   root.innerHTML = '<div class="field spell"><div class="pic"></div><div class="slots"></div><div class="letters"></div></div>';
   const field = root.firstChild, pic = $(".pic", field), slotsEl = $(".slots", field), tilesEl = $(".letters", field);
-  let level = levelOf("spell"), done = 0, word = "", pos = 0, busy = false, recent = [], wrongHere = 0, idleT = 0;
+  let level = levelOf("spell"), done = 0, word = "", pos = 0, busy = false, recent = [], wrongHere = 0, idleT = 0, wordMiss = false;
   const drawChip = () => { chip.innerHTML = `Lv ${level} ` + range(1, PER_LEVEL).map(i => `<i class="${i <= done ? "on" : ""}"></i>`).join(""); };
   tools.lastChild.addEventListener("click", () => { if (word) say("spell:" + word); });
   pic.addEventListener("click", () => { if (word) say("spell:" + word); });
@@ -2141,7 +2489,7 @@ function gameSpell(root, tools) {
   }
   function markNext() { [...slotsEl.children].forEach((s, i) => s.classList.toggle("next", i === pos)); }
   function next() {
-    busy = false; pos = 0; wrongHere = 0;
+    busy = false; pos = 0; wrongHere = 0; wordMiss = false;
     const pool = PRO ? (level <= 2 ? PRO_WORDS.filter(([x]) => x.length <= 6) : level <= 4 ? PRO_WORDS : [...PRO_WORDS, ...PRO_SPELL.map(x => [x, "🔊"])])
       : level <= 2 ? SPELL3 : level <= 4 ? [...SPELL3, ...SPELL4] : SPELL4;
     let w; do { w = pick(pool); } while (recent.includes(w[0]));
@@ -2169,12 +2517,13 @@ function gameSpell(root, tools) {
           pos++; wrongHere = 0; sfx.note(pos); say(c.toUpperCase()); markNext();
           if (pos === word.length) {
             busy = true; clearTimeout(idleT); done++; drawChip();
+            logAnswer("l", "spell", { ask: ["Spell", word], answer: word, _lv: level }, !wordMiss, null);
             later(() => { say(...[...word].map(x => x.toUpperCase()), word, "You spelled it!"); sfx.yay(); celebrate(); }, 600);
             if (done >= PER_LEVEL) { done = 0; level++; setLevel("spell", level); later(() => { drawChip(); reward("Level complete!", next); }, 4200); }
             else later(next, 4600);
           }
         } else {
-          b.classList.remove("pop-in"); replay(b, "wiggle"); sfx.boop(); say("That's", c.toUpperCase(), "Listen:", word);
+          wordMiss = true; b.classList.remove("pop-in"); replay(b, "wiggle"); sfx.boop(); say("That's", c.toUpperCase(), "Listen:", word);
           if (++wrongHere >= 2) hint();
         }
       });
@@ -3089,6 +3438,7 @@ function gameTimes(root, tools) {
   function check() {
     if (busy || !typed) return;
     const [a, b, op] = cur, ans = op ? a : a * b;
+    logAnswer("l", "times", { ask: ["What is", ...qParts(cur)], answer: ans, _lv: level }, Number(typed) === ans, Number(typed) === ans ? null : typed);
     if (Number(typed) === ans) {
       busy = true; correct++; sfx.yay(); celebrate(); ansEl.classList.add("good");
       say(praise(), ...qParts(cur), "is", ans);
@@ -5435,20 +5785,91 @@ const TAB_SETS = () => PRO
   ? [["learn", "🧠 Learn", LEARN_PRO], ["challenge", "🚀 Challenge", CHALLENGE_PRO], ["arcade", "🕹️ Arcade", ARCADE_PRO]]
   : [["play", "🐣 Play", GAMES], ["challenge", "🚀 Challenge", CHALLENGE], ["arcade", "🕹️ Arcade", ARCADE]];
 let hubTab = null;
-const NAMES_DEFAULT = { little: "Little kid", big: "Big kid" };
+const NAMES_DEFAULT = { little: "Luka", big: "Enzo", keira: "Keira" };
 const playerName = p => ((store.get("names", {}) || {})[p] || "").trim() || NAMES_DEFAULT[p];
 const BOOK = { id: "book", name: "Stickers", run: gameBook };
 const TILE_COLORS = ["--tomato", "--sun", "--sky", "--leaf", "--grape", "--bubble"];
 const hub = $("#hub"), gameEl = $("#game"), toolsEl = $("#tools"), titleEl = $("#gtitle"), homeAsk = $("#homeAsk");
 $("#logo").innerHTML = [..."Little Taps"].map((ch, i) =>
   ch === " " ? " " : `<span aria-hidden="true" style="color:var(${TILE_COLORS[i % 6]});--r:${i % 2 ? 5 : -5}deg;--k:${i}">${ch}</span>`).join("");
+// ---------- Progress page: reads every player's answer record ----------
+const readP = (p, k, d) => { try { const v = localStorage.getItem("littletaps." + PLAYERS[p].pre + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function summary(p) {
+  const log = readP(p, "log", []), now = Date.now(), day = 864e5, week = log.filter(e => now - e.t < 7 * day);
+  const acc = xs => xs.length ? Math.round(xs.reduce((a, e) => a + e.ok, 0) / xs.length * 100) : null;
+  const byC = {};
+  log.forEach(e => { (byC[e.c] = byC[e.c] || []).push(e); });
+  const topics = Object.entries(byC).map(([c, xs]) => {
+    const last = xs.slice(-20), a = acc(last), prev = xs.slice(-30, -10), lastTen = xs.slice(-10);
+    const st = last.length < 6 ? ["none", "⏳ Not enough yet"] : a >= 80 ? ["good", "✅ Got it"] : a >= 60 ? ["warn", "◐ Getting there"] : ["bad", "⚠️ Needs practice"];
+    const trend = prev.length >= 5 && lastTen.length >= 5 ? acc(lastTen) - acc(prev) : null;
+    return { c, n: xs.length, a, st, trend, misses: xs.filter(e => !e.ok).slice(-3).reverse(), area: xs[xs.length - 1].k, lv: Math.max(...xs.slice(-10).map(e => e.lv || 0)) };
+  }).sort((x, y) => (x.a ?? 101) - (y.a ?? 101));
+  const skills = {}, levels = {};
+  Object.keys(localStorage).forEach(k => {
+    const pre = "littletaps." + PLAYERS[p].pre; if (!k.startsWith(pre)) return; const rest = k.slice(pre.length);
+    if (p === "little" && /^p\d\./.test(rest)) return;
+    if (rest.startsWith("skill.")) skills[rest.slice(6)] = readP(p, rest, 1); else if (rest.startsWith("lvl.")) levels[rest.slice(4)] = readP(p, rest, 1);
+  });
+  const days = range(0, 13).map(i => { const d0 = new Date(); d0.setHours(0, 0, 0, 0); const start = d0.getTime() - (13 - i) * day, xs = log.filter(e => e.t >= start && e.t < start + day); return { start, n: xs.length, a: acc(xs) }; });
+  return { log, week, total: log.length, weekN: week.length, weekAcc: acc(week), allAcc: acc(log), breaks: readP(p, "breaks", 0), learnN: log.filter(e => e.s === "l").length, topics, skills, levels, days };
+}
+let repPlayer = null;
+function renderReport() {
+  const p = repPlayer || PROFILE || "little", S = summary(p);
+  $("#repTabs").innerHTML = Object.keys(PLAYERS).map(k => `<button data-k="${k}" class="${k === p ? "on" : ""}">${PLAYERS[k].em} ${esc(playerName(k))}</button>`).join("");
+  $("#repTabs").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { repPlayer = b.dataset.k; renderReport(); }));
+  const weak = S.topics.filter(t => t.st[0] === "bad" || t.st[0] === "warn");
+  const fmtD = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const maxDay = Math.max(1, ...S.days.map(d => d.n));
+  $("#repBody").innerHTML = `
+    <div class="rcardp"><div class="rstats">
+      <div class="rstat"><b>${S.weekN}</b><span>answers this week</span></div>
+      <div class="rstat"><b>${S.weekAcc == null ? "–" : S.weekAcc + "%"}</b><span>right on first try (week)</span></div>
+      <div class="rstat"><b>${S.breaks}</b><span>brain breaks finished</span></div>
+      <div class="rstat"><b>${S.total}</b><span>answers all time${S.allAcc == null ? "" : ` · ${S.allAcc}% right`}</span></div>
+    </div></div>
+    ${S.total ? "" : `<div class="rcardp"><b>No answers recorded yet for ${esc(playerName(p))}.</b> Answers from brain breaks and Learn games show up here.</div>`}
+    ${weak.length ? `<div class="rcardp"><h2>Needs practice</h2>${weak.slice(0, 6).map(t => `<div style="margin-bottom:8px"><span class="stat ${t.st[0]}">${t.st[1]}</span> <b>${esc(t.c)}</b> · ${t.a}% of last ${Math.min(20, t.n)}
+      <ul class="miss">${t.misses.map(m => `<li>${esc(m.q)} — picked <b>${esc(m.p ?? "?")}</b>, right: <b>${esc(m.a)}</b></li>`).join("")}</ul></div>`).join("")}</div>` : ""}
+    <div class="rcardp"><h2>Topics</h2><table class="rtable"><tr><th>Topic</th><th>Right (last 20)</th><th></th><th>Tries</th><th>Status</th></tr>
+      ${S.topics.map(t => `<tr title="${esc(t.c)}: ${t.a ?? "–"}% right, ${t.n} tries${t.trend == null ? "" : `, ${t.trend >= 0 ? "+" : ""}${t.trend} pts lately`}"><td>${esc(t.c)}</td><td style="width:30%"><div class="meter"><i style="width:${t.a ?? 0}%"></i></div></td>
+        <td class="num">${t.a ?? "–"}%${t.trend == null ? "" : t.trend >= 10 ? " ↑" : t.trend <= -10 ? " ↓" : ""}</td><td class="num">${t.n}</td><td><span class="stat ${t.st[0]}">${t.st[1]}</span></td></tr>`).join("") || `<tr><td colspan="5">Nothing yet.</td></tr>`}</table></div>
+    <div class="rcardp"><h2>Answers per day (last 14 days)</h2><div class="days">${S.days.map(d => `<i class="${d.n ? "" : "zero"}" style="height:${Math.max(2, d.n / maxDay * 100)}%" title="${fmtD(d.start)}: ${d.n} answers${d.a == null ? "" : `, ${d.a}% right`}"></i>`).join("")}</div>
+      <div class="dayl"><span>${fmtD(S.days[0].start)}</span><span>Today</span></div></div>
+    <div class="rcardp"><h2>Levels</h2><div><b>Brain breaks:</b> ${Object.entries(S.skills).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div>
+      <div><b>Games:</b> ${Object.entries(S.levels).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div></div>
+    <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
+}
+function reportText() {
+  const lines = [`Little Taps progress report — ${new Date().toLocaleString()}`, `App version ${APP_VERSION}`, ""];
+  Object.keys(PLAYERS).forEach(p => {
+    const S = summary(p);
+    lines.push(`== ${playerName(p)} ==`, `Answers: ${S.total} all time (${S.allAcc ?? "–"}% right first try); ${S.weekN} this week (${S.weekAcc ?? "–"}%). Brain breaks finished: ${S.breaks}. Learn-game answers: ${S.learnN}.`);
+    lines.push(`Brain-break levels: ${Object.entries(S.skills).map(([k, v]) => `${k} ${v}`).join(", ") || "-"}`, `Game levels: ${Object.entries(S.levels).map(([k, v]) => `${k} ${v}`).join(", ") || "-"}`);
+    lines.push("Topics (accuracy over last 20 tries, total tries, level, status):");
+    S.topics.forEach(t => lines.push(`- ${t.c}: ${t.a ?? "-"}% (${t.n} tries, level ${t.lv}) ${t.st[1].replace(/^\S+\s/, "")}${t.trend == null ? "" : `, trend ${t.trend >= 0 ? "+" : ""}${t.trend}`}`));
+    const misses = S.log.filter(e => !e.ok).slice(-15);
+    if (misses.length) { lines.push("Recent misses:"); misses.forEach(m => lines.push(`- [${m.c}, L${m.lv}] ${m.q} -> picked ${m.p ?? "?"}, right ${m.a}`)); }
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+$("#openReport").addEventListener("click", () => { sheet.hidden = true; stopSpeech(); repPlayer = PROFILE || "little"; hub.hidden = true; picker.hidden = true; $("#report").hidden = false; renderReport(); });
+$("#repClose").addEventListener("click", () => { $("#report").hidden = true; hub.hidden = false; renderHub(); });
+$("#repCopy").addEventListener("click", () => {
+  const text = reportText(), done = () => { const t = document.createElement("div"); t.className = "copied"; t.textContent = "Copied! Paste it into Claude."; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
+  const fallback = () => { $("#repBody").insertAdjacentHTML("afterbegin", `<div class="rcardp"><b>Select all and copy:</b><textarea class="reptext" readonly>${esc(text)}</textarea></div>`); const ta = $(".reptext"); ta.focus(); ta.select(); };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+});
 const enterAnim = el => { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); };
 
 let wakeLock = null;
 function keepAwake() { try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => { wakeLock = l; }).catch(() => {}); } catch (e) {} }
 function openGame(gm) {
   endSession(); audio(); loadClips();
-  hub.hidden = true; stage.hidden = false; homeAsk.hidden = true; enterAnim(stage);
+  hub.hidden = true; stage.hidden = false; homeAsk.hidden = true; enterAnim(stage); clearPause(); $("#pauseBtn").hidden = gm === BOOK;
   titleEl.innerHTML = `<span class="nm">${gm.name}</span>`;
   toolsEl.innerHTML = ""; gameEl.innerHTML = ""; fx.innerHTML = "";
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
@@ -5460,7 +5881,7 @@ function openGame(gm) {
   keepAwake();
 }
 function goHome() {
-  endSession(); MIS = null;
+  endSession(); MIS = null; clearPause();
   gameEl.innerHTML = ""; toolsEl.innerHTML = ""; fx.innerHTML = ""; homeAsk.hidden = true;
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   stage.hidden = true; hub.hidden = false; enterAnim(hub);
@@ -5476,7 +5897,7 @@ function renderHub() {
   tabs.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
     hubTab = b.dataset.tab; store.set("tab", hubTab); sfx.tap(); say(b.textContent.replace(/^\S+\s/, "")); renderHub();
   }));
-  $("#whoEm").textContent = PRO ? "🚀" : "🐣"; $("#whoName").textContent = playerName(PRO ? "big" : "little");
+  $("#whoEm").textContent = PLAYERS[PROFILE || "little"].em; $("#whoName").textContent = playerName(PROFILE || "little");
   tilesEl.innerHTML = "";
   sets.find(x => x[0] === hubTab)[2].forEach((gm, i) => {
     // Color order keeps neighbours different in 3, 4 and 6 column layouts.
@@ -5489,19 +5910,20 @@ function renderHub() {
   });
   { const set = stickerSet(), have = store.get("stickers", []); $("#bookCount").textContent = `${set.filter(([em]) => have.includes(em)).length}/${set.length}`; }
 }
+$("#pauseBtn").addEventListener("click", () => { if (!PAUSED) pauseGame(); });
 // "Who's playing?" picker: shown on first launch and from the player button on the home screen.
 const picker = $("#picker");
 function showPicker() {
   picker.hidden = false; hub.hidden = true;
-  $("#nameLittle").textContent = playerName("little"); $("#nameBig").textContent = playerName("big");
+  Object.keys(PLAYERS).forEach(k => { $("#name_" + k).textContent = playerName(k); });
   say("Who's playing?");
 }
 picker.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => {
   saveGateClock(); // the current player's brain-break clock is kept separately from the other player's
-  audio(); PROFILE = b.dataset.p; PRO = PROFILE === "big"; store.set("profile", PROFILE);
+  audio(); PROFILE = b.dataset.p; PRO = PROFILE !== "little"; store.set("profile", PROFILE);
   gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2);
   hubTab = null; picker.hidden = true; hub.hidden = false; sfx.tap(); renderHub();
-  say(playerName(PROFILE) === NAMES_DEFAULT[PROFILE] ? (PRO ? "Challenge" : "Play") : null);
+  say(playerName(PROFILE) === NAMES_DEFAULT[PROFILE] ? "hi:" + PROFILE : "Hi! Let's play!");
 }));
 $("#who").addEventListener("click", showPicker);
 if (PROFILE) renderHub(); else { renderHub(); showPicker(); }
@@ -5539,9 +5961,9 @@ function renderSheet() {
   }
   speedEl.querySelectorAll("button").forEach(b => b.classList.toggle("on", Math.abs(Number(b.dataset.rate) - rate) < .01));
   $("#gateMins").querySelectorAll("button").forEach(b => b.classList.toggle("on", Number(b.dataset.m) === store.get("gateMins", 2)));
-  $("#skills").textContent = PRO
-    ? `${playerName("big")}'s brain-break levels: Numbers ${store.get("skill.numbers", 1)} · Math ${store.get("skill.math", 1)} · Vocab ${store.get("skill.vocab", 1)} · Science ${store.get("skill.science", 1)}`
-    : `${playerName("little")}'s brain-break levels: Numbers ${store.get("skill.numbers", 1)} · Letters ${store.get("skill.letters", 1)} · Math ${store.get("skill.math", 1)}`;
+  $("#skills").textContent = `${playerName(PROFILE || "little")}'s brain-break levels: ` + (PRO
+    ? `Numbers ${skillOf("numbers")} · Math ${skillOf("math")} · Vocab ${skillOf("vocab")} · Science ${skillOf("science")}`
+    : `Numbers ${skillOf("numbers")} · Letters ${skillOf("letters")} · Animals ${skillOf("animals")}`);
 }
 // Voice check: every letter (alone, big, little) and number 0-100, tap to hear, optionally mark.
 let vcMarking = false;
@@ -5565,15 +5987,16 @@ $("#vcMark").addEventListener("click", e => { vcMarking = !vcMarking; e.target.t
 $("#gateMins").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { gateMins = Number(b.dataset.m); store.set("gateMins", gateMins); sfx.tap(); renderSheet(); }));
 modeEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { voiceMode = b.dataset.mode; store.set("voiceMode", voiceMode); audio(); renderSheet(); say("Hi! Let's play!"); }));
 speedEl.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rate = Number(b.dataset.rate); store.set("rate", rate); renderSheet(); say("Hi! Let's play!"); }));
-$("#gear").addEventListener("click", () => { audio(); renderSheet(); renderVoiceCheck(); const nm = store.get("names", {}) || {}; $("#nmLittle").value = nm.little || ""; $("#nmBig").value = nm.big || ""; sheet.hidden = false; });
-["nmLittle", "nmBig"].forEach(id => $("#" + id).addEventListener("input", () => { store.set("names", { little: $("#nmLittle").value, big: $("#nmBig").value }); renderHub(); }));
+$("#gear").addEventListener("click", () => { audio(); renderSheet(); renderVoiceCheck(); const nm = store.get("names", {}) || {}; Object.keys(PLAYERS).forEach(k => { $("#nm_" + k).value = nm[k] || ""; }); sheet.hidden = false; });
+Object.keys(PLAYERS).forEach(k => $("#nm_" + k).addEventListener("input", () => { store.set("names", Object.fromEntries(Object.keys(PLAYERS).map(p => [p, $("#nm_" + p).value]))); renderHub(); }));
 window.__onVoices = () => { if (!sheet.hidden) renderSheet(); };
 $("#sheetDone").addEventListener("click", () => { sheet.hidden = true; stopSpeech(); });
 let resetArmed = false;
 $("#resetAll").addEventListener("click", e => {
   if (!resetArmed) { resetArmed = true; e.target.textContent = "Tap again to clear everything"; setTimeout(() => { resetArmed = false; e.target.textContent = "Start over (clear levels and stickers)"; }, 4000); return; }
   try {
-    Object.keys(localStorage).filter(k => k.startsWith("littletaps.") && !GLOBAL_KEYS.test(k.slice(11)) && (PRO ? k.startsWith("littletaps.p2.") : !k.startsWith("littletaps.p2.")))
+    const pre = "littletaps." + PLAYERS[PROFILE || "little"].pre, others = Object.values(PLAYERS).map(x => x.pre).filter(Boolean).map(x => "littletaps." + x);
+    Object.keys(localStorage).filter(k => k.startsWith(pre) && !GLOBAL_KEYS.test(k.slice(11)) && (pre !== "littletaps." || !others.some(o => k.startsWith(o))))
       .forEach(k => localStorage.removeItem(k));
   } catch (err) {}
   resetArmed = false; e.target.textContent = "Cleared"; renderHub();
