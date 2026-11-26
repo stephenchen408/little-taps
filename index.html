@@ -515,6 +515,18 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .gpips i.on { background: var(--sun); }
 .gbody { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
 .gbody.land { flex-direction: row; }
+.glv { font-size: .7em; font-weight: 800; padding: 0 10px; border: 3px solid var(--ink); border-radius: 999px; background: linear-gradient(#E6F2FF, #B9DBFF); }
+.gpips { display: flex; flex-wrap: wrap; gap: 4px; max-width: 44%; }
+.choice.wait { opacity: .45; filter: saturate(.4); pointer-events: none; }
+.choice.no { background: radial-gradient(circle at 50% 40%, #FFE0DA, #FF9A8A 75%); }
+.gexplain { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 3px solid var(--ink); border-radius: 18px; background: linear-gradient(#FFFBEF, #FFEFC8);
+  box-shadow: 0 4px 0 rgba(23,58,94,.25); animation: popin .35s cubic-bezier(.3,1.6,.5,1); }
+.gexplain p { margin: 0; flex: 1; font-weight: 700; line-height: 1.25; font-size: clamp(1rem, 4.2vw, 1.4rem); }
+.gexplain p b { color: #D2462F; }
+.gotit { flex: none; padding: 10px 18px; border: 4px solid var(--ink); border-radius: 999px; font-weight: 800; font-size: clamp(1rem, 4.4vw, 1.3rem); color: var(--ink);
+  background: linear-gradient(#B4F0A8, var(--leaf)); box-shadow: 0 4px 0 var(--ink); white-space: nowrap; }
+.gotit:disabled { opacity: .4; }
+.gotit:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 .gready { align-items: center; justify-content: center; text-align: center; gap: 14px; }
 .gready b { font-size: clamp(2rem, 9vw, 3.2rem); line-height: 1; -webkit-text-stroke: 2px var(--ink); paint-order: stroke fill; color: var(--sun); text-shadow: 0 4px 0 var(--ink); }
 .gready span { font-size: clamp(1.1rem, 4.6vw, 1.5rem); font-weight: 700; opacity: .8; }
@@ -527,6 +539,14 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .gcount { font-size: min(40vw, 220px); font-weight: 800; line-height: 1; color: var(--paper); -webkit-text-stroke: 5px var(--ink); paint-order: stroke fill; text-shadow: 0 8px 0 var(--ink); }
 .countpop { animation: countpop .7s cubic-bezier(.3,1.6,.5,1); }
 @keyframes countpop { from { transform: scale(2.2); opacity: 0; } 40% { opacity: 1; } to { transform: scale(1); } }
+
+/* ---------- Captions (big kid) ---------- */
+.caption { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 46; max-width: min(92%, 640px); padding: 8px 18px; pointer-events: none; text-align: center;
+  border: 3px solid var(--ink); border-radius: 18px; background: rgba(255,253,246,.95); box-shadow: 0 5px 0 rgba(23,58,94,.35); font-weight: 800; line-height: 1.25;
+  font-size: clamp(1.05rem, 4.4vw, 1.45rem); color: var(--ink); text-wrap: balance; }
+.caption[hidden] { display: none; }
+.capin { animation: capin .3s cubic-bezier(.3,1.5,.5,1); }
+@keyframes capin { from { transform: translate(-50%, 30px); opacity: 0; } }
 
 /* ---------- Missions ---------- */
 .mpanel { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 30; width: min(92%, 440px); padding: 10px 14px 12px; border: 4px solid var(--ink); border-radius: 20px;
@@ -890,7 +910,7 @@ window.LT = (() => {
   const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
     "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
     "Make the number in one swipe!","Shoot the letters in order!","Count by",
-    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
+    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
     "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.","Fill rows to clear them. Each line is worth the times table number!"];
   function voiceLines() {
     const L = {};
@@ -967,7 +987,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "16 (Nov 26, missions + Hop)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "17 (Nov 26, smarter brain breaks)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1057,8 +1077,19 @@ function stopSpeech() {
   speaking.forEach(s => { try { s.stop(); } catch (e) {} }); speaking = [];
   if (synth) try { synth.cancel(); } catch (e) {}
 }
+// Captions: for the big kid, spoken sentences also appear as text so he can read along (single words, numbers and letters are skipped).
+let capEl = null, capT = 0;
+function caption(parts) {
+  if (!PRO || stage.hidden || stage.querySelector(".gate, .reward")) return;
+  const text = askText(parts);
+  if (!text || !/\s/.test(text) || /^[\d,.\s]+$/.test(text)) return;
+  if (!capEl || !capEl.isConnected) { capEl = document.createElement("div"); capEl.className = "caption"; stage.appendChild(capEl); }
+  capEl.textContent = text; capEl.hidden = false; replay(capEl, "capin");
+  clearTimeout(capT); capT = setTimeout(() => { if (capEl) capEl.hidden = true; }, Math.min(7000, partTimes(parts).slice(-1)[0] * 1000 + 1600));
+}
 function say(...parts) {
   stopSpeech();
+  try { caption(parts); } catch (e) {}
   const keys = keysOf(parts);
   if (!keys.length) return;
   if (window.__missing) keys.forEach(k => { if (!isPause(k) && !(k in LINES)) window.__missing.add(k); });
@@ -1363,72 +1394,92 @@ function gateTick(dt) { const m = store.get("gateMins", 2); if (!m) return false
 function openGate(onDone) {
   gateClock = 0;
   const tracks = PRO ? [["numbers", numberRoundPro], ["math", mathRoundPro], ["vocab", vocabRound], ["science", scienceRound]] : GATE_TRACKS;
-  const n = store.get("gateNext", 0), [track, make] = tracks[n % tracks.length], Q = PRO ? 4 : 3;
+  const n = store.get("gateNext", 0), [track, make] = tracks[n % tracks.length], Q = PRO ? 4 : 3, MAXQ = Q + 4;
   store.set("gateNext", n + 1);
-  let lvl = store.get("skill." + track, 1), q = 0, firstTry = 0, wrongHere = 0, round = null, busy = false;
+  // got = right on the first try; every miss adds one more problem (up to 4 more), so guessing makes the break longer.
+  // Difficulty adapts as it goes: two right in a row = a harder problem next; two misses in a row = a bit easier.
+  let lvl = store.get("skill." + track, 1), got = 0, misses = 0, need = Q, streak = 0, missStreak = 0, round = null, busy = false, unlockAt = 0;
   const ov = document.createElement("div");
   ov.className = "gate";
-  ov.innerHTML = '<div class="gcard"><div class="ghead"><b>🧠 Brain break!</b><span class="gpips"></span><button class="tool big" aria-label="Say it again">🔊</button></div><div class="gbody"><div class="prompt"></div><div class="choices"></div></div></div>';
+  ov.innerHTML = '<div class="gcard"><div class="ghead"><b>🧠 Brain break!</b><span class="glv"></span><span class="gpips"></span><button class="tool big" aria-label="Say it again">🔊</button></div><div class="gbody"><div class="prompt"></div><div class="choices"></div></div></div>';
   stage.appendChild(ov);
-  const body = $(".gbody", ov), promptEl = $(".prompt", ov), wrap = $(".choices", ov), pips = $(".gpips", ov);
+  const card = $(".gcard", ov), body = $(".gbody", ov), promptEl = $(".prompt", ov), wrap = $(".choices", ov), pips = $(".gpips", ov), lvEl = $(".glv", ov);
   ov._answer = () => round && round.answer; // read by automated tests
   const ask = () => { if (round && !busy) say(...round.ask); };
   $(".ghead .tool", ov).addEventListener("click", ask);
-  const drawPips = () => { pips.innerHTML = range(1, Q).map(i => `<i class="${i <= q ? "on" : ""}"></i>`).join(""); };
+  const drawPips = () => { pips.innerHTML = range(1, need).map(i => `<i class="${i <= got ? "on" : ""}"></i>`).join(""); lvEl.textContent = `Lv ${lvl}`; };
+  const setLvl = v => { const up = v > lvl; lvl = Math.max(1, v); store.set("skill." + track, lvl); drawPips(); replay(lvEl, "hop"); if (up) tone(880, { d: .12, v: .1, type: "triangle", to: 1320 }); };
   function layout() {
     const k = wrap.children.length, land = body.clientWidth > body.clientHeight * 1.1;
     body.classList.toggle("land", land);
     wrap.style.gridTemplateColumns = `repeat(${k === 2 ? 2 : land ? (k === 4 ? 2 : k) : (k === 3 ? 1 : 2)}, 1fr)`;
     if (round && round.relayout) round.relayout(promptEl);
   }
+  function explain(ch, b, guessed) {
+    // Wrong: show the right answer and why, out loud and in writing, then a new problem when they're ready.
+    busy = true; misses++; streak = 0; missStreak++;
+    need = Math.min(MAXQ, need + 1);
+    if (missStreak >= 2) { setLvl(lvl - 1); missStreak = 0; } else drawPips();
+    b.classList.remove("pop-in"); b.classList.add("no"); replay(b, "wiggle"); sfx.boop();
+    const right = [...wrap.children].find(x => x._val === round.answer); if (right) right.classList.add("yes");
+    wrap.querySelectorAll(".choice").forEach(x => x !== b && x !== right && x.classList.add("fade"));
+    if (round.onRight) round.onRight(promptEl);
+    const why = round.right.length === 1 ? ["The answer is", ...round.right] : round.right;
+    const parts = [...(guessed ? ["Slow down and read carefully.", P(.3)] : []), "Not quite.", P(.25), ...why];
+    const bar = document.createElement("div"); bar.className = "gexplain";
+    bar.innerHTML = `<p>${guessed ? "<b>Slow down and read carefully.</b> " : ""}${askText(why)}</p><button class="gotit" disabled>Got it ▶</button>`;
+    card.appendChild(bar);
+    say(...parts);
+    const go = $(".gotit", bar);
+    later(() => { go.disabled = false; replay(go, "hop"); }, Math.min(4000, Math.max(1500, partTimes(parts).slice(-1)[0] * 1000 - 300)));
+    go.addEventListener("click", () => { bar.remove(); next(false); });
+  }
   function next(first) {
-    busy = false; wrongHere = 0; round = make(lvl);
+    busy = false; round = make(lvl);
     showPrompt(promptEl, round);
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", ask);
     wrap.innerHTML = "";
     const cols = shuffle(COLORS);
     round.choices.forEach((ch, i) => {
       const b = document.createElement("button"), text = String(ch);
-      b._val = ch; b.className = "choice pop-in" + (round.kind ? " " + round.kind : ""); b.style.animationDelay = i * 80 + "ms";
+      b._val = ch; b.className = "choice wait pop-in" + (round.kind ? " " + round.kind : ""); b.style.animationDelay = i * 80 + "ms";
       b.style.setProperty("--c", cols[i % cols.length].c); b.style.setProperty("--len", Math.max(1, [...text].length));
       b.innerHTML = `<span>${text}</span>`; b.setAttribute("aria-label", round.label ? round.label(ch) : text);
       b.addEventListener("pointerdown", e => {
         e.preventDefault();
-        if (busy) return;
-        b.classList.remove("pop-in"); b.style.animationDelay = "0ms";
-        if (ch === round.answer) {
-          busy = true; q++; if (!wrongHere) firstTry++; drawPips();
-          wrap.querySelectorAll(".choice").forEach(x => x !== b && x.classList.add("fade"));
-          b.classList.remove("hint"); b.classList.add("yes"); sfx.yay();
-          say(praise(), ...round.right); if (round.onRight) round.onRight(promptEl);
-          later(q >= Q ? finish : () => next(false), 3000);
-        } else {
-          wrongHere++; replay(b, "wiggle"); sfx.boop(); say(...round.wrong(ch));
-          if (wrongHere >= 2) { const h = [...wrap.children].find(x => x._val === round.answer); if (h) h.classList.add("hint"); }
-        }
+        if (busy || b.classList.contains("wait")) return;
+        if (ch !== round.answer) return explain(ch, b, performance.now() - unlockAt < 1500);
+        // Right: no read-back, just a quick cheer and on to the next one.
+        busy = true; got++; streak++; missStreak = 0;
+        if (streak >= 2 && streak % 2 === 0) setLvl(lvl + 1); else drawPips();
+        b.classList.remove("pop-in"); b.classList.add("yes"); wrap.querySelectorAll(".choice").forEach(x => x !== b && x.classList.add("fade"));
+        sfx.yay(); say(praise());
+        later(got >= need ? finish : () => next(false), 1000);
       });
       wrap.appendChild(b);
     });
     layout(); drawPips();
-    // The little kid hears every question; the big kid reads it (the 🔊 button still reads it out).
-    if (PRO) { if (first) say("Brain break!"); } else say(...(first ? ["Brain break!", P(.4)] : []), ...round.ask);
+    // Answers unlock after a moment to read (big kid) or to hear the question (little kid), so it can't be tapped through.
+    let lock;
+    if (PRO) { if (first) say("Brain break!"); lock = Math.min(3000, Math.max(1200, askText(round.ask).length * 40)); }
+    else { const parts = [...(first ? ["Brain break!", P(.4)] : []), ...round.ask]; say(...parts); lock = Math.min(2600, Math.max(700, partTimes(parts).slice(-1)[0] * 800)); }
+    later(() => { wrap.querySelectorAll(".choice").forEach(x => x.classList.remove("wait")); unlockAt = performance.now(); }, lock);
     const r0 = round;
     later(function nudge() {
       if (round !== r0 || busy || !ov.isConnected) return;
-      if (!PRO) say(...round.ask); const h = [...wrap.children].find(x => x._val === round.answer); if (h && wrongHere) h.classList.add("hint");
+      if (!PRO) say(...round.ask);
       later(nudge, PRO ? 20000 : 12000);
     }, PRO ? 20000 : 12000);
   }
   function finish() {
-    // All three right the first time: harder next time. Struggled: easier next time.
-    if (firstTry === Q) lvl++; else if (firstTry <= Q - 2) lvl = Math.max(1, lvl - 1);
     store.set("skill." + track, lvl);
+    const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
     // Wait for a tap, then count down so the player is ready when the game starts moving again.
     later(() => {
-      $(".ghead .tool", ov).remove(); pips.innerHTML = range(1, Q).map(() => '<i class="on"></i>').join("");
+      $(".ghead .tool", ov).remove(); pips.innerHTML = range(1, need).map(() => '<i class="on"></i>').join("");
       body.className = "gbody gready";
-      body.innerHTML = `<div class="gstars">${"⭐".repeat(firstTry)}${"✨".repeat(Q - firstTry)}</div><b>Get ready!</b><button class="gogo" aria-label="I'm ready">▶</button><span>Tap when you're ready</span>`;
+      body.innerHTML = `<div class="gstars">${"⭐".repeat(stars)}${"✨".repeat(3 - stars)}</div><b>Get ready!</b><button class="gogo" aria-label="I'm ready">▶</button><span>Tap when you're ready</span>`;
       const go = $(".gogo", body);
       let started = false;
       later(function nudge() { if (started || !ov.isConnected) return; say("Tap when you're ready!"); replay(go, "hop"); later(nudge, 10000); }, 10000);
@@ -1437,13 +1488,13 @@ function openGate(onDone) {
         const steps = ["3", "2", "1", "Go!"];
         body.innerHTML = '<div class="gcount"></div>';
         const el = $(".gcount", body);
-        steps.forEach((s, i) => later(() => {
-          el.textContent = s; replay(el, "countpop"); say(s);
+        steps.forEach((st, i) => later(() => {
+          el.textContent = st; replay(el, "countpop"); say(st);
           tone(i < 3 ? 660 : 990, { d: i < 3 ? .12 : .3, v: .14, type: "triangle" });
           if (i === 3) { celebrate(); later(() => { ov.remove(); onDone(); }, 650); }
         }, i * 750));
       });
-    }, 1400);
+    }, 1300);
   }
   next(true);
 }
@@ -1800,7 +1851,7 @@ function mathRoundPro(level) {
   const emoji = { add: "🔵", sub: "🐦", mul: "🍪", div: "⭐" }[kind];
   return {
     prompt: `<div class="wp">${emoji} ${parts.join(" ")}</div>`, ask: parts, answer: ans, choices: near(ans, kind === "add" || kind === "sub" ? 10 : 2),
-    right: [ans], wrong: () => ["Not quite.", ...parts], wait: 4200,
+    right: [a, { add: "plus", sub: "minus", mul: "times", div: "divided by" }[kind], b, "is", ans], wrong: () => ["Not quite.", ...parts], wait: 4200,
   };
 }
 // Makes plausible misspellings for the spelling test.
