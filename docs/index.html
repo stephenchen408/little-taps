@@ -1343,17 +1343,136 @@ const PAPER = "#FFFDF6";
 // Enzo and Keira both get the big-kid games; Keira starts the learning levels higher. Voice settings and names are shared.
 const PLAYERS = { little: { name: "Luka", em: "🐘💥👻", c: "--sun", pre: "" }, big: { name: "Enzo", em: "🦑💥🐋", c: "--sky", pre: "p2." }, keira: { name: "Keira", em: "🐼", c: "--bubble", pre: "p3." } };
 const isDuo = em => [...String(em)].length > 2; // the "fighting" icons are three emoji: two creatures and a bang
-const GLOBAL_KEYS = /^(voiceMode|voice|rate|profile|names|vcMarked|syncToken|syncRepo|syncDevice|syncId|syncLast|syncErr|syncSha|claudeRemote)$/;
+const GLOBAL_KEYS = /^(voiceMode|voice|rate|profile|names|vcMarked|syncToken|syncRepo|syncDevice|syncId|syncLast|syncErr|syncSha|syncSeen|syncDevs|claudeRemote)$/;
 let PROFILE = (() => { try { return JSON.parse(localStorage.getItem("littletaps.profile")); } catch (e) { return null; } })();
 if (!PLAYERS[PROFILE]) PROFILE = null;
 let PRO = !!PROFILE && PROFILE !== "little";
 const store = {
   key: k => "littletaps." + (PROFILE && !GLOBAL_KEYS.test(k) ? PLAYERS[PROFILE].pre : "") + k,
   get(k, d) { try { const v = localStorage.getItem(store.key(k)); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
+  set(k, v, weak) { rawSet(store.key(k), v, weak); }, // weak: a default that any real change on another device beats
 };
+// ---------- Shared progress: every device keeps the whole family's record and merges in what the other devices saved ----------
+// How each kind of value merges:
+//  - totals (XP, coins, stars, brain breaks, robot builds) and play time: each device keeps its own share; the total is the sum of all shares
+//  - answer logs, play sessions, boss tries: every entry from every device
+//  - stickers, avatars bought, worlds beaten: everything any device has
+//  - best scores: the highest
+//  - brain-break clock: play time since the most recent finished break on any device, so switching devices doesn't skip a break
+//  - everything else (levels, missions, parent plan, settings): the most recent change wins
+// "Start over" on one device clears that kid on every device.
+const MONO = /^(xp|stars|breaks|built)$/; // these totals only go up
+const baseOf = full => full.slice(11).replace(/^p\d\./, "");
+const playerOf = full => { const m = full.slice(11).match(/^p\d\./); return (m && Object.keys(PLAYERS).find(p => PLAYERS[p].pre === m[0])) || "little"; };
+function policyOf(full) {
+  const r = full.slice(11);
+  if (!full.startsWith("littletaps.") || r[0] === "_" || GLOBAL_KEYS.test(r)) return "local";
+  const k = baseOf(full);
+  if (/^(tab|gateNext)$/.test(k)) return "local";
+  if (/^(xp|coins|stars|breaks|built)$/.test(k)) return "ctr";
+  if (k === "time") return "ctrm";
+  if (/^(log|sessions|bossLog)$/.test(k)) return "log";
+  if (/^(stickers|owned|bosses)$/.test(k)) return "set";
+  if (/Best(\.|$)/.test(k)) return "max";
+  if (/^gate(Clock|Reset)$/.test(k)) return "gate";
+  return "lww";
+}
+const rawGet = (full, d) => { try { const v = localStorage.getItem(full); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const META = (() => { const g = k => rawGet("littletaps._" + k, null); return { dev: g("dev"), lww: g("lww") || {}, ctr: g("ctr") || {}, ctrm: g("ctrm") || {}, reset: g("reset") || {} }; })();
+let metaT = 0, syncDirty = false, syncWiped = false;
+function saveMeta() { clearTimeout(metaT); metaT = 0; try { ["dev", "lww", "ctr", "ctrm", "reset"].forEach(k => localStorage.setItem("littletaps._" + k, JSON.stringify(META[k]))); } catch (e) {} }
+const metaLater = () => { if (!metaT) metaT = setTimeout(saveMeta, 800); };
+window.addEventListener("pagehide", saveMeta);
+document.addEventListener("visibilitychange", () => { if (document.hidden) saveMeta(); });
+const ctrTotal = L => Object.values(L).reduce((a, x) => a + (x[0] || 0) - (x[1] || 0), 0);
+function ctrmTotal(L) { const t = {}; Object.values(L).forEach(dv => Object.entries(dv).forEach(([d, g]) => Object.entries(g).forEach(([k, n]) => { (t[d] = t[d] || {})[k] = (t[d][k] || 0) + n; }))); return t; }
+function rawSet(full, v, weak) {
+  const pol = policyOf(full);
+  if (pol !== "local") { syncDirty = true; metaLater(); }
+  if (pol === "ctr") { // record only this device's change; the saved value is always the sum of every device's share
+    const d = (Number(v) || 0) - (Number(rawGet(full, 0)) || 0), L = META.ctr[full] = META.ctr[full] || {}, mine = L[META.dev] = L[META.dev] || [0, 0];
+    if (d > 0) mine[0] += d; else if (d < 0 && !MONO.test(baseOf(full))) mine[1] -= d;
+    v = ctrTotal(L);
+  } else if (pol === "ctrm") { // play time: {day: {game: seconds}}
+    const old = rawGet(full, {}) || {}, L = META.ctrm[full] = META.ctrm[full] || {}, mine = L[META.dev] = L[META.dev] || {}, nv = v || {};
+    Object.entries(nv).forEach(([d, g]) => Object.entries(g || {}).forEach(([k, n]) => { const x = n - ((old[d] || {})[k] || 0); if (x > 0) { const m = mine[d] = mine[d] || {}; m[k] = (m[k] || 0) + x; } }));
+    Object.values(L).forEach(dv => Object.keys(dv).forEach(d => { if (!(d in nv)) delete dv[d]; })); // days dropped from the record go for every device
+    v = ctrmTotal(L);
+  } else if (pol === "lww") META.lww[full] = weak ? (META.lww[full] || 1) : Date.now();
+  try { localStorage.setItem(full, JSON.stringify(v)); } catch (e) {}
+}
+// First run of this version: what's already on this device becomes this device's share.
+// Saved levels count as changed at the kid's last activity here, so the device they played on most recently wins.
+if (!META.dev) {
+  META.dev = Math.random().toString(36).slice(2, 10);
+  const last = {};
+  Object.keys(PLAYERS).forEach(p => {
+    const pre = "littletaps." + PLAYERS[p].pre, ts = [...(rawGet(pre + "log", []) || []).map(e => e.t || 0), ...(rawGet(pre + "sessions", []) || []).map(e => (e.t || 0) + (e.s || 0) * 1000)];
+    last[p] = ts.length ? Math.max(...ts) : 1;
+  });
+  Object.keys(localStorage).forEach(full => {
+    const pol = policyOf(full), v = rawGet(full, null); if (v == null) return;
+    if (pol === "ctr") { const n = Number(v) || 0; META.ctr[full] = { [META.dev]: [Math.max(n, 0), Math.max(-n, 0)] }; }
+    else if (pol === "ctrm" && typeof v === "object") META.ctrm[full] = { [META.dev]: JSON.parse(JSON.stringify(v)) };
+    else if (pol === "lww") META.lww[full] = last[playerOf(full)] || 1;
+  });
+  saveMeta(); syncDirty = true;
+}
+// Clear one kid on this device (their own "start over", or one done on another device).
+function wipePlayer(p, ts) {
+  Object.keys(localStorage).forEach(full => { if (playerOf(full) === p && policyOf(full) !== "local") { localStorage.removeItem(full); delete META.lww[full]; delete META.ctr[full]; delete META.ctrm[full]; } });
+  META.reset[p] = ts; saveMeta(); syncDirty = true; syncWiped = true;
+  if (p === PROFILE) gateClock = 0;
+}
+const LOG_CAP = { log: 2500, sessions: 600, bossLog: 300 }, entryKey = e => `${e.t}|${e.s || ""}|${e.q || e.g || e.w || ""}`;
+// Merge one other device's saved keys (R: key -> saved text) into this device. Returns true if anything changed.
+function mergeDevice(R) {
+  const J = k => { try { return R[k] == null ? undefined : JSON.parse(R[k]); } catch (e) { return undefined; } };
+  const dev = J("_dev"); if (!dev || dev === META.dev) return false; // an older app version (no shares yet), or this device
+  const rLww = J("_lww") || {}, rCtr = J("_ctr") || {}, rCtrm = J("_ctrm") || {}, rReset = J("_reset") || {};
+  let changed = false;
+  Object.keys(PLAYERS).forEach(p => { if ((rReset[p] || 0) > (META.reset[p] || 0)) { wipePlayer(p, rReset[p]); changed = true; } });
+  const behind = p => (rReset[p] || 0) < (META.reset[p] || 0); // that device hasn't seen a "start over" yet: skip that kid from it
+  const put = (full, v) => { const t = JSON.stringify(v); if (localStorage.getItem(full) !== t) { try { localStorage.setItem(full, t); } catch (e) {} changed = true; } };
+  Object.entries(rCtr).forEach(([full, L]) => {
+    if (policyOf(full) !== "ctr" || behind(playerOf(full))) return;
+    const mine = META.ctr[full] = META.ctr[full] || {};
+    Object.entries(L || {}).forEach(([d, x]) => { if (d === META.dev || !Array.isArray(x)) return; const m = mine[d] || [0, 0]; mine[d] = [Math.max(m[0], x[0] || 0), Math.max(m[1], x[1] || 0)]; });
+    put(full, ctrTotal(mine));
+  });
+  Object.entries(rCtrm).forEach(([full, L]) => {
+    if (policyOf(full) !== "ctrm" || behind(playerOf(full))) return;
+    const mine = META.ctrm[full] = META.ctrm[full] || {};
+    Object.entries(L || {}).forEach(([d, days]) => { if (d === META.dev) return; const m = mine[d] = mine[d] || {}; Object.entries(days || {}).forEach(([day, g]) => { const x = m[day] = m[day] || {}; Object.entries(g || {}).forEach(([k, n]) => { if (n > (x[k] || 0)) x[k] = n; }); }); });
+    put(full, ctrmTotal(mine));
+  });
+  Object.keys(PLAYERS).forEach(p => { // brain-break clock: a later finished break wins; same break, the longer clock wins
+    if (behind(p)) return;
+    const pre = PLAYERS[p].pre, cK = "littletaps." + pre + "gateClock", rK = "littletaps." + pre + "gateReset", rc = J(pre + "gateClock"), rr = J(pre + "gateReset") || 0;
+    if (typeof rc !== "number") return;
+    const lr = rawGet(rK, 0) || 0, lc = rawGet(cK, 0) || 0;
+    if (rr > lr) { put(rK, rr); put(cK, rc); } else if (rr === lr && rc > lc) put(cK, rc);
+  });
+  Object.entries(R).forEach(([k, raw]) => {
+    const full = "littletaps." + k, pol = policyOf(full);
+    if (/^(local|ctr|ctrm|gate)$/.test(pol) || behind(playerOf(full))) return;
+    let v; try { v = JSON.parse(raw); } catch (e) { return; }
+    const cur = rawGet(full, undefined);
+    if (pol === "log") {
+      if (!Array.isArray(v)) return;
+      const since = META.reset[playerOf(full)] || 0, have = new Set((cur || []).map(entryKey)), add = v.filter(e => e && (e.t || 0) >= since && !have.has(entryKey(e)));
+      if (add.length) put(full, [...(cur || []), ...add].sort((a, b) => (a.t || 0) - (b.t || 0)).slice(-(LOG_CAP[baseOf(full)] || 1000)));
+    } else if (pol === "set") {
+      if (!Array.isArray(v)) return; const have = Array.isArray(cur) ? cur : [], add = v.filter(x => !have.includes(x));
+      if (add.length) put(full, [...have, ...add]);
+    } else if (pol === "max") { if (typeof v === "number" && !(cur >= v)) put(full, v); }
+    else if ((rLww[full] || 0) > (META.lww[full] || 0)) { META.lww[full] = rLww[full]; put(full, v); }
+  });
+  saveMeta();
+  return changed;
+}
 const praise = () => pick(PRAISE);
-const APP_VERSION = "27 (Nov 27, sticker spelling attempts)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "28 (Nov 27, shared progress across devices)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1572,7 +1691,7 @@ setInterval(() => {
   const days = Object.keys(t).sort(); while (days.length > 90) delete t[days.shift()];
   store.set("time", t);
 }, 5000);
-function startPlay(id) { endPlay(); playId = id; playStart = Date.now(); playSecs = 0; }
+function startPlay(id) { endPlay(); playId = id; playStart = Date.now(); playSecs = 0; if (syncReady()) syncNow(); }
 function endPlay() {
   const had = playId && playSecs >= 10;
   if (had) { const ss = store.get("sessions", []); ss.push({ g: playId, t: playStart, s: playSecs }); if (ss.length > 600) ss.splice(0, ss.length - 600); store.set("sessions", ss); }
@@ -1866,7 +1985,7 @@ const topicIn = (c, list) => list.some(k => c === k || c.startsWith(k + ":") || 
 const unitsFor = p => UNITS[p || "little"] || UNITS.little;
 const curUnit = () => { const U = unitsFor(PROFILE), i = Math.min(U.length - 1, store.get("bosses", []).length); return { ...U[i], idx: i }; };
 // Starting a world raises its topics to at least the unit's level.
-function applyUnitFloors() { if (!PROFILE) return; const u = curUnit(); Object.entries(u.tracks).forEach(([k, lv]) => { if (skillOf(k) < lv) store.set("skill." + k, lv); }); }
+function applyUnitFloors() { if (!PROFILE) return; const u = curUnit(); Object.entries(u.tracks).forEach(([k, lv]) => { if (skillOf(k) < lv) store.set("skill." + k, lv, true); }); }
 // Player level as shown on the map: XP level, but held at the next boss until that boss is beaten.
 function progressInfo(xp = store.get("xp", 0), passed = store.get("bosses", []).length) {
   const raw = levelInfo(xp), cap = 10 * (passed + 1);
@@ -2172,7 +2291,7 @@ function openGate(onDone, opts = {}) {
   function finish() {
     if (boss) { later(() => { ov.remove(); onDone({ got, n: Q }); if (syncReady()) setTimeout(() => syncNow(true), 1500); }, 600); return; }
     store.set("skill." + track, lvl);
-    gateClock = 0; saveGateClock(); // the break counts as done only now
+    gateClock = 0; saveGateClock(); store.set("gateReset", Date.now()); // the break counts as done only now
     const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
     store.set("breaks", store.get("breaks", 0) + 1); award(stars === 3 ? 40 : 30, 5); if (syncReady()) setTimeout(() => syncNow(), 2500);
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
@@ -2181,7 +2300,7 @@ function openGate(onDone, opts = {}) {
   }
   next(true);
 }
-if (window.__debug) Object.assign(window.__debug, { openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ wordProblemRound, readingRound, numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
+if (window.__debug) Object.assign(window.__debug, { sync: { mergeDevice, wipePlayer, META, syncNow: f => syncNow(f), gate: v => (v != null && (gateClock = v), gateClock) }, openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ wordProblemRound, readingRound, numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
 // Picks a column count that gives the biggest cells for n items.
 const fitGrid = (el, n, aspect = 1, pad = 28, gap = 10) => {
   const W = el.clientWidth - pad, H = el.clientHeight - pad;
@@ -6345,7 +6464,7 @@ function proficiency(p, S) {
   }).sort((a, b) => (a.rate ?? 9) - (b.rate ?? 9));
 }
 const RATE = { 4: ["good", "★ 4 Exceeds"], 3: ["good", "✅ 3 Meets"], 2: ["warn", "◐ 2 Approaching"], 1: ["bad", "⚠️ 1 Below"] };
-const writeP = (p, k, v) => { try { localStorage.setItem("littletaps." + PLAYERS[p].pre + k, JSON.stringify(v)); } catch (e) {} };
+const writeP = (p, k, v) => rawSet("littletaps." + PLAYERS[p].pre + k, v);
 const TRACK_NAMES = { numbers: "Numbers", math: "Math", story: "Word problems", reading: "Reading", vocab: "Grammar & words", science: "Science", letters: "Letters", animals: "Animals" };
 // Recommendations from the answer record; each has choices a parent can pick. Choices take effect right away and go into the copied report.
 function recommendations(p, S) {
@@ -6382,42 +6501,92 @@ function deviceName() {
   return `${kind}-${id}`;
 }
 const syncReady = () => !!(store.get("syncToken", "") && (store.get("syncRepo", "") || SYNC_REPO_DEFAULT));
-let syncBusy = false, syncTry = 0;
-async function syncNow(force) {
+const syncSlug = () => deviceName().replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").slice(0, 40) || "device";
+function syncApi() {
   const token = store.get("syncToken", ""), repo = (store.get("syncRepo", "") || SYNC_REPO_DEFAULT).trim();
-  if (!token || !repo) return false;
-  if (syncBusy || (!force && Date.now() - syncTry < 120000)) return false;
-  syncBusy = true; syncTry = Date.now(); renderSyncStatus("Syncing…");
-  const H = { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
-  const api = path => `https://api.github.com/repos/${repo}/contents/${path}`;
-  const fail = r => new Error(r.status === 401 ? "The token wasn't accepted (check it, or make a new one)." : r.status === 403 ? "GitHub refused. The token needs Contents: Read and write on this repo." : r.status === 404 ? "Repo not found, or the token can't see it." : `GitHub error ${r.status}`);
-  async function put(path, text) {
-    const shas = store.get("syncSha", {}) || {};
-    const send = sha => fetch(api(path), { method: "PUT", headers: H, body: JSON.stringify({ message: `${deviceName()}: ${path}`, content: b64e(text), ...(sha ? { sha } : {}) }) });
-    let r = await send(shas[path]);
-    if (r.status === 409 || r.status === 422) { const g = await fetch(api(path), { headers: H }); r = await send(g.ok ? (await g.json()).sha : undefined); }
-    if (!r.ok) throw fail(r);
-    const j = await r.json(); shas[path] = j.content && j.content.sha; store.set("syncSha", shas);
+  return { H: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" }, url: path => `https://api.github.com/repos/${repo}/contents/${path}` };
+}
+const syncFail = r => new Error(r.status === 401 ? "The token wasn't accepted (check it, or make a new one)." : r.status === 403 ? "GitHub refused. The token needs Contents: Read and write on this repo." : r.status === 404 ? "Repo not found, or the token can't see it." : `GitHub error ${r.status}`);
+// Everything this device has saved, except its token and sync bookkeeping.
+function deviceFile() {
+  saveMeta(); const data = {};
+  Object.keys(localStorage).forEach(k => { if (k.startsWith("littletaps.") && !/^littletaps\.(syncToken|syncSha|syncSeen|syncDevs|claudeRemote)$/.test(k)) data[k.slice(11)] = localStorage.getItem(k); });
+  return JSON.stringify({ device: deviceName(), synced: new Date().toISOString(), app: APP_VERSION, data });
+}
+async function syncPut(path, text, keepalive) {
+  const { H, url } = syncApi(), shas = store.get("syncSha", {}) || {};
+  const send = sha => { const body = JSON.stringify({ message: `${deviceName()}: ${path}`, content: b64e(text), ...(sha ? { sha } : {}) }); return fetch(url(path), { method: "PUT", headers: H, body, keepalive: !!keepalive && body.length < 60000 }); };
+  let r = await send(shas[path]);
+  if (!keepalive && (r.status === 409 || r.status === 422)) { const g = await fetch(url(path), { headers: H, cache: "no-store" }); r = await send(g.ok ? (await g.json()).sha : undefined); }
+  if (!r.ok) throw syncFail(r);
+  const j = await r.json(); shas[path] = j.content && j.content.sha; store.set("syncSha", shas);
+}
+// Bring in what the other devices saved since last time. Only files that changed are downloaded.
+async function syncPull() {
+  const { H, url } = syncApi(), slug = syncSlug();
+  const lr = await fetch(url("devices"), { headers: H, cache: "no-store" });
+  if (lr.status === 404) return false; if (!lr.ok) throw syncFail(lr);
+  const list = await lr.json(), seen = store.get("syncSeen", {}) || {}, devs = store.get("syncDevs", {}) || {}, got = [];
+  for (const f of list) {
+    if (f.type !== "file" || !/\.json$/.test(f.name) || f.name === slug + ".json" || seen[f.name] === f.sha) continue;
+    const g = await fetch(url("devices/" + encodeURIComponent(f.name)), { headers: { ...H, Accept: "application/vnd.github.raw+json" }, cache: "no-store" });
+    if (g.ok) { try { got.push([f, await g.json()]); } catch (e) {} }
   }
+  devs[slug + ".json"] = { name: deviceName(), t: Date.now(), shared: true };
+  if (!got.length) { store.set("syncDevs", devs); return false; }
+  saveGateClock(); syncWiped = false; let changed = false;
+  got.forEach(([f, j]) => { const d = j.data || {}; if (mergeDevice(d)) changed = true; seen[f.name] = f.sha; devs[f.name] = { name: j.device || f.name, t: Date.parse(j.synced) || 0, shared: !!d._dev }; });
+  store.set("syncSeen", syncWiped ? {} : seen); store.set("syncDevs", devs);
+  if (changed) afterMerge();
+  return changed;
+}
+// Show what came in: the brain-break clock, levels, coins and the home screen.
+function afterMerge() {
+  if (PROFILE) { gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2); applyUnitFloors(); }
+  updateHud();
+  if (!hub.hidden && stage.hidden) renderHub();
+  if (!$("#map").hidden && !$("#map").querySelector(".gate")) renderMap();
+}
+let syncBusy = false, syncTry = 0, reportT = 0;
+async function syncNow(force) {
+  if (!syncReady() || syncBusy || (!force && Date.now() - syncTry < 45000)) return false;
+  syncBusy = true; syncTry = Date.now(); renderSyncStatus("Syncing…");
   try {
-    const slug = deviceName().replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").slice(0, 40) || "device", data = {};
-    Object.keys(localStorage).forEach(k => { if (k.startsWith("littletaps.") && !/^littletaps\.(syncToken|syncSha)$/.test(k)) data[k.slice(11)] = localStorage.getItem(k); });
-    await put(`devices/${slug}.json`, JSON.stringify({ device: deviceName(), synced: new Date().toISOString(), app: APP_VERSION, data }));
-    await put(`reports/${slug}.md`, reportText());
-    const g = await fetch(api("claude.json"), { headers: H });
+    await syncPull();
+    const slug = syncSlug(), path = `devices/${slug}.json`;
+    if (force || syncDirty || !(store.get("syncSha", {}) || {})[path]) { syncDirty = false; try { await syncPut(path, deviceFile()); } catch (e) { syncDirty = true; throw e; } }
+    if (force || Date.now() - reportT > 10 * 60000) { reportT = Date.now(); await syncPut(`reports/${slug}.md`, reportText()); }
+    const { H, url } = syncApi(), g = await fetch(url("claude.json"), { headers: H, cache: "no-store" });
     if (g.ok) { try { store.set("claudeRemote", JSON.parse(b64d((await g.json()).content))); } catch (e) {} }
     store.set("syncLast", Date.now()); store.set("syncErr", "");
     return true;
   } catch (e) { store.set("syncErr", String(e.message || e)); return false; }
-  finally { syncBusy = false; renderSyncStatus(); if (!$("#report").hidden && !document.activeElement?.closest?.(".sync")) { const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; } }
+  finally {
+    syncBusy = false; renderSyncStatus();
+    const a = document.activeElement;
+    if (!$("#report").hidden && !(a && /^(INPUT|TEXTAREA)$/.test(a.tagName))) { const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; }
+  }
+}
+// As the app goes away (home button, switching apps), save this device's file right away so another device can pick up from here.
+let hidePush = false;
+async function syncOnHide() {
+  if (!syncReady() || !syncDirty || hidePush) return;
+  hidePush = true; syncDirty = false;
+  try { await syncPut(`devices/${syncSlug()}.json`, deviceFile(), true); } catch (e) { syncDirty = true; } finally { hidePush = false; }
 }
 function renderSyncStatus(msg) {
   const el = $("#syncStatus"); if (!el) return;
   const last = store.get("syncLast", 0), err = store.get("syncErr", "");
   el.textContent = msg || (!syncReady() ? "Not set up yet" : err ? "⚠️ " + err : last ? `✅ Last synced ${new Date(last).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" })}` : "Ready. Tap Save & sync now.");
+  const dl = $("#syncDevs"); if (!dl) return;
+  const devs = Object.values(store.get("syncDevs", {}) || {}).sort((a, b) => b.t - a.t);
+  dl.innerHTML = devs.length ? devs.map(d => `<li><b>${esc(d.name)}</b> · ${d.t ? new Date(d.t).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" }) : "–"}${d.shared ? "" : " · <i>old version: open the app there to update it</i>"}</li>`).join("") : "<li>None yet.</li>";
 }
-// Sync on its own: after brain breaks, boss challenges and play sessions, and every few minutes of play.
-setInterval(() => { if (syncReady() && playId) syncNow(); }, 5 * 60000);
+// When to sync: on opening the app, coming back to it, starting a game, every 2 minutes of play, and after breaks, bosses and games.
+setInterval(() => { if (syncReady() && playId && !document.hidden) syncNow(); }, 2 * 60000);
+document.addEventListener("visibilitychange", () => { if (!syncReady()) return; if (document.hidden) syncOnHide(); else syncNow(Date.now() - syncTry > 15000); });
+window.addEventListener("pagehide", () => syncOnHide());
+if (syncReady()) setTimeout(() => syncNow(true), 1200);
 let repPlayer = null;
 function renderReport() {
   const p = repPlayer || PROFILE || "little", S = summary(p);
@@ -6465,7 +6634,8 @@ function renderReport() {
       <label>Data repo <input id="syncRepo" autocomplete="off" spellcheck="false" placeholder="${SYNC_REPO_DEFAULT}" value="${esc(store.get("syncRepo", "") || SYNC_REPO_DEFAULT)}"></label>
       <label>This device's name <input id="syncDevice" autocomplete="off" placeholder="${esc(deviceName())}" value="${esc(store.get("syncDevice", ""))}"></label>
       <div class="syncbtns"><button id="syncSave">Save &amp; sync now</button></div>
-      <p class="fine">The token stays on this device and is never sent anywhere except GitHub. Each device saves its own file, so set this up on every phone and iPad the kids use.</p></div>
+      <p><b>Devices sharing progress</b> (last saved):</p><ul class="recent" id="syncDevs"></ul>
+      <p class="fine">Every synced device adds up all the devices, so each kid's levels, coins, stickers, play time and brain-break clock follow them to any device. The token stays on this device and is never sent anywhere except GitHub.</p></div>
     <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : e.s === "s" ? "sticker spelling" : e.s === "x" ? "boss challenge" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
   const R = recommendations(p, S);
   $("#repBody").querySelectorAll(".recopts button").forEach(b => b.addEventListener("click", () => { decide(p, R[Number(b.dataset.i)], b.dataset.k); sfx.tap(); const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; }));
@@ -6568,7 +6738,7 @@ function renderShop() {
 $("#shopBtn").addEventListener("click", () => { $("#shop").hidden = false; renderShop(); sfx.tap(); });
 $("#shopClose").addEventListener("click", () => { $("#shop").hidden = true; });
 
-$("#openReport").addEventListener("click", () => { if (syncReady()) syncNow(); sheet.hidden = true; stopSpeech(); repPlayer = PROFILE || "little"; hub.hidden = true; picker.hidden = true; $("#report").hidden = false; renderReport(); });
+$("#openReport").addEventListener("click", () => { if (syncReady()) syncNow(true); sheet.hidden = true; stopSpeech(); repPlayer = PROFILE || "little"; hub.hidden = true; picker.hidden = true; $("#report").hidden = false; renderReport(); });
 $("#repClose").addEventListener("click", () => { $("#report").hidden = true; hub.hidden = false; renderHub(); });
 $("#repCopy").addEventListener("click", () => {
   const text = reportText(), done = () => { const t = document.createElement("div"); t.className = "copied"; t.textContent = "Copied! Paste it into Claude."; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
@@ -6640,7 +6810,7 @@ picker.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () 
 }));
 function seedPlan() {
   if (PROFILE === "keira" && store.get("plan", null) == null)
-    store.set("plan", { focus: { "Word problems": "more" }, focusTrack: { story: "more" }, decisions: { "parent:word": { choice: "more", t: Date.now(), text: "Practice word problems more" } }, note: "" });
+    store.set("plan", { focus: { "Word problems": "more" }, focusTrack: { story: "more" }, decisions: { "parent:word": { choice: "more", t: Date.now(), text: "Practice word problems more" } }, note: "" }, true);
 }
 seedPlan(); applyUnitFloors();
 $("#who").addEventListener("click", showPicker);
@@ -6712,12 +6882,8 @@ $("#sheetDone").addEventListener("click", () => { sheet.hidden = true; stopSpeec
 let resetArmed = false;
 $("#resetAll").addEventListener("click", e => {
   if (!resetArmed) { resetArmed = true; e.target.textContent = "Tap again to clear everything"; setTimeout(() => { resetArmed = false; e.target.textContent = "Start over (clear levels and stickers)"; }, 4000); return; }
-  try {
-    const pre = "littletaps." + PLAYERS[PROFILE || "little"].pre, others = Object.values(PLAYERS).map(x => x.pre).filter(Boolean).map(x => "littletaps." + x);
-    Object.keys(localStorage).filter(k => k.startsWith(pre) && !GLOBAL_KEYS.test(k.slice(11)) && (pre !== "littletaps." || !others.some(o => k.startsWith(o))))
-      .forEach(k => localStorage.removeItem(k));
-  } catch (err) {}
-  resetArmed = false; e.target.textContent = "Cleared"; renderHub();
+  try { wipePlayer(PROFILE || "little", Date.now()); } catch (err) {}
+  resetArmed = false; e.target.textContent = "Cleared"; renderHub(); if (syncReady()) syncNow(true);
 });
 
 document.addEventListener("contextmenu", e => e.preventDefault());
