@@ -160,6 +160,20 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
   animation: spinin .9s cubic-bezier(.3,1.4,.5,1), floaty 2.6s ease-in-out .9s infinite; }
 @keyframes floaty { 50% { transform: translateY(-7%) rotate(4deg) scale(1.04); } }
 .rcard.quizzing { max-width: min(96vw, 620px); padding: 12px 16px 16px; }
+.rcard.weapon { background: radial-gradient(circle at 50% 30%, #fff7d6, #ffe08a 70%, #f4b73b); }
+.rcard.weapon .big { filter: drop-shadow(0 0 18px rgba(255,200,60,.9)) drop-shadow(0 8px 0 rgba(23,58,94,.22)); }
+.rcard.lootcard { max-width: min(92vw, 460px); }
+.rcard.lootcard .rt:last-of-type { font-size: clamp(1.3rem, 6vw, 2rem); }
+.stksvg { display: block; overflow: visible; }
+.armory { display: flex; gap: 6px; margin: 6px 0 2px; flex-wrap: wrap; }
+.loot { width: 40px; height: 40px; display: grid; place-items: center; font-size: 26px; border: 3px solid var(--ink); border-radius: 12px; background: rgba(255,255,255,.5); }
+.loot.got { background: radial-gradient(#fff7d6, #f4b73b); box-shadow: 0 0 10px rgba(255,190,40,.8); }
+.loot.next { border-style: dashed; animation: lootpulse 1.6s ease-in-out infinite; }
+.loot i { font-style: normal; display: grid; place-items: center; }
+.loot.next i { filter: grayscale(1) brightness(.35); opacity: .6; }
+@keyframes lootpulse { 50% { transform: scale(1.1); } }
+.bloot { display: grid; place-items: center; filter: grayscale(1) brightness(.4); opacity: .75; }
+.bloot.got { filter: drop-shadow(0 0 6px rgba(255,190,40,.9)); opacity: 1; }
 .rcard.quizzing .big { font-size: min(18vw, 84px); animation: none; }
 .rcard.quizzing .rt { font-size: clamp(1rem, 4.5vw, 1.4rem); }
 .sword.hideq { opacity: 0; max-height: 0; margin: 0; overflow: hidden; transition: opacity .4s, max-height .4s; }
@@ -956,17 +970,25 @@ window.LT = (() => {
   const SHAPE_INFO = [["circle"],["oval"],["square",4],["rectangle",4],["triangle",3],["diamond",4],["pentagon",5],["hexagon",6],["octagon",8],["trapezoid",4],["semicircle"],["star"],["heart"]];
   const VEHICLE_INFO = [["car","Beep beep!"],["truck","Honk honk!"],["bus","All aboard!"],["fire truck","Nee naw, nee naw!"],["train","Choo choo!"],
     ["boat","Toot toot!"],["rocket","Three, two, one, blast off!"],["airplane","Zoom!"],["tractor","Putt putt putt!"],["helicopter","Whirr whirr!"]];
-  const STICKERS = [["🦁","lion"],["🐯","tiger"],["🐼","panda"],["🐨","koala"],["🦊","fox"],["🐸","frog"],["🐙","octopus"],["🦄","unicorn"],["🐲","dragon"],["🦖","dinosaur"],
+  // Weapons, knights and ninjas come first (the kids' favorites). "svg:" stickers are drawn by the app (no emoji for them).
+  const STICKERS = [["🗡️","sword",1],["🛡️","shield",1],["🏹","bow",1],["svg:axe","axe",1],["svg:shuriken","ninja star",1],["svg:ninja","ninja",1],
+    ["svg:helmet","knight",1],["👑","crown",1],["🏰","castle",1],["🗝️","key",1],["💰","gold",1],["🐎","horse",1],
+    ["🦁","lion"],["🐯","tiger"],["🐼","panda"],["🐨","koala"],["🦊","fox"],["🐸","frog"],["🐙","octopus"],["🦄","unicorn"],["🐲","dragon"],["🦖","dinosaur"],
     ["🐬","dolphin"],["🦋","butterfly"],["🐝","bee"],["🐢","turtle"],["🦉","owl"],["🐧","penguin"],["🦒","giraffe"],["🐘","elephant"],["🦓","zebra"],["🐳","whale"],
     ["🚀","rocket"],["🚒","fire truck"],["🚂","train"],["🚁","helicopter"],["✈️","airplane"],["🚜","tractor"],["🏎️","race car"],["⛵","sailboat"],["🚌","bus"],["🚓","police car"],
     ["🌈","rainbow"],["⭐","star"],["🌙","moon"],["☀️","sun"],["🍦","ice cream"],["🍕","pizza"],["🎂","cake"],["🍩","donut"],["🎈","balloon"],["🏆","trophy"]];
   // The big kid's sticker book: longer, trickier words to spell.
-  const PRO_STICKERS = [["🐊","crocodile"],["🦏","rhinoceros"],["🦛","hippopotamus"],["🦘","kangaroo"],["🦩","flamingo"],["🦚","peacock"],["🐆","leopard"],
+  const PRO_STICKERS = [["svg:shuriken","shuriken",1],["svg:katana","katana",1],["svg:nunchucks","nunchucks",1],["svg:axe","battle axe",1],
+    ["svg:mace","mace",1],["svg:helmet","helmet",1],["svg:catapult","catapult",1],["svg:ninja","ninja",1],["🗡️","dagger",1],["⚔️","sword fight",1],
+    ["🛡️","shield",1],["🏹","bow and arrow",1],["🔱","trident",1],["🤺","fencing",1],["🐎","stallion",1],["💰","treasure",1],["📜","scroll",1],["🗝️","skeleton key",1],
+    ["🐊","crocodile"],["🦏","rhinoceros"],["🦛","hippopotamus"],["🦘","kangaroo"],["🦩","flamingo"],["🦚","peacock"],["🐆","leopard"],
     ["🦔","hedgehog"],["🐿️","squirrel"],["🦋","butterfly"],["🐞","ladybug"],["🦂","scorpion"],["🐉","dragon"],["🦄","unicorn"],["🧜","mermaid"],["🧙","wizard"],
     ["🚁","helicopter"],["🚀","spaceship"],["🛰️","satellite"],["🚂","locomotive"],["🚑","ambulance"],["🚲","bicycle"],["🛹","skateboard"],["🚤","speedboat"],
     ["🌋","volcano"],["🌪️","tornado"],["🌈","rainbow"],["☄️","comet"],["🌌","galaxy"],["🏔️","mountain"],["🏝️","island"],["🌵","cactus"],["🍄","mushroom"],
     ["🍍","pineapple"],["🍉","watermelon"],["🥦","broccoli"],["🥑","avocado"],["🍫","chocolate"],["🧁","cupcake"],["🥨","pretzel"],["🍝","spaghetti"],
     ["🔭","telescope"],["🔬","microscope"],["🧭","compass"],["🎸","guitar"],["🎺","trumpet"],["🎻","violin"],["🏰","castle"],["💎","diamond"],["🏆","trophy"]];
+  const LOOT = [["svg:shuriken","Golden Ninja Star"],["🛡️","Dragon Shield"],["svg:katana","Thunder Katana"],["svg:axe","Viking Battle Axe"],
+    ["🏹","Phoenix Bow"],["🔱","Ocean Trident"],["👑","Crown of Legends"]];
   const PAIR_PICS = [["🐻","bear"],["🐳","whale"],["🦒","giraffe"],["🍌","banana"],["🚀","rocket"],["🌈","rainbow"],["🐙","octopus"],["🍉","watermelon"],
     ["🦖","dinosaur"],["🚂","train"],["🌻","sunflower"],["🐧","penguin"],["🦋","butterfly"],["🍕","pizza"]];
   const STAMPS = [["🚗","car"],["🚒","fire truck"],["🚌","bus"],["🚜","tractor"],["🚂","train"],["✈️","airplane"],["🚀","rocket"],
@@ -993,7 +1015,7 @@ window.LT = (() => {
     "Fill a row or a column to clear it!","Line!","Two lines!","Three lines!","Wow, so many lines!","No more room! You scored","points!","That's your best score ever!","Your best score is",
     "Watch out, some pieces don't belong.","That piece doesn't belong.","That one goes somewhere else.",
     "Watch how to write","Now you try! Start at the green dot.","Start at the green dot.",
-    "Vehicle stamps!","All clean!","Let's paint!","rainbow","Your sticker book!","Play games to win stickers!","hundred",
+    "Vehicle stamps!","All clean!","Let's paint!","rainbow","Your sticker book!","Play games to win stickers!","You earned a weapon!","Boss loot!","Your armory!","hundred",
   ];
   // ---- Challenge games (ages 6-10) ----
   const LADDERS = [
@@ -1280,7 +1302,7 @@ window.LT = (() => {
     });
     ASK_PLACES.forEach(p => add("where:" + p, p === "fly" ? "Which animal can fly?" : `Which animal ${PLACES[p][0]}?`));
     VEHICLE_INFO.forEach(([n, snd]) => { add(n); add("build:" + n, `Let's build ${an(n)} ${n}!`); add("built:" + n, `You built ${an(n)} ${n}! ${snd}`); });
-    STICKERS.forEach(([, n]) => add(n)); PRO_STICKERS.forEach(([, n]) => add(n)); PAIR_PICS.forEach(([, n]) => add(n)); STAMPS.forEach(([, n]) => add(n));
+    STICKERS.forEach(([, n]) => add(n)); PRO_STICKERS.forEach(([, n]) => add(n)); LOOT.forEach(([, n]) => add(n)); PAIR_PICS.forEach(([, n]) => add(n)); STAMPS.forEach(([, n]) => add(n));
     SEQS.forEach(s => add(s.say));
     PHRASES2.forEach(p => add(p));
     LADDERS.flat().forEach(([w]) => add(w));
@@ -1307,15 +1329,48 @@ window.LT = (() => {
     return L;
   }
   return { READING, VOCAB_QA2, PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, COUNTBY, LADDERS, GOODS, COIN_NAMES, COLORS, LN, LETTERS, numWords, an, cap, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO,
-    VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
+    VEHICLE_INFO, STICKERS, PRO_STICKERS, LOOT, PAIR_PICS, STAMPS, SEQS, range, voiceLines };
 })();
 </script>
 
 <script>
 (() => {
 "use strict";
-const { READING, VOCAB_QA2, PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
+const { READING, VOCAB_QA2, PRO_SPELL2, VOCAB_QA, SCI_FACTS, MISSIONS, missionText, PRO_WORDS, PRO_SPELL, OPPOSITES, SYNONYMS, PLURALS, SYLLABLES, ANIMAL_INFO, SCI_CLASSES, WORD_PROBLEMS, LADDERS, GOODS, COLORS, LETTERS, PRAISE, SPELL3, SPELL4, RHYMES, SIGHT, CRITTERS, PLACES, ASK_PLACES, SHAPE_INFO, VEHICLE_INFO, STICKERS, PRO_STICKERS, LOOT, PAIR_PICS, STAMPS, SEQS, range } = window.LT;
 const stickerSet = () => PRO ? PRO_STICKERS : STICKERS;
+// Drawn stickers for weapons that have no emoji. Each is 100x100, sized 1em so it scales like an emoji.
+const SK_INK = "#2d2a40", SK_STEEL = "#dfe6ee", SK_STEEL2 = "#9aa8b8", SK_GOLD = "#f4b73b", SK_WOOD = "#b06a35", SK_WOOD2 = "#7a4321", SK_RED = "#e5484d";
+const STK_SVG = {
+  shuriken: `<g transform="rotate(12 50 50)"><path d="M50 4 L61 39 L96 50 L61 61 L50 96 L39 61 L4 50 L39 39 Z" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M50 4 L61 39 L50 50 Z M96 50 L61 61 L50 50 Z M50 96 L39 61 L50 50 Z M4 50 L39 39 L50 50 Z" fill="${SK_STEEL2}"/><circle cx="50" cy="50" r="9" fill="${SK_INK}"/><circle cx="47" cy="47" r="2.5" fill="#fff" opacity=".6"/></g>`,
+  katana: `<g transform="rotate(-40 50 50) translate(50 50) scale(1.12) translate(-50 -50)"><path d="M37 41 Q70 33 100 42 Q93 56 37 59 Z" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M41 55 Q70 52 95 47" stroke="${SK_STEEL2}" stroke-width="3.5" fill="none"/><ellipse cx="35" cy="50" rx="5.5" ry="16" fill="${SK_GOLD}" stroke="${SK_INK}" stroke-width="3"/>
+    <rect x="5" y="42" width="27" height="16" rx="5" fill="#3d2f6b" stroke="${SK_INK}" stroke-width="3"/><path d="M9 42 L14 58 L19 42 L24 58 L29 42" stroke="#fff" stroke-width="2.5" fill="none" opacity=".85"/>
+    <rect x="0" y="43" width="7" height="14" rx="2.5" fill="${SK_GOLD}" stroke="${SK_INK}" stroke-width="2.5"/></g>`,
+  nunchucks: `<path d="M34 20 Q50 6 66 20" stroke="${SK_INK}" stroke-width="4" fill="none" stroke-dasharray="5 4" stroke-linecap="round"/>
+    <g transform="rotate(-24 28 52)"><rect x="19" y="20" width="18" height="66" rx="9" fill="${SK_WOOD}" stroke="${SK_INK}" stroke-width="3.5"/><rect x="19" y="34" width="18" height="6" fill="${SK_WOOD2}"/><rect x="19" y="68" width="18" height="6" fill="${SK_WOOD2}"/></g>
+    <g transform="rotate(24 72 52)"><rect x="63" y="20" width="18" height="66" rx="9" fill="${SK_WOOD}" stroke="${SK_INK}" stroke-width="3.5"/><rect x="63" y="34" width="18" height="6" fill="${SK_WOOD2}"/><rect x="63" y="68" width="18" height="6" fill="${SK_WOOD2}"/></g>`,
+  axe: `<rect x="45" y="12" width="10" height="84" rx="5" fill="${SK_WOOD}" stroke="${SK_INK}" stroke-width="3.5"/>
+    <path d="M45 22 Q14 14 8 40 Q14 66 45 58 Z" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="3.5" stroke-linejoin="round"/><path d="M55 22 Q86 14 92 40 Q86 66 55 58 Z" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M14 40 Q18 24 34 24 M86 40 Q82 24 66 24" stroke="${SK_STEEL2}" stroke-width="3" fill="none"/><rect x="42" y="34" width="16" height="12" rx="3" fill="${SK_GOLD}" stroke="${SK_INK}" stroke-width="3"/><path d="M50 4 L56 14 L44 14 Z" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="3" stroke-linejoin="round"/>`,
+  mace: `<path d="M58 42 L20 90" stroke="${SK_INK}" stroke-width="13" stroke-linecap="round"/><path d="M58 42 L20 90" stroke="${SK_WOOD}" stroke-width="7" stroke-linecap="round"/>
+    ${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<path d="M64 10 L70 22 L58 22 Z" transform="rotate(${a} 64 36)" fill="${SK_STEEL2}" stroke="${SK_INK}" stroke-width="3" stroke-linejoin="round"/>`).join("")}
+    <circle cx="64" cy="36" r="17" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="3.5"/><circle cx="58" cy="30" r="5" fill="#fff" opacity=".7"/>`,
+  helmet: `<path d="M50 14 Q60 0 82 4 Q66 8 60 18" fill="${SK_RED}" stroke="${SK_INK}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M22 34 Q22 12 50 12 Q78 12 78 34 L78 82 Q50 94 22 82 Z" fill="${SK_STEEL}" stroke="${SK_INK}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M28 30 Q30 18 46 16" stroke="#fff" stroke-width="4" fill="none" opacity=".7" stroke-linecap="round"/><rect x="28" y="40" width="44" height="7" rx="3.5" fill="${SK_INK}"/>
+    <path d="M50 47 L50 84" stroke="${SK_STEEL2}" stroke-width="4"/>${[0, 1, 2].map(i => `<circle cx="38" cy="${60 + i * 8}" r="2.5" fill="${SK_INK}"/><circle cx="62" cy="${60 + i * 8}" r="2.5" fill="${SK_INK}"/>`).join("")}`,
+  catapult: `<rect x="10" y="64" width="80" height="11" rx="4" fill="${SK_WOOD}" stroke="${SK_INK}" stroke-width="3.5"/><path d="M38 64 L50 38 L62 64" fill="none" stroke="${SK_INK}" stroke-width="9" stroke-linejoin="round"/><path d="M38 64 L50 38 L62 64" fill="none" stroke="${SK_WOOD2}" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M24 62 L78 24" stroke="${SK_INK}" stroke-width="9" stroke-linecap="round"/><path d="M24 62 L78 24" stroke="${SK_WOOD}" stroke-width="4" stroke-linecap="round"/>
+    <path d="M70 20 Q80 32 92 20 Z" fill="${SK_WOOD2}" stroke="${SK_INK}" stroke-width="3" stroke-linejoin="round"/><circle cx="81" cy="14" r="8" fill="#a3a9b4" stroke="${SK_INK}" stroke-width="3"/>
+    <circle cx="26" cy="80" r="10" fill="${SK_WOOD2}" stroke="${SK_INK}" stroke-width="3.5"/><circle cx="74" cy="80" r="10" fill="${SK_WOOD2}" stroke="${SK_INK}" stroke-width="3.5"/><circle cx="26" cy="80" r="3" fill="${SK_GOLD}"/><circle cx="74" cy="80" r="3" fill="${SK_GOLD}"/>`,
+  ninja: `<path d="M80 34 Q96 30 98 44 Q90 38 82 42 Z M80 38 Q94 44 92 58 Q86 48 80 46 Z" fill="${SK_RED}" stroke="${SK_INK}" stroke-width="2.5" stroke-linejoin="round"/>
+    <circle cx="50" cy="52" r="38" fill="#33304a" stroke="${SK_INK}" stroke-width="4"/><rect x="14" y="30" width="70" height="9" rx="4" fill="${SK_RED}" stroke="${SK_INK}" stroke-width="2.5"/>
+    <rect x="20" y="44" width="60" height="20" rx="10" fill="#f6c99d" stroke="${SK_INK}" stroke-width="3"/>
+    <ellipse cx="38" cy="54" rx="6" ry="5" fill="#fff"/><ellipse cx="62" cy="54" rx="6" ry="5" fill="#fff"/><circle cx="39" cy="55" r="3" fill="${SK_INK}"/><circle cx="61" cy="55" r="3" fill="${SK_INK}"/>
+    <path d="M30 46 L44 50 M70 46 L56 50" stroke="${SK_INK}" stroke-width="3.5" stroke-linecap="round"/>`,
+};
+const stkArt = em => String(em).startsWith("svg:") ? `<svg class="stksvg" viewBox="0 0 100 100" width="1em" height="1em" aria-hidden="true">${STK_SVG[em.slice(4)] || ""}</svg>` : em;
 const $ = (s, el = document) => el.querySelector(s);
 const rand = (a, b) => a + Math.random() * (b - a);
 const ri = (a, b) => Math.floor(rand(a, b + 1));
@@ -1456,7 +1511,7 @@ function mergeDevice(R) {
   return changed;
 }
 const praise = () => pick(PRAISE);
-const APP_VERSION = "28 (Nov 27, shared progress across devices)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "29 (Nov 27, weapon stickers and boss loot)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1768,19 +1823,19 @@ const setLevel = (id, v) => store.set("lvl." + id, v);
 function reward(lead, next) {
   const have = store.get("stickers", []);
   store.set("stars", store.get("stars", 0) + 1);
-  const left = stickerSet().filter(s => !have.includes(s[0]));
-  const s = left.length ? pick(left) : null;
+  const left = stickerSet().filter(s => !have.includes(s[0])), arms = left.filter(s => s[2]);
+  const s = left.length ? pick(arms.length && Math.random() < .7 ? arms : left) : null; // weapons first, most of the time
   if (s) { have.push(s[0]); store.set("stickers", have); }
   const ov = document.createElement("div");
   ov.className = "reward";
-  ov.innerHTML = `<div class="rcard"><div class="big">${s ? s[0] : "⭐"}</div><div class="rt">${s ? "New sticker!" : "You earned a star!"}</div>${s ? spellHTML(s[1]) : ""}<div class="rquiz" hidden></div></div>`;
+  ov.innerHTML = `<div class="rcard${s && s[2] ? " weapon" : ""}"><div class="big">${s ? stkArt(s[0]) : "⭐"}</div><div class="rt">${s ? (s[2] ? "⚔️ New weapon!" : "New sticker!") : "You earned a star!"}</div>${s ? spellHTML(s[1]) : ""}<div class="rquiz" hidden></div></div>`;
   stage.appendChild(ov);
   sfx.yay(); celebrate();
   let closed = false;
   const close = () => { if (closed) return; closed = true; ov.remove(); if (next) next(); };
   if (!s) { say(lead, "You earned a star!"); const t0 = performance.now(); ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > 1500) close(); }); later(close, 3200); return; }
   // The sticker's name is read and spelled with each letter lighting up, then they spell it themselves.
-  const total = spellAloud($(".sword", ov), [lead, "You earned a sticker!"], s[1]);
+  const total = spellAloud($(".sword", ov), [lead, s[2] ? "You earned a weapon!" : "You earned a sticker!"], s[1]);
   later(() => spellQuiz(ov, s[1], close), total * 1000 + 400);
 }
 // Sticker spelling test, right after the word was spelled for them.
@@ -2284,7 +2339,7 @@ function openGate(onDone, opts = {}) {
   }
   next(true);
 }
-if (window.__debug) Object.assign(window.__debug, { sync: { mergeDevice, wipePlayer, META, syncNow: f => syncNow(f), gate: v => (v != null && (gateClock = v), gateClock) }, openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ wordProblemRound, readingRound, numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
+if (window.__debug) Object.assign(window.__debug, { showLoot: (...a) => showLoot(...a), sync: { mergeDevice, wipePlayer, META, syncNow: f => syncNow(f), gate: v => (v != null && (gateClock = v), gateClock) }, openGate, logAnswer, conceptOf, reward: (...a) => reward(...a), rounds: () => ({ wordProblemRound, readingRound, numberRoundPro, mathRoundPro, vocabRound, scienceRound, flapPair, stackLabel }) });
 // Picks a column count that gives the biggest cells for n items.
 const fitGrid = (el, n, aspect = 1, pad = 28, gap = 10) => {
   const W = el.clientWidth - pad, H = el.clientHeight - pad;
@@ -6301,7 +6356,7 @@ function gameBook(root) {
   const gridEl = $(".bookgrid", root);
   set.forEach(([em, name]) => {
     const got = have.includes(em), b = document.createElement("button");
-    b.className = "stk" + (got ? "" : " locked"); b.innerHTML = `<span>${em}</span>`; b.setAttribute("aria-label", got ? name : "locked sticker");
+    b.className = "stk" + (got ? "" : " locked"); b.innerHTML = `<span>${stkArt(em)}</span>`; b.setAttribute("aria-label", got ? name : "locked sticker");
     b.addEventListener("click", () => { if (got) { replay(b, "hop"); sfx.tap(); say(name); } else { sfx.boop(); say("Play games to win stickers!"); } });
     gridEl.appendChild(b);
   });
@@ -6657,13 +6712,15 @@ function reportText() {
   return lines.join("\n");
 }
 // ---------- Adventure map ----------
-const AVATARS = [["🐘💥👻", 0], ["🦑💥🐋", 0], ["🐼", 0], ["🦄", 60], ["🐶", 40], ["🐱", 40], ["🐰", 60], ["🦊", 80], ["🐼", 100], ["🐸", 120], ["🐵", 150], ["🦁", 200], ["🐯", 200],
-  ["🐧", 250], ["🐙", 300], ["🦖", 350], ["🐲", 400], ["🤖", 450], ["👽", 500], ["🦸", 600], ["🧙", 700], ["🐉", 900], ["👑", 1200]];
+const AVATARS = [["🐘💥👻", 0], ["🦑💥🐋", 0], ["🐼", 0], ["🦄", 60], ["🐶", 40], ["🐱", 40], ["🐰", 60], ["🦊", 80], ["🐼", 100], ["🐸", 120], ["🐵", 150], ["🛡️", 150], ["🗡️", 200], ["🦁", 200], ["🐯", 200],
+  ["⚔️", 250], ["🐧", 250], ["🐙", 300], ["🦖", 350], ["🏹💥🐺", 350], ["🐲", 400], ["🤖", 450], ["🧙💥👹", 450], ["👽", 500], ["🤺💥🐉", 550], ["🦸", 600], ["🧙", 700], ["🐉", 900], ["👑", 1200]];
 function renderMap() {
   const L = progressInfo(), U = unitsFor(PROFILE), passed = store.get("bosses", []).length, unit = curUnit(), N = Math.min(70, Math.max(30, (passed + 2) * 10)), gap = 92, H = N * gap + 120, world = $("#mapWorld");
   $("#mapCoins").textContent = store.get("coins", 0);
   $("#mapInfo").innerHTML = `<b>${avatarOf()} Level ${L.lv}</b> · World ${unit.idx + 1}: ${worldOf(L.lv).em} <b>${unit.name}</b><span class="xpbar big"><i style="width:${Math.round(L.rest / L.need * 100)}%"></i></span>
     <small>📚 ${unit.skills}</small>
+    <div class="armory" aria-label="Boss loot">${U.map((u, i) => { const l = LOOT[i % LOOT.length]; return `<span class="loot${i < passed ? " got" : i === passed ? " next" : ""}" title="${l[1]}">${i <= passed ? `<i>${stkArt(l[0])}</i>` : "🔒"}</span>`; }).join("")}</div>
+    <small>${passed < U.length ? `⚔️ World ${unit.idx + 1} boss drops: <b>${LOOT[unit.idx % LOOT.length][1]}</b>` : "🏆 Every boss beaten!"}</small>
     ${L.capped ? `<button class="bossgo">⚔️ Take the boss challenge! (${unit.pass} of 5 to pass)</button>` : `<small>${L.need - L.rest} XP to level ${L.lv + 1} · ⚔️ boss at level ${L.cap} · Earn XP: right answers +10 · brain breaks +30 · missions +50</small>`}`;
   const pos = n => ({ x: 50 + 30 * Math.sin(n * .85), y: H - 70 - (n - 1) * gap });
   let html = "";
@@ -6677,7 +6734,7 @@ function renderMap() {
   html += `<svg class="mpath" viewBox="0 0 100 ${H}" preserveAspectRatio="none" style="height:${H}px"><polyline points="${pts.map(p => `${p.x},${p.y}`).join(" ")}" /><polyline class="done" points="${pts.slice(0, L.lv).map(p => `${p.x},${p.y}`).join(" ")}" /></svg>`;
   for (let n = 1; n <= N; n++) {
     const p = pos(n), isBoss = n % 10 === 0, chest = n % 5 === 0 && !isBoss, cls = n < L.lv ? "done" : n === L.lv ? "cur" : "lock";
-    const icon = isBoss ? (n / 10 <= passed ? "🏆" : "⚔️") : chest ? (n <= L.lv ? "📦" : "🎁") : n < L.lv ? "⭐" : n;
+    const icon = isBoss ? `<span class="bloot${n / 10 <= passed ? " got" : ""}">${stkArt(LOOT[(n / 10 - 1) % LOOT.length][0])}</span>` : chest ? (n <= L.lv ? "📦" : "🎁") : n < L.lv ? "⭐" : n;
     html += `<div class="node ${cls}${chest ? " chest" : ""}${isBoss ? " boss" : ""}${isBoss && n === L.cap && L.capped ? " ready" : ""}" style="left:${p.x}%;top:${p.y}px">${icon}</div>`;
     if (n === L.lv) html += `<div class="me${isDuo(avatarOf()) ? " duo" : ""}" style="left:${p.x}%;top:${p.y - 54}px">${avatarOf()}</div>`;
   }
@@ -6693,11 +6750,18 @@ function startBoss() {
     log.push({ w: unit.idx, t: Date.now(), got: res.got, n: res.n, pass }); store.set("bossLog", log);
     if (pass) {
       store.set("bosses", [...store.get("bosses", []), unit.idx]); applyUnitFloors();
-      const nx = curUnit(); banner(`🏆 World ${unit.idx + 1} complete!`, `Next: ${nx.name}`); celebrate(); sfx.yay(); say("World complete!");
-      award(60, 25);
+      const nx = curUnit(), l = LOOT[unit.idx % LOOT.length]; celebrate(); sfx.yay(); say("World complete!", P(.3), "Boss loot!", l[1]);
+      award(60, 25); showLoot(l, `World ${unit.idx + 1} complete! Next: ${nx.name}`);
     } else { banner(`So close! ${res.got} of ${res.n}`, `You need ${unit.pass}. Practice in brain breaks, then try again!`); sfx.boop(); say("So close! Try again."); }
     renderMap(); updateHud();
   }, { boss: unit, host: $("#map") });
+}
+// Boss loot: a big reveal of the legendary weapon, tap to close.
+function showLoot(l, sub) {
+  const ov = document.createElement("div"); ov.className = "reward"; ov.style.cssText = "position:fixed;z-index:90";
+  ov.innerHTML = `<div class="rcard weapon lootcard"><div class="rt">🏆 Boss loot!</div><div class="big">${stkArt(l[0])}</div><div class="rt">${l[1]}</div><small>${sub}</small></div>`;
+  document.body.appendChild(ov);
+  const t0 = performance.now(); ov.addEventListener("pointerdown", () => { if (performance.now() - t0 > 1200) ov.remove(); }); setTimeout(() => ov.remove(), 7000);
 }
 function openMap() { audio(); hub.hidden = true; $("#map").hidden = false; renderMap(); sfx.tap(); say("Adventure map"); }
 $("#xpHud").addEventListener("click", openMap);
