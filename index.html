@@ -579,6 +579,34 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .choice.long span { font-size: clamp(.9rem, 3.5vw, 1.2rem); white-space: normal; line-height: 1.2; color: var(--ink); -webkit-text-stroke: 0; padding: 4px 10px; text-align: center; }
 .choice.word span { white-space: normal; }
 
+/* ---------- Curriculum worlds, bosses, level bar in games ---------- */
+.gxp { display: flex; flex-direction: column; gap: 2px; min-width: 64px; font-weight: 800; font-size: .85rem; line-height: 1; }
+.gxp .xpbar { height: 9px; border-width: 2px; }
+.mini { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: min(70vw, 320px); }
+.mini .xpbar { width: 100%; height: 16px; }
+.mini .mlv { font-weight: 800; font-size: 1.1rem; }
+.mini small { font-weight: 700; opacity: .8; }
+.node.boss { width: 66px; height: 66px; margin: -33px 0 0 -33px; font-size: 1.9rem; background: linear-gradient(#E9DDFF, #B79CFF); }
+.node.boss.done { background: linear-gradient(#FFF3B0, var(--sun)); }
+.node.boss.ready { animation: gogo 1s ease-in-out infinite; box-shadow: 0 4px 0 var(--ink), 0 0 30px rgba(167,123,243,.9); cursor: pointer; }
+.bossgo { display: block; margin-top: 8px; padding: 10px 18px; border: 4px solid var(--ink); border-radius: 999px; font-weight: 800; font-size: 1.1rem; color: #fff;
+  background: linear-gradient(#B79CFF, #7B52E0); box-shadow: 0 5px 0 var(--ink); -webkit-text-stroke: 1px var(--ink); animation: gogo 1.4s ease-in-out infinite; }
+.gate.boss .gcard { background: linear-gradient(#FBF7FF, #EFE6FF); }
+.gpips i.miss { background: var(--tomato); }
+.tdays { display: flex; gap: 6px; align-items: flex-end; margin-top: 10px; }
+.tdays > div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tbar { width: 100%; max-width: 46px; height: 90px; display: flex; flex-direction: column-reverse; gap: 2px; }
+.tbar i { display: block; width: 100%; border-radius: 4px 4px 0 0; min-height: 0; }
+.tbar i.ar, .key.ar { background: #E08A2E; } .tbar i.le, .key.le { background: #3D7DD8; }
+.tdays small { font-size: .72rem; font-weight: 700; color: #4A5D73; }
+.key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: middle; margin: 0 2px 0 8px; }
+.units { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.units li { padding: 6px 10px; border-radius: 12px; background: #F4F1EA; }
+.units li.cur { background: #E6F4FF; border: 2px solid #3D7DD8; }
+.units li.done { background: #E7F7E7; }
+.units small { display: block; font-weight: 600; color: #4A5D73; }
+.units .tries { color: #34475C; }
+
 /* ---------- XP bar, level up, adventure map, shop ---------- */
 .xphud { display: flex; align-items: center; gap: 10px; align-self: center; width: min(100%, 560px); padding: 6px 14px 6px 8px; border: 4px solid var(--ink); border-radius: 999px;
   background: linear-gradient(#FFFFFF, var(--paper)); box-shadow: 0 5px 0 var(--ink), 0 10px 20px rgba(23,58,94,.15); font-weight: 800; }
@@ -821,6 +849,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
     <div class="topbar">
       <button id="home" class="tool big" aria-label="Home">🏠</button>
       <button id="pauseBtn" class="tool big" aria-label="Pause">⏸</button>
+      <span class="gxp" id="gxp" aria-label="Level"><b id="gxpLv">Lv 1</b><i class="xpbar"><i id="gxpBar"></i></i></span>
       <div id="homeAsk" class="homeask" hidden>Go home? <button class="yes" id="homeYes" aria-label="Yes, go home">✔</button><button class="no" id="homeNo" aria-label="No, keep playing">✖</button></div>
       <div class="gtitle" id="gtitle"></div>
       <div class="tools" id="tools"></div>
@@ -1220,7 +1249,7 @@ window.LT = (() => {
   const PRO_PHRASES2 = ["Make","dollar","dollars","and","cents","The customer paid","five dollars","ten dollars","one dollar bill","five dollar bill",
     "Match each fact with its answer!","Match each word with its opposite!","Match each word with its plural!","Match the words that mean the same!",
     "Make the number in one swipe!","Shoot the letters in order!","Count by",
-    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Your turn! Spell it.","Almost! Fix the blanks.","Here's a clue.","Adventure map","Treasure chest!","You bought it!","Not enough coins yet.","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
+    "Drop","Too high! Let's clear the board.","Tap when you're ready!","Go!","Boss challenge!","Boss challenge ready!","World complete!","Your turn! Spell it.","Almost! Fix the blanks.","Here's a clue.","Adventure map","Treasure chest!","You bought it!","Not enough coins yet.","Slow down and read carefully.","The answer is","Hop","Tap a lily pad to hop on it.","Hop on the numbers in order!","Hop on the letters in order!","Start at","Splash!","You made it!","line!","lines!","Level up!","Tap to turn. Use the buttons to move and drop.",
     "Fill a row to clear it! Tap to turn. Use the buttons to move and drop.","Fill rows to clear them. Each line is worth the times table number!"];
   function voiceLines() {
     const L = {};
@@ -1304,7 +1333,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "23 (Nov 26, sticker spelling test)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "25 (Nov 27, worlds, bosses, play time)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1489,12 +1518,13 @@ function loop(fn) {
   session.raf = requestAnimationFrame(tick);
 }
 function onWin(type, fn) { window.addEventListener(type, fn); session.offs.push(() => window.removeEventListener(type, fn)); }
-function pauseGame(doneMsg) {
+function pauseGame(doneMsg, extra = "") {
   if (PAUSED || stage.hidden || (!doneMsg && stage.querySelector(".gate, .reward"))) return;
   PAUSED = true; stopSpeech();
   pauseOv = document.createElement("div"); pauseOv.className = "pauseov" + (doneMsg ? " after" : "");
-  pauseOv.innerHTML = `<div class="pcard">${doneMsg ? `<b>${doneMsg}</b><span>Look where you are, then tap ▶</span>` : "<b>Paused</b>"}<button class="gogo" aria-label="Keep playing">▶</button></div>`;
+  pauseOv.innerHTML = `<div class="pcard">${doneMsg ? `<b>${doneMsg}</b>${extra}<span>Look where you are, then tap ▶</span>` : "<b>Paused</b>"}<button class="gogo" aria-label="Keep playing">▶</button></div>`;
   $("#game").appendChild(pauseOv);
+  setTimeout(() => pauseOv && pauseOv.querySelectorAll("[data-to]").forEach(el => { el.style.width = el.dataset.to + "%"; }), 400);
   const ov = pauseOv, go = $(".gogo", ov);
   let started = false;
   const nudge = () => setTimeout(() => { if (started || !ov.isConnected) return; say("Tap when you're ready!"); replay(go, "hop"); nudge(); }, 12000);
@@ -1511,6 +1541,23 @@ function pauseGame(doneMsg) {
     }, i * 650));
   });
 }
+// ---------- Play time: seconds per day per game, counted only while a game is on screen (paused time doesn't count).
+// Brain breaks count separately. Each visit to a game is also saved as a session (game, start time, minutes).
+let playId = null, playStart = 0, playSecs = 0;
+const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+setInterval(() => {
+  if (!PROFILE || !playId || stage.hidden || document.hidden) return;
+  const key = stage.querySelector(".gate") ? "brainbreak" : PAUSED ? null : playId; if (!key) return;
+  const t = store.get("time", {}), d = dayKey(); (t[d] = t[d] || {})[key] = (t[d][key] || 0) + 5; playSecs += 5;
+  const days = Object.keys(t).sort(); while (days.length > 90) delete t[days.shift()];
+  store.set("time", t);
+}, 5000);
+function startPlay(id) { endPlay(); playId = id; playStart = Date.now(); playSecs = 0; }
+function endPlay() {
+  if (playId && playSecs >= 10) { const ss = store.get("sessions", []); ss.push({ g: playId, t: playStart, s: playSecs }); if (ss.length > 600) ss.splice(0, ss.length - 600); store.set("sessions", ss); }
+  playId = null; playSecs = 0;
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden && playId) { const id = playId; endPlay(); startPlay(id); } });
 function clearPause() { PAUSED = false; if (pauseOv) { pauseOv.remove(); pauseOv = null; } }
 function endSession() {
   session.timers.forEach(clearTimeout); session.timers.clear();
@@ -1756,6 +1803,49 @@ function logAnswer(src, track, r, ok, picked) {
 // ---------- XP, coins and levels (per player) ----------
 // Right answer +10 XP and a coin; a miss still earns +2 XP for trying. Brain break +30 XP, mission +50 XP.
 // Each level needs a little more XP than the last; every 5th level opens a treasure chest (+50 coins).
+// Each world on the map is one unit of the child's curriculum (NYS grade levels). While in a world, brain breaks lean toward
+// that unit's topics, and its levels start no lower than the unit's level. The world's last node is a boss: a 5-question test
+// on the unit. Passing it opens the next world; XP can't carry a child past a boss they haven't beaten.
+const UNITS = {
+  big: [
+    { name: "Times tables", skills: "Multiplication and division facts, two-step word problems (grade 3)", tracks: { math: 2, story: 2 }, boss: ["math", "story", "math", "story", "numbers"], lv: 2, pass: 4, topics: ["Times tables", "Division", "Missing factor", "Multiples", "Skip counting", "Word problems: multiply", "Word problems: divide", "Word problems: two-step"] },
+    { name: "Place value and rounding", skills: "Place value to thousands, rounding, comparing, number patterns (grades 3-4)", tracks: { numbers: 3, story: 3 }, boss: ["numbers", "numbers", "story", "numbers", "math"], lv: 3, pass: 4, topics: ["Place value", "Rounding", "Comparing numbers", "Number patterns", "Odd and even", "3-digit adding", "3-digit subtracting", "Word problems: compare", "Word problems: two-step"] },
+    { name: "Big multiplication", skills: "Multi-digit multiplication, long division, remainders (grade 4)", tracks: { math: 4, story: 4 }, boss: ["math", "story", "math", "story", "math"], lv: 4, pass: 4, topics: ["Multi-digit multiplication", "Long division", "Division with remainders", "Factors", "Word problems: multiply", "Word problems: remainders", "Word problems: times as many"] },
+    { name: "Fraction frontier", skills: "Equivalent fractions, adding fractions, fraction word problems (grade 4)", tracks: { math: 4, story: 4, reading: 4 }, boss: ["math", "story", "reading", "math", "story"], lv: 4, pass: 4, topics: ["Equivalent fractions", "Adding fractions", "Fractions", "Comparing fractions", "Word problems: fractions", "Reading"] },
+    { name: "Decimals and reading", skills: "Decimals, factors and primes, reading inference and theme (grade 5)", tracks: { numbers: 5, reading: 5, vocab: 5 }, boss: ["numbers", "reading", "vocab", "numbers", "reading"], lv: 5, pass: 4, topics: ["Decimal place value", "Decimals", "Factors", "Prime numbers", "Word problems: money", "Reading", "Homophones", "Past tense verbs", "Parts of speech", "Prefixes and suffixes"] },
+    { name: "5th-grade fractions", skills: "Unlike denominators, fraction of a number, fractions as division, volume (grade 5)", tracks: { math: 6, story: 6 }, boss: ["math", "story", "story", "math", "story"], lv: 6, pass: 4, topics: ["Word problems: fractions", "Word problems: fraction of a number", "Word problems: fractions as division", "Word problems: volume", "Fraction of a number", "Adding fractions", "Comparing fractions"] },
+    { name: "Champion", skills: "Everything mixed at the hardest level", tracks: { math: 7, story: 6, reading: 6, numbers: 6 }, boss: ["math", "story", "reading", "numbers", "vocab"], lv: 7, pass: 4, topics: [] },
+  ],
+  keira: [
+    { name: "4th-grade review", skills: "Multi-digit multiplication, division with remainders, place value (grade 4)", tracks: { math: 4, story: 4, numbers: 4 }, boss: ["math", "story", "numbers", "story", "math"], lv: 4, pass: 4, topics: ["Multi-digit multiplication", "Long division", "Division with remainders", "Place value", "Rounding", "Word problems: multiply", "Word problems: remainders", "Word problems: times as many", "Word problems: two-step"] },
+    { name: "Word problem woods", skills: "Multi-step word problems: money, measurement, remainders (grade 5)", tracks: { story: 5 }, boss: ["story", "story", "story", "story", "story"], lv: 5, pass: 4, topics: ["Word problems"] },
+    { name: "Fractions", skills: "Adding fractions with unlike denominators, fraction of a number, fractions as division (grade 5)", tracks: { math: 5, story: 5 }, boss: ["math", "story", "math", "story", "story"], lv: 5, pass: 4, topics: ["Word problems: fractions", "Word problems: fraction of a number", "Word problems: fractions as division", "Adding fractions", "Equivalent fractions", "Fraction of a number", "Comparing fractions"] },
+    { name: "Decimals and place value", skills: "Decimal place value, rounding, comparing, decimal money (grade 5)", tracks: { numbers: 5, story: 5 }, boss: ["numbers", "numbers", "story", "numbers", "story"], lv: 5, pass: 4, topics: ["Decimal place value", "Decimals", "Place value", "Rounding", "Comparing numbers", "Word problems: money"] },
+    { name: "Reading skills", skills: "Main idea, theme, inference, figurative language, grammar (grade 5)", tracks: { reading: 6, vocab: 5 }, boss: ["reading", "reading", "vocab", "reading", "vocab"], lv: 6, pass: 4, topics: ["Reading", "Homophones", "Past tense verbs", "Parts of speech", "Prefixes and suffixes", "Contractions", "Word meanings", "Capitals and periods", "Compound words"] },
+    { name: "Measurement and volume", skills: "Volume, unit conversions, order of operations (grade 5)", tracks: { story: 6, math: 6 }, boss: ["story", "math", "story", "math", "story"], lv: 6, pass: 4, topics: ["Word problems: volume", "Word problems: measurement", "Word problems: area and perimeter", "Area", "Perimeter", "Order of operations"] },
+    { name: "Grade 5 champion", skills: "Everything mixed at 5th-grade test level", tracks: { story: 6, math: 6, reading: 6, numbers: 6 }, boss: ["story", "math", "reading", "numbers", "vocab"], lv: 6, pass: 4, topics: [] },
+  ],
+  little: [
+    { name: "Numbers 1 to 10", skills: "Find and name the numbers 1 to 10", tracks: { numbers: 1 }, boss: ["numbers"], lv: 1, pass: 3, topics: ["Number recognition", "Counting order"] },
+    { name: "Letters A to Z", skills: "Letter names, big and little letters", tracks: { letters: 1 }, boss: ["letters"], lv: 1, pass: 3, topics: ["Big and little letters", "Alphabet order"] },
+    { name: "Animal friends", skills: "Animal sounds and where animals live", tracks: { animals: 1 }, boss: ["animals"], lv: 1, pass: 3, topics: ["Animal sounds", "Where animals live", "Animal facts"] },
+    { name: "Numbers to 20", skills: "Numbers 11 to 20, what comes next", tracks: { numbers: 2 }, boss: ["numbers"], lv: 2, pass: 3, topics: ["Number recognition", "Counting order", "Bigger and smaller"] },
+    { name: "Beginning sounds", skills: "What letter does a word start with?", tracks: { letters: 2 }, boss: ["letters"], lv: 2, pass: 3, topics: ["Beginning sounds"] },
+    { name: "Counting fun", skills: "Numbers to 50, bigger and smaller, skip counting", tracks: { numbers: 3 }, boss: ["numbers"], lv: 3, pass: 3, topics: ["Bigger and smaller", "Skip counting", "Tens and ones", "Counting order"] },
+    { name: "Super reader", skills: "Rhymes, sight words and letters", tracks: { letters: 3, animals: 2 }, boss: ["letters"], lv: 3, pass: 3, topics: ["Rhymes", "Sight words", "Beginning sounds"] },
+  ],
+};
+// A topic belongs to a unit if it matches a unit topic exactly or as a sub-topic ("Reading" covers "Reading: theme").
+const topicIn = (c, list) => list.some(k => c === k || c.startsWith(k + ":") || c.startsWith(k + " ("));
+const unitsFor = p => UNITS[p || "little"] || UNITS.little;
+const curUnit = () => { const U = unitsFor(PROFILE), i = Math.min(U.length - 1, store.get("bosses", []).length); return { ...U[i], idx: i }; };
+// Starting a world raises its topics to at least the unit's level.
+function applyUnitFloors() { if (!PROFILE) return; const u = curUnit(); Object.entries(u.tracks).forEach(([k, lv]) => { if (skillOf(k) < lv) store.set("skill." + k, lv); }); }
+// Player level as shown on the map: XP level, but held at the next boss until that boss is beaten.
+function progressInfo(xp = store.get("xp", 0), passed = store.get("bosses", []).length) {
+  const raw = levelInfo(xp), cap = 10 * (passed + 1);
+  return raw.lv < cap ? { ...raw, cap, capped: false } : { lv: cap, rest: 1, need: 1, cap, capped: true };
+}
 function levelInfo(xp) { let lv = 1, need = 100, rest = xp; while (rest >= need) { rest -= need; lv++; need = 100 + 40 * (lv - 1); } return { lv, rest, need }; }
 let xpPopEl = null, xpPopT = 0, xpPopSum = { xp: 0, c: 0 };
 function xpPop(xp, c) {
@@ -1766,20 +1856,29 @@ function xpPop(xp, c) {
 }
 function award(xp, coins = 0) {
   if (!PROFILE) return;
-  const before = levelInfo(store.get("xp", 0)).lv, total = store.get("xp", 0) + xp;
+  const before = progressInfo(store.get("xp", 0)).lv, total = store.get("xp", 0) + xp;
   store.set("xp", total); if (coins) store.set("coins", store.get("coins", 0) + coins);
   xpPop(xp, coins);
-  const after = levelInfo(total).lv;
-  if (after > before) levelUp(after);
+  const P = progressInfo(total);
+  if (P.lv > before) levelUp(P.lv, P.capped);
   updateHud();
 }
-function levelUp(lv) {
-  const chest = lv % 5 === 0;
-  if (chest) store.set("coins", store.get("coins", 0) + 50);
+function banner(title, sub) {
   const b = document.createElement("div"); b.className = "lvlup";
-  b.innerHTML = `<b>⬆️ Level ${lv}!</b>${chest ? "<span>🎁 Treasure chest: +50 coins</span>" : `<span>${worldOf(lv).name}</span>`}`;
+  b.innerHTML = `<b>${title}</b>${sub ? `<span>${sub}</span>` : ""}`;
   document.body.appendChild(b); setTimeout(() => b.remove(), 3600);
-  celebrate(); sfx.yay(); setTimeout(() => say("Level up!", chest ? "Treasure chest!" : null), 900);
+}
+function levelUp(lv, bossReady) {
+  const chest = lv % 5 === 0 && lv % 10 !== 0;
+  if (chest) store.set("coins", store.get("coins", 0) + 50);
+  banner(`⬆️ Level ${lv}!`, bossReady ? "⚔️ Boss challenge ready on your map!" : chest ? "🎁 Treasure chest: +50 coins" : worldOf(lv).name);
+  celebrate(); sfx.yay(); setTimeout(() => say("Level up!", bossReady ? "Boss challenge ready!" : chest ? "Treasure chest!" : null), 900);
+}
+// A small progress strip: the level bar fills from where it was to where it is now.
+function xpStrip(before) {
+  const A = progressInfo(before), B = progressInfo(), from = A.lv === B.lv ? Math.round(A.rest / A.need * 100) : 0, to = B.capped ? 100 : Math.round(B.rest / B.need * 100);
+  return `<div class="mini"><span class="mlv">${avatarOf()} Level ${B.lv}${B.lv > A.lv ? " ⬆️" : ""}</span><span class="xpbar"><i style="width:${from}%" data-to="${to}"></i></span>
+    <small>${B.capped ? "⚔️ Boss challenge ready on your map!" : `+${store.get("xp", 0) - before} XP · ${B.need - B.rest} XP to level ${B.lv + 1}`}</small></div>`;
 }
 const WORLDS = [["Sunny Meadow", "🌼", "#BFF0A8", "#8FD67A", ["🌼", "🌷", "🦋", "🐞"]], ["Whispering Forest", "🌲", "#A8DDB0", "#5FAE6E", ["🌲", "🍄", "🦊", "🦉"]],
   ["Sandy Desert", "🏜️", "#FFE3A3", "#F2BE6B", ["🌵", "🐪", "🦂", "☀️"]], ["Frosty Peaks", "❄️", "#E3F2FF", "#A9CDF2", ["❄️", "⛄", "🐧", "🏔️"]],
@@ -1788,9 +1887,10 @@ const worldOf = lv => { const w = WORLDS[Math.min(WORLDS.length - 1, Math.floor(
 const avatarOf = () => store.get("avatar", PLAYERS[PROFILE || "little"].em);
 function updateHud() {
   const hud = $("#xpHud"); if (!hud || !PROFILE) return;
-  const L = levelInfo(store.get("xp", 0));
+  const L = progressInfo();
+  if ($("#gxpLv")) { $("#gxpLv").textContent = `Lv ${L.lv}`; $("#gxpBar").style.width = Math.round(L.rest / L.need * 100) + "%"; }
   $("#hudAv").textContent = avatarOf(); $("#hudAv").classList.toggle("duo", isDuo(avatarOf())); $("#hudLv").textContent = `Level ${L.lv}`; $("#hudBar").style.width = Math.round(L.rest / L.need * 100) + "%";
-  $("#hudCoins").textContent = store.get("coins", 0); $("#hudNext").textContent = `${L.need - L.rest} XP to go`;
+  $("#hudCoins").textContent = store.get("coins", 0); $("#hudNext").textContent = L.capped ? "⚔️ Boss ready on the map!" : `${L.need - L.rest} XP to go · ${curUnit().name}`;
 }
 // Accuracy on a topic over the last n tries.
 function mastery(log, c, n = 20) { const xs = log.filter(e => e.c === c).slice(-n); return { n: xs.length, acc: xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : null }; }
@@ -1802,8 +1902,8 @@ const FOCUS_W = { more: 3, less: .4, skip: .02 };
 function pickRound(make, lvl, track, lastC) {
   const log = store.get("log", []).slice(-500), cands = [];
   for (let i = 0; i < 6; i++) { const r = make(lvl); r._lv = lvl; r._c = conceptOf(r, track); cands.push(r); }
-  const plan = planOf();
-  const w = cands.map(r => { const m = mastery(log, r._c); let x = m.n < 4 ? 1.1 : .2 + (1 - m.acc) * 1.8; if (r._c === lastC) x *= .3; const f = focusOf(plan, r._c); if (f) x *= FOCUS_W[f] || 1; return x; });
+  const plan = planOf(), uTopics = PROFILE ? curUnit().topics || [] : [];
+  const w = cands.map(r => { const m = mastery(log, r._c); let x = m.n < 4 ? 1.1 : .2 + (1 - m.acc) * 1.8; if (r._c === lastC) x *= .3; const f = focusOf(plan, r._c); if (f) x *= FOCUS_W[f] || 1; if (uTopics.length && topicIn(r._c, uTopics)) x *= 2.5; return x; });
   let roll = Math.random() * w.reduce((a, b) => a + b, 0), pickd = cands[0];
   for (let i = 0; i < cands.length; i++) { roll -= w[i]; if (roll <= 0) { pickd = cands[i]; break; } }
   if (pickd._qa) { recentQA.push(pickd._qa); if (recentQA.length > 18) recentQA.shift(); }
@@ -1950,31 +2050,34 @@ function gateTick(dt) {
 }
 document.addEventListener("visibilitychange", () => { if (document.hidden) saveGateClock(); });
 window.addEventListener("pagehide", saveGateClock);
-function openGate(onDone) {
-  saveGateClock();
-  const tracks = PRO ? [["numbers", numberRoundPro], ["math", mathRoundPro], ["story", wordProblemRound], ["reading", readingRound], ["vocab", vocabRound], ["science", scienceRound]] : GATE_TRACKS;
+function openGate(onDone, opts = {}) {
+  const boss = opts.boss || null, host = opts.host || stage, xpBefore = store.get("xp", 0);
+  if (!boss) saveGateClock();
+  const TRACK_FN = PRO ? { numbers: numberRoundPro, math: mathRoundPro, story: wordProblemRound, reading: readingRound, vocab: vocabRound, science: scienceRound } : Object.fromEntries(GATE_TRACKS);
+  const tracks = Object.entries(TRACK_FN), unitT = new Set(Object.keys(curUnit().tracks));
   // Topic area for this break: weaker and less recently used areas come up more often.
   const recent = store.get("log", []).filter(e => e.s === "b").slice(-200), lastTrack = store.get("gateLast", "");
   const plan = planOf(), focusTracks = new Set(store.get("log", []).filter(e => focusOf(plan, e.c) === "more").map(e => e.k));
   Object.entries(plan.focusTrack || {}).forEach(([k, v]) => { if (v === "more") focusTracks.add(k); });
-  const tw = tracks.map(([k]) => { const xs = recent.filter(e => e.k === k).slice(-12), acc = xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : .5; return (k === lastTrack ? .25 : 1) * (.6 + (1 - acc) * 1.4) * (focusTracks.has(k) ? 2.5 : 1); });
+  const tw = tracks.map(([k]) => { const xs = recent.filter(e => e.k === k).slice(-12), acc = xs.length ? xs.reduce((a, e) => a + e.ok, 0) / xs.length : .5; return (k === lastTrack ? .25 : 1) * (.6 + (1 - acc) * 1.4) * (focusTracks.has(k) ? 2.5 : 1) * (unitT.has(k) ? 2.5 : 1); });
   let roll = Math.random() * tw.reduce((a, b) => a + b, 0), ti = 0; while (ti < tracks.length - 1 && (roll -= tw[ti]) > 0) ti++;
   const forced = store.get("gateNext", null); if (forced != null) { ti = forced % tracks.length; store.set("gateNext", null); } // used by automated tests
-  const [track, make] = tracks[ti], Q = PRO ? 4 : 3, MAXQ = Q + (PRO ? 4 : 2);
-  store.set("gateLast", track);
+  let [track, make] = boss ? [boss.boss[0], TRACK_FN[boss.boss[0]]] : tracks[ti];
+  const Q = boss ? 5 : PRO ? 4 : 3, MAXQ = boss ? 5 : Q + (PRO ? 4 : 2), src = boss ? "x" : "b";
+  if (!boss) store.set("gateLast", track);
   // got = right on the first try; every miss adds one more problem (up to 4 more), so guessing makes the break longer.
   // Difficulty adapts as it goes: two right in a row = a harder problem next; two misses in a row = a bit easier.
-  let lvl = skillOf(track), got = 0, misses = 0, need = Q, streak = 0, missStreak = 0, round = null, busy = false, unlockAt = 0;
+  let lvl = boss ? boss.lv : skillOf(track), got = 0, misses = 0, need = Q, streak = 0, missStreak = 0, round = null, busy = false, unlockAt = 0;
   const ov = document.createElement("div");
-  ov.className = "gate";
-  ov.innerHTML = '<div class="gcard"><div class="ghead"><b>🧠 Brain break!</b><span class="glv"></span><span class="gpips"></span><button class="tool big" aria-label="Say it again">🔊</button></div><div class="gbody"><div class="prompt"></div><div class="choices"></div></div></div>';
-  stage.appendChild(ov);
+  ov.className = "gate" + (boss ? " boss" : "");
+  ov.innerHTML = '<div class="gcard"><div class="ghead"><b>' + (boss ? "⚔️ Boss challenge" : "🧠 Brain break!") + '</b><span class="glv"></span><span class="gpips"></span><button class="tool big" aria-label="Say it again">🔊</button></div><div class="gbody"><div class="prompt"></div><div class="choices"></div></div></div>';
+  host.appendChild(ov);
   const card = $(".gcard", ov), body = $(".gbody", ov), promptEl = $(".prompt", ov), wrap = $(".choices", ov), pips = $(".gpips", ov), lvEl = $(".glv", ov);
   ov._answer = () => round && round.answer; // read by automated tests
   const ask = () => { if (round && !busy) say(...round.ask); };
   $(".ghead .tool", ov).addEventListener("click", ask);
-  const drawPips = () => { pips.innerHTML = range(1, need).map(i => `<i class="${i <= got ? "on" : ""}"></i>`).join(""); lvEl.textContent = `Lv ${lvl}`; };
-  const setLvl = v => { const up = v > lvl; lvl = Math.max(1, v); store.set("skill." + track, lvl); drawPips(); replay(lvEl, "hop"); if (up) tone(880, { d: .12, v: .1, type: "triangle", to: 1320 }); };
+  const drawPips = () => { pips.innerHTML = range(1, need).map(i => `<i class="${i <= got ? "on" : boss && i <= got + misses ? "miss" : ""}"></i>`).join(""); lvEl.textContent = boss ? `${got}/${boss.pass} to pass` : `Lv ${lvl}`; };
+  const setLvl = v => { if (boss) return drawPips(); const up = v > lvl; lvl = Math.max(1, v); store.set("skill." + track, lvl); drawPips(); replay(lvEl, "hop"); if (up) tone(880, { d: .12, v: .1, type: "triangle", to: 1320 }); };
   function layout() {
     const k = wrap.children.length, land = body.clientWidth > body.clientHeight * 1.1;
     body.classList.toggle("land", land);
@@ -1983,8 +2086,8 @@ function openGate(onDone) {
   }
   function explain(ch, b, guessed) {
     // Wrong: show the right answer and why, out loud and in writing, then a new problem when they're ready.
-    busy = true; misses++; streak = 0; missStreak++; logAnswer("b", track, round, false, ch);
-    need = Math.min(MAXQ, need + 1);
+    busy = true; misses++; streak = 0; missStreak++; logAnswer(src, track, round, false, ch);
+    if (!boss) need = Math.min(MAXQ, need + 1);
     if (missStreak >= 2) { setLvl(lvl - 1); missStreak = 0; } else drawPips();
     b.classList.remove("pop-in"); b.classList.add("no"); replay(b, "wiggle"); sfx.boop();
     const right = [...wrap.children].find(x => x._val === round.answer); if (right) right.classList.add("yes");
@@ -1998,10 +2101,12 @@ function openGate(onDone) {
     say(...parts);
     const go = $(".gotit", bar);
     later(() => { go.disabled = false; replay(go, "hop"); }, Math.min(4000, Math.max(1500, partTimes(parts).slice(-1)[0] * 1000 - 300)));
-    go.addEventListener("click", () => { bar.remove(); next(false); });
+    go.addEventListener("click", () => { bar.remove(); if (boss && got + misses >= Q) finish(); else next(false); });
   }
   function next(first) {
+    if (boss) { track = boss.boss[(got + misses) % boss.boss.length]; make = TRACK_FN[track]; }
     busy = false; round = pickRound(make, lvl, track, round && round._c);
+    if (boss && (boss.topics || []).length) for (let tries = 0; tries < 40 && !topicIn(round._c, boss.topics); tries++) round = pickRound(make, lvl, track, round._c);
     showPrompt(promptEl, round); body.classList.toggle("reading", round.kind === "long");
     const ear = $(".ear", promptEl); if (ear) ear.addEventListener("click", ask);
     wrap.innerHTML = "";
@@ -2016,19 +2121,20 @@ function openGate(onDone) {
         if (busy || b.classList.contains("wait")) return;
         if (ch !== round.answer) return explain(ch, b, performance.now() - unlockAt < 1500);
         // Right: no read-back, just a quick cheer and on to the next one.
-        busy = true; got++; streak++; missStreak = 0; logAnswer("b", track, round, true, null);
+        busy = true; got++; streak++; missStreak = 0; logAnswer(src, track, round, true, null);
         if (streak >= 2 && streak % 2 === 0) setLvl(lvl + 1); else drawPips();
         b.classList.remove("pop-in"); b.classList.add("yes"); wrap.querySelectorAll(".choice").forEach(x => x !== b && x.classList.add("fade"));
         sfx.yay(); say(praise());
-        later(got >= need ? finish : () => next(false), 1000);
+        later((boss ? got + misses >= Q : got >= need) ? finish : () => next(false), 1000);
       });
       wrap.appendChild(b);
     });
     layout(); drawPips();
     // Answers unlock after a moment to read (big kid) or to hear the question (little kid), so it can't be tapped through.
     let lock;
-    if (PRO) { if (first) say("Brain break!"); lock = Math.min(3000, Math.max(1200, askText(round.ask).length * 40)); }
-    else { const parts = [...(first ? ["Brain break!", P(.4)] : []), ...round.ask]; say(...parts); lock = Math.min(2600, Math.max(700, partTimes(parts).slice(-1)[0] * 800)); }
+    const title = boss ? "Boss challenge!" : "Brain break!";
+    if (PRO) { if (first) say(title); lock = Math.min(3000, Math.max(1200, askText(round.ask).length * 40)); }
+    else { const parts = [...(first ? [title, P(.4)] : []), ...round.ask]; say(...parts); lock = Math.min(2600, Math.max(700, partTimes(parts).slice(-1)[0] * 800)); }
     later(() => { wrap.querySelectorAll(".choice").forEach(x => x.classList.remove("wait")); unlockAt = performance.now(); }, lock);
     const r0 = round;
     later(function nudge() {
@@ -2038,13 +2144,14 @@ function openGate(onDone) {
     }, PRO ? 20000 : 12000);
   }
   function finish() {
+    if (boss) { later(() => { ov.remove(); onDone({ got, n: Q }); }, 600); return; }
     store.set("skill." + track, lvl);
     gateClock = 0; saveGateClock(); // the break counts as done only now
     const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
     store.set("breaks", store.get("breaks", 0) + 1); award(stars === 3 ? 40 : 30, 5);
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
     // The question window goes away right away; the game stays paused (and visible) until they tap ▶.
-    later(() => { ov.remove(); onDone(); pauseGame(`${"⭐".repeat(stars)}${"✨".repeat(3 - stars)} Brain break done!`); }, 900);
+    later(() => { ov.remove(); onDone(); pauseGame(`${"⭐".repeat(stars)}${"✨".repeat(3 - stars)} Brain break done!`, xpStrip(xpBefore)); }, 900);
   }
   next(true);
 }
@@ -6183,6 +6290,20 @@ const CLAUDE_NOTES = {
 };
 const TARGET_GRADE = { little: null, big: 3, keira: 5 }, lvGrade = lv => lv <= 2 ? 3 : lv <= 4 ? 4 : lv <= 6 ? 5 : 6;
 const AREA_NAMES = { stickers: "Sticker spelling", numbers: "Number sense", math: "Computation", story: "Word problems", reading: "Reading", vocab: "Grammar & vocabulary", science: "Science", letters: "Letters & sounds", animals: "Animals" };
+// Play time summary for a player: minutes per day, split into arcade, learning and brain breaks.
+const fmtMin = sec => { const m = Math.round(sec / 60); if (sec > 0 && m === 0) return "<1m"; return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`; };
+function playTime(p) {
+  const t = readP(p, "time", {}), arcadeIds = new Set([...ARCADE, ...ARCADE_PRO].map(g => g.id)), days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = dayKey(Date.now() - i * 864e5), row = t[d] || {}; let arcade = 0, learn = 0, brk = 0;
+    Object.entries(row).forEach(([g, sec]) => { if (g === "brainbreak") brk += sec; else if (arcadeIds.has(g)) arcade += sec; else learn += sec; });
+    days.push({ d, arcade, learn, brk, total: arcade + learn + brk });
+  }
+  const byGame = {}; Object.entries(t).filter(([d]) => d >= days[0].d).forEach(([, row]) => Object.entries(row).forEach(([g, sec]) => { byGame[g] = (byGame[g] || 0) + sec; }));
+  const sessions = readP(p, "sessions", []).slice(-15).reverse();
+  return { days, byGame: Object.entries(byGame).sort((a, b) => b[1] - a[1]), sessions, week: days.reduce((a, x) => a + x.total, 0), today: days[6].total };
+}
+const gameName = id => id === "brainbreak" ? "Brain breaks" : ([...GAMES, ...CHALLENGE, ...ARCADE, ...LEARN_PRO, ...CHALLENGE_PRO, ...ARCADE_PRO].find(g => g.id === id) || { name: id }).name;
 // Claude's proficiency scoring per subject area: grade level being worked at + accuracy, compared with the child's grade.
 function proficiency(p, S) {
   const by = {}; S.log.forEach(e => (by[e.k] = by[e.k] || []).push(e));
@@ -6233,6 +6354,16 @@ function renderReport() {
   const maxDay = Math.max(1, ...S.days.map(d => d.n));
   $("#repBody").innerHTML = `
     <div class="rcardp claude"><h2>💬 From Claude</h2>${[...(CLAUDE_NOTES.all || []), ...(CLAUDE_NOTES[p] || [])].map(([d, t]) => `<p><small>${esc(d)}</small> ${esc(t)}</p>`).join("")}</div>
+    ${(() => { const T = playTime(p), mx = Math.max(60, ...T.days.map(x => x.total)); return `<div class="rcardp"><h2>⏱️ Play time</h2>
+      <div class="rstats"><div class="rstat"><b>${fmtMin(T.today)}</b><span>today</span></div><div class="rstat"><b>${fmtMin(T.week)}</b><span>last 7 days</span></div>
+      <div class="rstat"><b>${fmtMin(T.days.reduce((a, x) => a + x.learn + x.brk, 0))}</b><span>learning + brain breaks (7 days)</span></div><div class="rstat"><b>${fmtMin(T.days.reduce((a, x) => a + x.arcade, 0))}</b><span>arcade (7 days)</span></div></div>
+      <div class="tdays">${T.days.map(x => `<div title="${x.d}: ${fmtMin(x.total)} (arcade ${fmtMin(x.arcade)}, learning ${fmtMin(x.learn)}, brain breaks ${fmtMin(x.brk)})"><span class="tbar"><i class="ar" style="height:${x.arcade / mx * 100}%"></i><i class="le" style="height:${(x.learn + x.brk) / mx * 100}%"></i></span><small>${new Date(x.d + "T12:00").toLocaleDateString(undefined, { weekday: "short" })}</small><small>${fmtMin(x.total)}</small></div>`).join("")}</div>
+      <p class="fine"><span class="key ar"></span> arcade <span class="key le"></span> learning + brain breaks. Counted only while a game is on screen; paused time isn't counted.</p>
+      ${T.byGame.length ? `<p><b>By game (7 days):</b> ${T.byGame.slice(0, 8).map(([g, sec]) => `${esc(gameName(g))} ${fmtMin(sec)}`).join(" · ")}</p>` : ""}
+      ${T.sessions.length ? `<p><b>Recent sessions:</b></p><ul class="recent">${T.sessions.map(x => `<li>${esc(gameName(x.g))} — ${fmtMin(x.s)} <small>· ${new Date(x.t).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" })}</small></li>`).join("")}</ul>` : ""}</div>`; })()}
+    <div class="rcardp"><h2>🗺️ Curriculum path</h2>${(() => { const U = unitsFor(p), passed = readP(p, "bosses", []).length, bl = readP(p, "bossLog", []);
+      return `<ol class="units">${U.map((u, i) => { const tries = bl.filter(b => b.w === i); return `<li class="${i < passed ? "done" : i === passed ? "cur" : ""}"><b>${i < passed ? "✅" : i === passed ? "▶️" : "🔒"} World ${i + 1}: ${esc(u.name)}</b> <small>${esc(u.skills)} · boss: ${u.pass} of 5</small>
+        ${tries.length ? `<small class="tries">Boss tries: ${tries.map(b => `${b.pass ? "✅" : "❌"} ${b.got}/${b.n} (${fmtD(b.t)})`).join(" · ")}</small>` : ""}</li>`; }).join("")}</ol>`; })()}</div>
     <div class="rcardp"><h2>🎯 Proficiency (Claude's scoring)</h2>${(() => { const P = proficiency(p, S); return P.length ? `<table class="rtable"><tr><th>Area</th><th>Working at</th><th>Right (last 30)</th><th>Rating</th></tr>
       ${P.map(a => `<tr><td>${esc(a.name)}</td><td>${a.grade ? `Grade ${a.grade} · L${a.lv}` : `Level ${a.lv}`}</td><td class="num">${a.acc}% <small>(${a.n})</small></td><td>${a.rate ? `<span class="stat ${RATE[a.rate][0]}">${RATE[a.rate][1]}</span>` : '<span class="stat none">⏳ Not enough yet</span>'}</td></tr>`).join("")}</table>
       <p class="fine">Ratings compare the grade level of the questions with ${esc(playerName(p))}'s grade (1 Below · 2 Approaching · 3 Meets · 4 Exceeds), like New York State test levels. They need at least 8 answers.</p>` : "<p>Scores appear after a few brain breaks.</p>"; })()}</div>
@@ -6255,7 +6386,7 @@ function renderReport() {
       <div class="dayl"><span>${fmtD(S.days[0].start)}</span><span>Today</span></div></div>
     <div class="rcardp"><h2>Levels</h2><div><b>Brain breaks:</b> ${Object.entries(S.skills).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div>
       <div><b>Games:</b> ${Object.entries(S.levels).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div></div>
-    <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : e.s === "s" ? "sticker spelling" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
+    <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : e.s === "s" ? "sticker spelling" : e.s === "x" ? "boss challenge" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
   const R = recommendations(p, S);
   $("#repBody").querySelectorAll(".recopts button").forEach(b => b.addEventListener("click", () => { decide(p, R[Number(b.dataset.i)], b.dataset.k); sfx.tap(); const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; }));
   $("#repNote").addEventListener("input", e => { const plan = readP(p, "plan", {}) || {}; plan.note = e.target.value; writeP(p, "plan", plan); });
@@ -6270,8 +6401,12 @@ function reportText() {
     if (P.length) { lines.push("Proficiency (area: working at, accuracy last 30, rating):"); P.forEach(a => lines.push(`- ${a.name}: ${a.grade ? "grade " + a.grade + ", " : ""}level ${a.lv}, ${a.acc}% (${a.n} answers), ${a.rate ? RATE[a.rate][1].replace(/^\S+\s/, "") : "not enough yet"}`)); }
     lines.push("Topics (accuracy over last 20 tries, total tries, level, status):");
     S.topics.forEach(t => lines.push(`- ${t.c}: ${t.a ?? "-"}% (${t.n} tries, level ${t.lv}) ${t.st[1].replace(/^\S+\s/, "")}${t.trend == null ? "" : `, trend ${t.trend >= 0 ? "+" : ""}${t.trend}`}`));
-    const plan = readP(p, "plan", {}) || {}, L = levelInfo(readP(p, "xp", 0));
-    lines.push(`Player level ${L.lv} (${readP(p, "xp", 0)} XP), coins ${readP(p, "coins", 0)}.`);
+    const plan = readP(p, "plan", {}) || {}, passedW = readP(p, "bosses", []).length, L = progressInfo(readP(p, "xp", 0), passedW), U = unitsFor(p);
+    lines.push(`Player level ${L.lv} (${readP(p, "xp", 0)} XP), coins ${readP(p, "coins", 0)}. Curriculum: World ${Math.min(U.length, passedW + 1)} "${U[Math.min(U.length - 1, passedW)].name}"${L.capped ? " (boss ready)" : ""}; ${passedW} boss${passedW === 1 ? "" : "es"} passed.`);
+    const T = playTime(p);
+    lines.push(`Play time: today ${fmtMin(T.today)}, last 7 days ${fmtMin(T.week)} (arcade ${fmtMin(T.days.reduce((a, x) => a + x.arcade, 0))}, learning ${fmtMin(T.days.reduce((a, x) => a + x.learn, 0))}, brain breaks ${fmtMin(T.days.reduce((a, x) => a + x.brk, 0))}). By game: ${T.byGame.slice(0, 8).map(([g, sec]) => `${gameName(g)} ${fmtMin(sec)}`).join(", ") || "-"}.`);
+    if (T.sessions.length) lines.push(`Recent sessions: ${T.sessions.slice(0, 8).map(x => `${gameName(x.g)} ${fmtMin(x.s)} (${new Date(x.t).toLocaleString()})`).join("; ")}`);
+    const bl = readP(p, "bossLog", []); if (bl.length) lines.push(`Boss tries: ${bl.map(b => `World ${b.w + 1} ${b.got}/${b.n} ${b.pass ? "pass" : "fail"} (${new Date(b.t).toLocaleDateString()})`).join("; ")}`);
     const dec = Object.entries(plan.decisions || {});
     if (dec.length) { lines.push("Parent decisions:"); dec.forEach(([id, d]) => lines.push(`- ${d.text || id}: ${d.choice} (${new Date(d.t).toLocaleDateString()})`)); }
     if (Object.keys(plan.focus || {}).length) lines.push(`Current focus: ${Object.entries(plan.focus).map(([k, v]) => `${k} = ${v}`).join("; ")}`);
@@ -6286,27 +6421,44 @@ function reportText() {
 const AVATARS = [["🐘💥👻", 0], ["🦑💥🐋", 0], ["🐼", 0], ["🦄", 60], ["🐶", 40], ["🐱", 40], ["🐰", 60], ["🦊", 80], ["🐼", 100], ["🐸", 120], ["🐵", 150], ["🦁", 200], ["🐯", 200],
   ["🐧", 250], ["🐙", 300], ["🦖", 350], ["🐲", 400], ["🤖", 450], ["👽", 500], ["🦸", 600], ["🧙", 700], ["🐉", 900], ["👑", 1200]];
 function renderMap() {
-  const L = levelInfo(store.get("xp", 0)), N = Math.max(30, Math.ceil((L.lv + 12) / 10) * 10), gap = 92, H = N * gap + 120, world = $("#mapWorld");
+  const L = progressInfo(), U = unitsFor(PROFILE), passed = store.get("bosses", []).length, unit = curUnit(), N = Math.min(70, Math.max(30, (passed + 2) * 10)), gap = 92, H = N * gap + 120, world = $("#mapWorld");
   $("#mapCoins").textContent = store.get("coins", 0);
-  const nextChest = Math.ceil((L.lv + 1) / 5) * 5;
-  $("#mapInfo").innerHTML = `<b>${avatarOf()} Level ${L.lv}</b> · ${worldOf(L.lv).em} ${worldOf(L.lv).name}<span class="xpbar big"><i style="width:${Math.round(L.rest / L.need * 100)}%"></i></span>
-    <small>${L.need - L.rest} XP to level ${L.lv + 1} · 🎁 treasure at level ${nextChest} · Earn XP: right answers +10 · brain breaks +30 · missions +50</small>`;
+  $("#mapInfo").innerHTML = `<b>${avatarOf()} Level ${L.lv}</b> · World ${unit.idx + 1}: ${worldOf(L.lv).em} <b>${unit.name}</b><span class="xpbar big"><i style="width:${Math.round(L.rest / L.need * 100)}%"></i></span>
+    <small>📚 ${unit.skills}</small>
+    ${L.capped ? `<button class="bossgo">⚔️ Take the boss challenge! (${unit.pass} of 5 to pass)</button>` : `<small>${L.need - L.rest} XP to level ${L.lv + 1} · ⚔️ boss at level ${L.cap} · Earn XP: right answers +10 · brain breaks +30 · missions +50</small>`}`;
   const pos = n => ({ x: 50 + 30 * Math.sin(n * .85), y: H - 70 - (n - 1) * gap });
   let html = "";
   for (let w = 0; w * 10 < N; w++) { // world bands, bottom to top
     const wd = worldOf(w * 10 + 1), top = H - 70 - (Math.min(N, w * 10 + 10) - 1) * gap - gap / 2, bot = w === 0 ? H : H - 70 - (w * 10) * gap + gap / 2;
-    html += `<div class="band" style="top:${top}px;height:${bot - top}px;background:linear-gradient(${wd.c1},${wd.c2})"><span class="bname">${wd.em} ${wd.name}</span></div>`;
+    const un = U[Math.min(U.length - 1, w)];
+    html += `<div class="band" style="top:${top}px;height:${bot - top}px;background:linear-gradient(${wd.c1},${wd.c2})"><span class="bname">${wd.em} World ${w + 1}: ${un.name}</span></div>`;
     for (let k = 0; k < 6; k++) { const yy = top + 40 + ((k * 137 + w * 59) % Math.max(60, bot - top - 80)), xx = (k % 2 ? 78 + (k * 7) % 14 : 6 + (k * 11) % 12); html += `<span class="deco" style="top:${yy}px;left:${xx}%">${wd.deco[k % 4]}</span>`; }
   }
   const pts = range(1, N).map(n => pos(n));
   html += `<svg class="mpath" viewBox="0 0 100 ${H}" preserveAspectRatio="none" style="height:${H}px"><polyline points="${pts.map(p => `${p.x},${p.y}`).join(" ")}" /><polyline class="done" points="${pts.slice(0, L.lv).map(p => `${p.x},${p.y}`).join(" ")}" /></svg>`;
   for (let n = 1; n <= N; n++) {
-    const p = pos(n), chest = n % 5 === 0, cls = n < L.lv ? "done" : n === L.lv ? "cur" : "lock";
-    html += `<div class="node ${cls}${chest ? " chest" : ""}" style="left:${p.x}%;top:${p.y}px">${chest ? (n <= L.lv ? "📦" : "🎁") : n < L.lv ? "⭐" : n}</div>`;
+    const p = pos(n), isBoss = n % 10 === 0, chest = n % 5 === 0 && !isBoss, cls = n < L.lv ? "done" : n === L.lv ? "cur" : "lock";
+    const icon = isBoss ? (n / 10 <= passed ? "🏆" : "⚔️") : chest ? (n <= L.lv ? "📦" : "🎁") : n < L.lv ? "⭐" : n;
+    html += `<div class="node ${cls}${chest ? " chest" : ""}${isBoss ? " boss" : ""}${isBoss && n === L.cap && L.capped ? " ready" : ""}" style="left:${p.x}%;top:${p.y}px">${icon}</div>`;
     if (n === L.lv) html += `<div class="me${isDuo(avatarOf()) ? " duo" : ""}" style="left:${p.x}%;top:${p.y - 54}px">${avatarOf()}</div>`;
   }
   world.style.height = H + "px"; world.innerHTML = html;
+  [...world.querySelectorAll(".node.ready"), ...$("#mapInfo").querySelectorAll(".bossgo")].forEach(b => b.addEventListener("click", startBoss));
   const sc = $("#mapScroll"); sc.scrollTop = pos(L.lv).y - sc.clientHeight * .6;
+}
+function startBoss() {
+  const unit = curUnit(); if (!progressInfo().capped || $("#map").querySelector(".gate")) return;
+  audio(); sfx.tap();
+  openGate(res => {
+    const pass = res.got >= unit.pass, log = store.get("bossLog", []);
+    log.push({ w: unit.idx, t: Date.now(), got: res.got, n: res.n, pass }); store.set("bossLog", log);
+    if (pass) {
+      store.set("bosses", [...store.get("bosses", []), unit.idx]); applyUnitFloors();
+      const nx = curUnit(); banner(`🏆 World ${unit.idx + 1} complete!`, `Next: ${nx.name}`); celebrate(); sfx.yay(); say("World complete!");
+      award(60, 25);
+    } else { banner(`So close! ${res.got} of ${res.n}`, `You need ${unit.pass}. Practice in brain breaks, then try again!`); sfx.boop(); say("So close! Try again."); }
+    renderMap(); updateHud();
+  }, { boss: unit, host: $("#map") });
 }
 function openMap() { audio(); hub.hidden = true; $("#map").hidden = false; renderMap(); sfx.tap(); say("Adventure map"); }
 $("#xpHud").addEventListener("click", openMap);
@@ -6344,7 +6496,7 @@ let wakeLock = null;
 function keepAwake() { try { navigator.wakeLock && navigator.wakeLock.request("screen").then(l => { wakeLock = l; }).catch(() => {}); } catch (e) {} }
 function openGame(gm) {
   endSession(); audio(); loadClips();
-  hub.hidden = true; stage.hidden = false; homeAsk.hidden = true; enterAnim(stage); clearPause(); $("#pauseBtn").hidden = gm === BOOK;
+  hub.hidden = true; stage.hidden = false; homeAsk.hidden = true; enterAnim(stage); clearPause(); updateHud(); startPlay(gm.id); $("#pauseBtn").hidden = gm === BOOK;
   titleEl.innerHTML = `<span class="nm">${gm.name}</span>`;
   toolsEl.innerHTML = ""; gameEl.innerHTML = ""; fx.innerHTML = "";
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
@@ -6356,7 +6508,7 @@ function openGame(gm) {
   keepAwake();
 }
 function goHome() {
-  endSession(); MIS = null; clearPause();
+  endSession(); MIS = null; clearPause(); endPlay();
   gameEl.innerHTML = ""; toolsEl.innerHTML = ""; fx.innerHTML = ""; homeAsk.hidden = true;
   stage.querySelectorAll(".reward, .gate").forEach(x => x.remove());
   stage.hidden = true; hub.hidden = false; enterAnim(hub);
@@ -6394,9 +6546,10 @@ function showPicker() {
   say("Who's playing?");
 }
 picker.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => {
+  endPlay();
   saveGateClock(); // the current player's brain-break clock is kept separately from the other player's
   audio(); PROFILE = b.dataset.p; PRO = PROFILE !== "little"; store.set("profile", PROFILE);
-  gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2); seedPlan();
+  gateClock = store.get("gateClock", 0); gateMins = store.get("gateMins", 2); seedPlan(); applyUnitFloors();
   hubTab = null; picker.hidden = true; hub.hidden = false; sfx.tap(); renderHub();
   say(playerName(PROFILE) === NAMES_DEFAULT[PROFILE] ? "hi:" + PROFILE : "Hi! Let's play!");
 }));
@@ -6404,7 +6557,7 @@ function seedPlan() {
   if (PROFILE === "keira" && store.get("plan", null) == null)
     store.set("plan", { focus: { "Word problems": "more" }, focusTrack: { story: "more" }, decisions: { "parent:word": { choice: "more", t: Date.now(), text: "Practice word problems more" } }, note: "" });
 }
-seedPlan();
+seedPlan(); applyUnitFloors();
 $("#who").addEventListener("click", showPicker);
 if (PROFILE) renderHub(); else { renderHub(); showPicker(); }
 $("#book").addEventListener("click", () => openGame(BOOK));
