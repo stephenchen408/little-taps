@@ -600,6 +600,10 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .tbar i.ar, .key.ar { background: #E08A2E; } .tbar i.le, .key.le { background: #3D7DD8; }
 .tdays small { font-size: .72rem; font-weight: 700; color: #4A5D73; }
 .key { display: inline-block; width: 10px; height: 10px; border-radius: 3px; vertical-align: middle; margin: 0 2px 0 8px; }
+.syncbtns { margin-top: 10px; }
+.syncbtns button { padding: 8px 16px; border: 3px solid var(--ink); border-radius: 999px; background: linear-gradient(#B4F0A8, var(--leaf)); font-weight: 800; font-size: 1rem; box-shadow: 0 3px 0 var(--ink); }
+.sync label { display: block; margin-top: 8px; font-weight: 700; }
+.sync input { display: block; width: 100%; margin-top: 4px; font: inherit; font-size: 1rem; padding: 8px 10px; border: 3px solid var(--ink); border-radius: 12px; user-select: text; -webkit-user-select: text; touch-action: auto; }
 .units { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .units li { padding: 6px 10px; border-radius: 12px; background: #F4F1EA; }
 .units li.cur { background: #E6F4FF; border: 2px solid #3D7DD8; }
@@ -1323,7 +1327,7 @@ const PAPER = "#FFFDF6";
 // Enzo and Keira both get the big-kid games; Keira starts the learning levels higher. Voice settings and names are shared.
 const PLAYERS = { little: { name: "Luka", em: "🐘💥👻", c: "--sun", pre: "" }, big: { name: "Enzo", em: "🦑💥🐋", c: "--sky", pre: "p2." }, keira: { name: "Keira", em: "🐼", c: "--bubble", pre: "p3." } };
 const isDuo = em => [...String(em)].length > 2; // the "fighting" icons are three emoji: two creatures and a bang
-const GLOBAL_KEYS = /^(voiceMode|voice|rate|profile|names|vcMarked)$/;
+const GLOBAL_KEYS = /^(voiceMode|voice|rate|profile|names|vcMarked|syncToken|syncRepo|syncDevice|syncId|syncLast|syncErr|syncSha|claudeRemote)$/;
 let PROFILE = (() => { try { return JSON.parse(localStorage.getItem("littletaps.profile")); } catch (e) { return null; } })();
 if (!PLAYERS[PROFILE]) PROFILE = null;
 let PRO = !!PROFILE && PROFILE !== "little";
@@ -1333,7 +1337,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "25 (Nov 27, worlds, bosses, play time)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "26 (Nov 27, sync with Claude)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1554,8 +1558,10 @@ setInterval(() => {
 }, 5000);
 function startPlay(id) { endPlay(); playId = id; playStart = Date.now(); playSecs = 0; }
 function endPlay() {
-  if (playId && playSecs >= 10) { const ss = store.get("sessions", []); ss.push({ g: playId, t: playStart, s: playSecs }); if (ss.length > 600) ss.splice(0, ss.length - 600); store.set("sessions", ss); }
+  const had = playId && playSecs >= 10;
+  if (had) { const ss = store.get("sessions", []); ss.push({ g: playId, t: playStart, s: playSecs }); if (ss.length > 600) ss.splice(0, ss.length - 600); store.set("sessions", ss); }
   playId = null; playSecs = 0;
+  if (had && syncReady()) setTimeout(() => syncNow(), 500);
 }
 document.addEventListener("visibilitychange", () => { if (document.hidden && playId) { const id = playId; endPlay(); startPlay(id); } });
 function clearPause() { PAUSED = false; if (pauseOv) { pauseOv.remove(); pauseOv = null; } }
@@ -2144,11 +2150,11 @@ function openGate(onDone, opts = {}) {
     }, PRO ? 20000 : 12000);
   }
   function finish() {
-    if (boss) { later(() => { ov.remove(); onDone({ got, n: Q }); }, 600); return; }
+    if (boss) { later(() => { ov.remove(); onDone({ got, n: Q }); if (syncReady()) setTimeout(() => syncNow(true), 1500); }, 600); return; }
     store.set("skill." + track, lvl);
     gateClock = 0; saveGateClock(); // the break counts as done only now
     const stars = misses === 0 ? 3 : misses <= 2 ? 2 : 1;
-    store.set("breaks", store.get("breaks", 0) + 1); award(stars === 3 ? 40 : 30, 5);
+    store.set("breaks", store.get("breaks", 0) + 1); award(stars === 3 ? 40 : 30, 5); if (syncReady()) setTimeout(() => syncNow(), 2500);
     celebrate(); sfx.yay(); say("Back to the game!", P(.5), "Tap when you're ready!");
     // The question window goes away right away; the game stays paused (and visible) until they tap ▶.
     later(() => { ov.remove(); onDone(); pauseGame(`${"⭐".repeat(stars)}${"✨".repeat(3 - stars)} Brain break done!`, xpStrip(xpBefore)); }, 900);
@@ -6344,6 +6350,54 @@ function decide(p, r, choice) {
   if (r.track && (choice === "up" || choice === "down")) writeP(p, "skill." + r.track, Math.max(1, r.lv + (choice === "up" ? 1 : -1)));
   writeP(p, "plan", plan);
 }
+// ---------- Sync with Claude: each device saves its data to a private GitHub repository ----------
+// The token (only allowed to write that one repo) and the settings stay on this device. Each device writes its own files,
+// so devices never overwrite each other. Claude reads the repo and can leave notes in claude.json, shown on this dashboard.
+const SYNC_REPO_DEFAULT = "stephenchen408/little-taps-data";
+const b64e = t => btoa(unescape(encodeURIComponent(t))), b64d = t => decodeURIComponent(escape(atob(t.replace(/\s/g, ""))));
+function deviceName() {
+  let n = (store.get("syncDevice", "") || "").trim(); if (n) return n;
+  const ua = navigator.userAgent, kind = /iPad/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "iPad" : /iPhone/.test(ua) ? "iPhone" : /Android/.test(ua) ? "Android" : "Computer";
+  let id = store.get("syncId", ""); if (!id) { id = Math.random().toString(36).slice(2, 6); store.set("syncId", id); }
+  return `${kind}-${id}`;
+}
+const syncReady = () => !!(store.get("syncToken", "") && (store.get("syncRepo", "") || SYNC_REPO_DEFAULT));
+let syncBusy = false, syncTry = 0;
+async function syncNow(force) {
+  const token = store.get("syncToken", ""), repo = (store.get("syncRepo", "") || SYNC_REPO_DEFAULT).trim();
+  if (!token || !repo) return false;
+  if (syncBusy || (!force && Date.now() - syncTry < 120000)) return false;
+  syncBusy = true; syncTry = Date.now(); renderSyncStatus("Syncing…");
+  const H = { Authorization: "Bearer " + token, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+  const api = path => `https://api.github.com/repos/${repo}/contents/${path}`;
+  const fail = r => new Error(r.status === 401 ? "The token wasn't accepted (check it, or make a new one)." : r.status === 403 ? "GitHub refused. The token needs Contents: Read and write on this repo." : r.status === 404 ? "Repo not found, or the token can't see it." : `GitHub error ${r.status}`);
+  async function put(path, text) {
+    const shas = store.get("syncSha", {}) || {};
+    const send = sha => fetch(api(path), { method: "PUT", headers: H, body: JSON.stringify({ message: `${deviceName()}: ${path}`, content: b64e(text), ...(sha ? { sha } : {}) }) });
+    let r = await send(shas[path]);
+    if (r.status === 409 || r.status === 422) { const g = await fetch(api(path), { headers: H }); r = await send(g.ok ? (await g.json()).sha : undefined); }
+    if (!r.ok) throw fail(r);
+    const j = await r.json(); shas[path] = j.content && j.content.sha; store.set("syncSha", shas);
+  }
+  try {
+    const slug = deviceName().replace(/[^a-z0-9-]+/gi, "-").replace(/^-|-$/g, "").slice(0, 40) || "device", data = {};
+    Object.keys(localStorage).forEach(k => { if (k.startsWith("littletaps.") && !/^littletaps\.(syncToken|syncSha)$/.test(k)) data[k.slice(11)] = localStorage.getItem(k); });
+    await put(`devices/${slug}.json`, JSON.stringify({ device: deviceName(), synced: new Date().toISOString(), app: APP_VERSION, data }));
+    await put(`reports/${slug}.md`, reportText());
+    const g = await fetch(api("claude.json"), { headers: H });
+    if (g.ok) { try { store.set("claudeRemote", JSON.parse(b64d((await g.json()).content))); } catch (e) {} }
+    store.set("syncLast", Date.now()); store.set("syncErr", "");
+    return true;
+  } catch (e) { store.set("syncErr", String(e.message || e)); return false; }
+  finally { syncBusy = false; renderSyncStatus(); if (!$("#report").hidden && !document.activeElement?.closest?.(".sync")) { const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; } }
+}
+function renderSyncStatus(msg) {
+  const el = $("#syncStatus"); if (!el) return;
+  const last = store.get("syncLast", 0), err = store.get("syncErr", "");
+  el.textContent = msg || (!syncReady() ? "Not set up yet" : err ? "⚠️ " + err : last ? `✅ Last synced ${new Date(last).toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit" })}` : "Ready. Tap Save & sync now.");
+}
+// Sync on its own: after brain breaks, boss challenges and play sessions, and every few minutes of play.
+setInterval(() => { if (syncReady() && playId) syncNow(); }, 5 * 60000);
 let repPlayer = null;
 function renderReport() {
   const p = repPlayer || PROFILE || "little", S = summary(p);
@@ -6353,7 +6407,7 @@ function renderReport() {
   const fmtD = t => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
   const maxDay = Math.max(1, ...S.days.map(d => d.n));
   $("#repBody").innerHTML = `
-    <div class="rcardp claude"><h2>💬 From Claude</h2>${[...(CLAUDE_NOTES.all || []), ...(CLAUDE_NOTES[p] || [])].map(([d, t]) => `<p><small>${esc(d)}</small> ${esc(t)}</p>`).join("")}</div>
+    <div class="rcardp claude"><h2>💬 From Claude</h2>${(() => { const R = (store.get("claudeRemote", null) || {}).notes || {}; return [...(R.all || []), ...(R[p] || []), ...(CLAUDE_NOTES.all || []), ...(CLAUDE_NOTES[p] || [])]; })().map(([d, t]) => `<p><small>${esc(d)}</small> ${esc(t)}</p>`).join("")}</div>
     ${(() => { const T = playTime(p), mx = Math.max(60, ...T.days.map(x => x.total)); return `<div class="rcardp"><h2>⏱️ Play time</h2>
       <div class="rstats"><div class="rstat"><b>${fmtMin(T.today)}</b><span>today</span></div><div class="rstat"><b>${fmtMin(T.week)}</b><span>last 7 days</span></div>
       <div class="rstat"><b>${fmtMin(T.days.reduce((a, x) => a + x.learn + x.brk, 0))}</b><span>learning + brain breaks (7 days)</span></div><div class="rstat"><b>${fmtMin(T.days.reduce((a, x) => a + x.arcade, 0))}</b><span>arcade (7 days)</span></div></div>
@@ -6386,9 +6440,20 @@ function renderReport() {
       <div class="dayl"><span>${fmtD(S.days[0].start)}</span><span>Today</span></div></div>
     <div class="rcardp"><h2>Levels</h2><div><b>Brain breaks:</b> ${Object.entries(S.skills).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div>
       <div><b>Games:</b> ${Object.entries(S.levels).map(([k, v]) => `${esc(k)} ${v}`).join(" · ") || "–"}</div></div>
+    <div class="rcardp sync"><h2>☁️ Sync with Claude</h2><p>Status: <b id="syncStatus"></b></p>
+      <label>GitHub token <input id="syncToken" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" value="${esc(store.get("syncToken", ""))}"></label>
+      <label>Data repo <input id="syncRepo" autocomplete="off" spellcheck="false" placeholder="${SYNC_REPO_DEFAULT}" value="${esc(store.get("syncRepo", "") || SYNC_REPO_DEFAULT)}"></label>
+      <label>This device's name <input id="syncDevice" autocomplete="off" placeholder="${esc(deviceName())}" value="${esc(store.get("syncDevice", ""))}"></label>
+      <div class="syncbtns"><button id="syncSave">Save &amp; sync now</button></div>
+      <p class="fine">The token stays on this device and is never sent anywhere except GitHub. Each device saves its own file, so set this up on every phone and iPad the kids use.</p></div>
     <div class="rcardp"><h2>Latest answers</h2><ul class="recent">${S.log.slice(-25).reverse().map(e => `<li>${e.ok ? "✅" : "❌"} ${esc(e.q)} — ${e.ok ? `<b>${esc(e.a)}</b>` : `picked <b>${esc(e.p ?? "?")}</b>, right: <b>${esc(e.a)}</b>`} <small>· ${esc(e.c)} · L${e.lv} · ${e.s === "b" ? "brain break" : e.s === "s" ? "sticker spelling" : e.s === "x" ? "boss challenge" : "learn"} · ${fmtD(e.t)}</small></li>`).join("") || "<li>Nothing yet.</li>"}</ul></div>`;
   const R = recommendations(p, S);
   $("#repBody").querySelectorAll(".recopts button").forEach(b => b.addEventListener("click", () => { decide(p, R[Number(b.dataset.i)], b.dataset.k); sfx.tap(); const st = $("#repBody").scrollTop; renderReport(); $("#repBody").scrollTop = st; }));
+  renderSyncStatus();
+  $("#syncSave").addEventListener("click", async () => {
+    store.set("syncToken", $("#syncToken").value.trim()); store.set("syncRepo", $("#syncRepo").value.trim()); store.set("syncDevice", $("#syncDevice").value.trim());
+    store.set("syncSha", {}); sfx.tap(); await syncNow(true);
+  });
   $("#repNote").addEventListener("input", e => { const plan = readP(p, "plan", {}) || {}; plan.note = e.target.value; writeP(p, "plan", plan); });
 }
 function reportText() {
@@ -6483,7 +6548,7 @@ function renderShop() {
 $("#shopBtn").addEventListener("click", () => { $("#shop").hidden = false; renderShop(); sfx.tap(); });
 $("#shopClose").addEventListener("click", () => { $("#shop").hidden = true; });
 
-$("#openReport").addEventListener("click", () => { sheet.hidden = true; stopSpeech(); repPlayer = PROFILE || "little"; hub.hidden = true; picker.hidden = true; $("#report").hidden = false; renderReport(); });
+$("#openReport").addEventListener("click", () => { if (syncReady()) syncNow(); sheet.hidden = true; stopSpeech(); repPlayer = PROFILE || "little"; hub.hidden = true; picker.hidden = true; $("#report").hidden = false; renderReport(); });
 $("#repClose").addEventListener("click", () => { $("#report").hidden = true; hub.hidden = false; renderHub(); });
 $("#repCopy").addEventListener("click", () => {
   const text = reportText(), done = () => { const t = document.createElement("div"); t.className = "copied"; t.textContent = "Copied! Paste it into Claude."; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); };
