@@ -1353,7 +1353,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(store.key(k), JSON.stringify(v)); } catch (e) {} },
 };
 const praise = () => pick(PRAISE);
-const APP_VERSION = "26 (Nov 27, sync with Claude)"; // shown in the grown-ups screen so you can tell which copy is loaded
+const APP_VERSION = "27 (Nov 27, sticker spelling attempts)"; // shown in the grown-ups screen so you can tell which copy is loaded
 
 /* ---------- Audio context + sound effects ---------- */
 let ac = null;
@@ -1688,7 +1688,8 @@ function spellQuiz(ov, word, done) {
   if (!ov.isConnected) return;
   const W = [...word.toUpperCase()], card = $(".rcard", ov), q = $(".rquiz", ov), copy = !PRO, sword = $(".sword", ov);
   const slotsIdx = W.map((c, i) => /[A-Z]/.test(c) ? i : -1).filter(i => i >= 0), filled = {}, locked = new Set();
-  let checks = 0, perfect = true, finished = false, wrongHere = 0;
+  let checks = 0, perfect = true, finished = false, wrongHere = 0, firstTry = null;
+  const slips = []; // copy mode: wrong letters tapped, as "B for W"
   card.classList.add("quizzing"); if (!copy) sword.classList.add("hideq");
   const decoyN = copy ? 1 : slotsIdx.length > 9 ? 2 : 3, decoys = [];
   while (decoys.length < decoyN) { const c = "ABCDEFGHIKLMNOPRSTUW"[ri(0, 19)]; if (!W.includes(c) && !decoys.includes(c)) decoys.push(c); }
@@ -1706,7 +1707,9 @@ function spellQuiz(ov, word, done) {
   mark();
   function win() {
     finished = true; sfx.yay(); celebrate();
-    logAnswer("s", "stickers", { ask: ["Spell", word], answer: word, _lv: 0, _concept: "Sticker spelling" }, perfect, null);
+    // Record what they actually spelled so the report shows the misspelling, not just "missed".
+    const tried = perfect ? word : copy ? `${slips.length} wrong tap${slips.length === 1 ? "" : "s"}: ${slips.slice(0, 5).join(", ")}${slips.length > 5 ? "…" : ""}` : firstTry;
+    logAnswer("s", "stickers", { ask: ["Spell", word], answer: word, _lv: 0, _concept: "Sticker spelling" }, perfect, tried);
     say("You spelled it!", word);
     $(".qbtns", q).innerHTML = `<button class="qdone">Done ▶</button>`;
     $(".qdone", q).addEventListener("click", done);
@@ -1715,6 +1718,7 @@ function spellQuiz(ov, word, done) {
   function check() {
     if (finished || !slotsIdx.every(j => locked.has(j) || filled[j])) return;
     checks++;
+    if (checks === 1) firstTry = W.map((c, i) => filled[i] ? filled[i].textContent : c).join("").toLowerCase();
     const wrong = slotsIdx.filter(i => !locked.has(i) && filled[i].textContent !== W[i]);
     slotsIdx.forEach(i => { if (!locked.has(i) && !wrong.includes(i)) { locked.add(i); slot(i).classList.add("ok"); } });
     if (!wrong.length) return win();
@@ -1736,7 +1740,7 @@ function spellQuiz(ov, word, done) {
     const i = nextOpen(); if (i == null) return;
     const c = t.textContent;
     if (copy) { // copy mode: only the right next letter goes in
-      if (c !== W[i]) { wrongHere++; perfect = false; replay(t, "wiggle"); sfx.boop(); say("That's", c, P(.2), "Find", W[i]); if (wrongHere >= 2) { const h = tiles.find(x => !x.classList.contains("used") && x.textContent === W[i]); if (h) h.classList.add("hint"); } return; }
+      if (c !== W[i]) { wrongHere++; perfect = false; slips.push(`${c} for ${W[i]}`); replay(t, "wiggle"); sfx.boop(); say("That's", c, P(.2), "Find", W[i]); if (wrongHere >= 2) { const h = tiles.find(x => !x.classList.contains("used") && x.textContent === W[i]); if (h) h.classList.add("hint"); } return; }
       wrongHere = 0; tiles.forEach(x => x.classList.remove("hint"));
     }
     t.classList.add("used"); filled[i] = t; const el = slot(i); el.textContent = c; replay(el, "hop"); sfx.note(Object.keys(filled).length); say(c);
